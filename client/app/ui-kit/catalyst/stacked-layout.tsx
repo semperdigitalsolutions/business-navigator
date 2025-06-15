@@ -48,7 +48,12 @@ export function StackedLayout({
   navbar,
   sidebar,
   children,
-}: React.PropsWithChildren<{ navbar: React.ReactNode; sidebar: React.ReactNode }>) {
+  footer, // Add footer prop
+}: React.PropsWithChildren<{
+  navbar: React.ReactNode;
+  sidebar: React.ReactNode;
+  footer?: React.ReactNode; // Define footer prop type
+}>) {
   let [showSidebar, setShowSidebar] = useState(false)
 
   return (
@@ -74,6 +79,7 @@ export function StackedLayout({
           <div className="mx-auto max-w-6xl">{children}</div>
         </div>
       </main>
+      {footer && <footer>{footer}</footer>} {/* Render footer if provided */}
     </div>
   )
 }

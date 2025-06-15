@@ -1,7 +1,7 @@
 import { type RouteConfig, index, route } from "@react-router/dev/routes";
 
 export default [
-  index("welcome/welcome.tsx"), // Handles the '/' path
+  index("routes/index.tsx"), // Updated to use the new landing page
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
   route("forgot-password", "routes/forgot-password.tsx"),

@@ -63,6 +63,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock state
   const location = useLocation();
+  console.log('App component rendering, path:', location.pathname); // Debug log
 
   // Optional: Add a simple way to toggle authentication for testing (Ctrl+A)
   useEffect(() => {

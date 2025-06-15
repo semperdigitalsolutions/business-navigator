@@ -1,7 +1,6 @@
 
 // Catalyst UI components
 import type { ReactNode } from "react";
-import { Footer, FooterLink } from "../ui-kit/catalyst/footer"; // Added Footer imports
 import { Avatar } from "../ui-kit/catalyst/avatar";
 import {
   Dropdown,
@@ -40,6 +39,7 @@ import {
   UserIcon,
 } from "@heroicons/react/16/solid";
 import { InboxIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
+import Footer from "~/components/ui/Footer"; // Use the custom footer component
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -186,6 +186,7 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
           </Sidebar>
         ) : null
       }
+      footer={<Footer />}
     >
       {children}
     </StackedLayout>
