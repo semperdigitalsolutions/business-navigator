@@ -1,18 +1,22 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import { Heading } from '~/ui-kit/catalyst/heading';
+import { useAuth } from '~/root'; // Import useAuth
+// import { Navigate } from 'react-router-dom'; // If redirecting non-auth users
 
-export function meta({}: Route.MetaArgs) {
-  return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
-  ];
-}
+export default function HomePage() {
+  const { isAuthenticated } = useAuth(); // Consume AuthContext
 
-export default function Home() {
+  if (!isAuthenticated) {
+    // This page should ideally not be reachable if not authenticated due to AppLayout behavior,
+    // but as a fallback, redirect or show a message.
+    // return <Navigate to="/login" replace />;
+    return <p>Please <a href="/login" style={{color: 'blue'}}>login</a> to view the dashboard.</p>;
+  }
+
   return (
     <div>
-      <Welcome />
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <Heading level={1}>Home Dashboard</Heading>
+      <p>Welcome to your personalized dashboard! (Authenticated)</p>
+      <p>Toggle auth state with Ctrl+A (defined in root.tsx for testing).</p>
     </div>
   );
 }

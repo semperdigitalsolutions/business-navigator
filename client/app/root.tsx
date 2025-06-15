@@ -2,13 +2,34 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  Outlet,
+  // Outlet, -- Outlet will be used inside App component
   Scripts,
   ScrollRestoration,
+  useLocation, // Added useLocation
+  Outlet,      // Added Outlet for use in App
 } from "react-router";
+// import { useState, useEffect } from 'react'; // Moved to top for AuthContext
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react'; // AuthContext imports
+import AppLayout from '~/layouts/AppLayout';   // Added AppLayout import
+import AuthLayout from '~/layouts/AuthLayout'; // Added AuthLayout import
 
 import type { Route } from "./+types/root";
 import "./app.css";
+
+// Context creation
+interface AuthContextType {
+  isAuthenticated: boolean;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+}
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -42,7 +63,35 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock state
+  const location = useLocation();
+
+  // Optional: Add a simple way to toggle authentication for testing (Ctrl+A)
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'a' && event.ctrlKey) {
+        event.preventDefault(); // Prevent default browser action for Ctrl+A (select all)
+        setIsAuthenticated(prev => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Provide the context
+  return (
+    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
+      {location.pathname === '/login' || location.pathname === '/signup' ? (
+        <AuthLayout>
+          <Outlet />
+        </AuthLayout>
+      ) : (
+        <AppLayout isAuthenticated={isAuthenticated}>
+          <Outlet />
+        </AppLayout>
+      )}
+    </AuthContext.Provider>
+  );
 }
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
