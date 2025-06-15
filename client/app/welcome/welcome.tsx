@@ -1,10 +1,14 @@
-import { Navigate } from 'react-router-dom'; // Or 'react-router'
 import { useAuth } from '~/root'; // Assuming AuthContext is exported from root.tsx
 import logoDark from "./logo-dark.svg";
 import logoLight from "./logo-light.svg";
+import { Navigate } from 'react-router';
 // import { Link } from 'react-router-dom'; // For Link components
 
-export function Welcome() {
+export async function loader() {
+  return null;
+}
+
+function Welcome() {
   const { isAuthenticated } = useAuth();
 
   if (isAuthenticated) {
@@ -42,3 +46,4 @@ export function Welcome() {
   );
 }
 // Removed the 'resources' array as it's no longer used.
+export default Welcome;

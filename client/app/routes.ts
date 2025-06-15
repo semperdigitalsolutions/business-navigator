@@ -4,6 +4,7 @@ export default [
   index("welcome/welcome.tsx"), // Handles the '/' path
   route("login", "routes/login.tsx"),
   route("signup", "routes/signup.tsx"),
+  route("forgot-password", "routes/forgot-password.tsx"),
   route("home", "routes/home.tsx"),
   route("2ndPage", "routes/2ndPage.tsx"),
   route("profile", "routes/profile.tsx"),

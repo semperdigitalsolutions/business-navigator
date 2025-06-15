@@ -186,12 +186,6 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
           </Sidebar>
         ) : null
       }
-      footer={
-        <Footer>
-          <FooterLink href="/privacy">Privacy Policy</FooterLink>
-          <FooterLink href="/tos">Terms of Service</FooterLink>
-        </Footer>
-      }
     >
       {children}
     </StackedLayout>

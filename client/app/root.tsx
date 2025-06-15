@@ -2,14 +2,12 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
-  // Outlet, -- Outlet will be used inside App component
   Scripts,
   ScrollRestoration,
   useLocation, // Added useLocation
   Outlet,      // Added Outlet for use in App
 } from "react-router";
-// import { useState, useEffect } from 'react'; // Moved to top for AuthContext
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'; // AuthContext imports
+import React, { createContext, useContext, useState, useEffect } from 'react'; // AuthContext imports
 import AppLayout from '~/layouts/AppLayout';   // Added AppLayout import
 import AuthLayout from '~/layouts/AuthLayout'; // Added AuthLayout import
 
@@ -81,7 +79,7 @@ export default function App() {
   // Provide the context
   return (
     <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
-      {location.pathname === '/login' || location.pathname === '/signup' ? (
+      {location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' ? (
         <AuthLayout>
           <Outlet />
         </AuthLayout>
