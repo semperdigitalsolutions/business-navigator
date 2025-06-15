@@ -1,8 +1,17 @@
+import { Heading } from '~/ui-kit/catalyst/heading';
+import { useAuth } from '~/root'; // Import useAuth
+
 export default function SecondPage() {
+  const { isAuthenticated } = useAuth(); // Consume AuthContext
+
+  if (!isAuthenticated) {
+    return <p>Please <a href="/login" style={{color: 'blue'}}>login</a> to view this page.</p>;
+  }
+
   return (
     <div>
-      <h1>Welcome to the Second Page!</h1>
-      <p>This is a new route in your application.</p>
+      <Heading level={1}>Idea Validation & Naming</Heading>
+      <p>Content for Idea Validation & Naming will go here. (Authenticated)</p>
     </div>
   );
 }

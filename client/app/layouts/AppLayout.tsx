@@ -1,6 +1,7 @@
 
 // Catalyst UI components
 import type { ReactNode } from "react";
+import { Footer, FooterLink } from "../ui-kit/catalyst/footer"; // Added Footer imports
 import { Avatar } from "../ui-kit/catalyst/avatar";
 import {
   Dropdown,
@@ -42,14 +43,26 @@ import { InboxIcon, MagnifyingGlassIcon } from "@heroicons/react/20/solid";
 
 interface AppLayoutProps {
   children: ReactNode;
+  isAuthenticated: boolean; // Added isAuthenticated prop
 }
 
-const navItems = [
+// Define different navigation items based on authentication state
+const navItemsNonAuthenticated = [
   { label: "Home", url: "/" },
-  { label: "Events", url: "/events" },
-  { label: "Orders", url: "/orders" },
-  { label: "Broadcasts", url: "/broadcasts" },
-  { label: "Settings", url: "/settings" },
+  { label: "Login", url: "/login" },
+  { label: "Sign Up", url: "/signup" },
+];
+
+const navItemsAuthenticated = [
+  { label: "Home", url: "/home" },
+  { label: "2nd Page", url: "/2ndPage" },
+  { label: "Profile", url: "/profile" },
+  { label: "Logout", url: "/logout" },
+];
+
+const sidebarNavItems = [
+  { label: "2nd Page", url: "/2ndPage" },
+  { label: "Legal Registration", url: "/legal-registration" },
 ];
 
 function TeamDropdownMenu() {
@@ -77,89 +90,101 @@ function TeamDropdownMenu() {
   );
 }
 
-export default function AppLayout({ children }: AppLayoutProps) {
+export default function AppLayout({ children, isAuthenticated }: AppLayoutProps) {
+  const currentNavItems = isAuthenticated
+    ? navItemsAuthenticated
+    : navItemsNonAuthenticated;
+
   return (
     <StackedLayout
       navbar={
         <Navbar>
-          <Dropdown>
-            <DropdownButton as={NavbarItem} className="max-lg:hidden">
-              <Avatar src="/tailwind-logo.svg" />
-              <NavbarLabel>Tailwind Labs</NavbarLabel>
-              <ChevronDownIcon />
-            </DropdownButton>
-            <TeamDropdownMenu />
-          </Dropdown>
-          <NavbarDivider className="max-lg:hidden" />
+          {isAuthenticated && (
+            <>
+              <Dropdown>
+                <DropdownButton as={NavbarItem} className="max-lg:hidden">
+                  <Avatar src="/tailwind-logo.svg" />
+                  <NavbarLabel>Tailwind Labs</NavbarLabel>
+                  <ChevronDownIcon />
+                </DropdownButton>
+                <TeamDropdownMenu />
+              </Dropdown>
+              <NavbarDivider className="max-lg:hidden" />
+            </>
+          )}
           <NavbarSection className="max-lg:hidden">
-            {navItems.map(({ label, url }) => (
+            {currentNavItems.map(({ label, url }) => (
               <NavbarItem key={label} href={url}>
                 {label}
               </NavbarItem>
             ))}
           </NavbarSection>
           <NavbarSpacer />
-          <NavbarSection>
-            <NavbarItem href="/search" aria-label="Search">
-              <MagnifyingGlassIcon />
-            </NavbarItem>
-            <NavbarItem href="/inbox" aria-label="Inbox">
-              <InboxIcon />
-            </NavbarItem>
-            <Dropdown>
-              <DropdownButton as={NavbarItem}>
-                <Avatar src="/profile-photo.jpg" square />
-              </DropdownButton>
-              <DropdownMenu className="min-w-64" anchor="bottom end">
-                <DropdownItem href="/my-profile">
-                  <UserIcon />
-                  <DropdownLabel>My profile</DropdownLabel>
-                </DropdownItem>
-                <DropdownItem href="/settings">
-                  <Cog8ToothIcon />
-                  <DropdownLabel>Settings</DropdownLabel>
-                </DropdownItem>
-                <DropdownDivider />
-                <DropdownItem href="/privacy-policy">
-                  <ShieldCheckIcon />
-                  <DropdownLabel>Privacy policy</DropdownLabel>
-                </DropdownItem>
-                <DropdownItem href="/share-feedback">
-                  <LightBulbIcon />
-                  <DropdownLabel>Share feedback</DropdownLabel>
-                </DropdownItem>
-                <DropdownDivider />
-                <DropdownItem href="/logout">
-                  <ArrowRightStartOnRectangleIcon />
-                  <DropdownLabel>Sign out</DropdownLabel>
-                </DropdownItem>
-              </DropdownMenu>
-            </Dropdown>
-          </NavbarSection>
+          {isAuthenticated && (
+            <NavbarSection>
+              <NavbarItem href="/search" aria-label="Search">
+                <MagnifyingGlassIcon />
+              </NavbarItem>
+              <NavbarItem href="/inbox" aria-label="Inbox">
+                <InboxIcon />
+              </NavbarItem>
+              <Dropdown>
+                <DropdownButton as={NavbarItem}>
+                  <Avatar src="/profile-photo.jpg" square />
+                </DropdownButton>
+                <DropdownMenu className="min-w-64" anchor="bottom end">
+                  <DropdownItem href="/my-profile">
+                    <UserIcon />
+                    <DropdownLabel>My profile</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownItem href="/settings">
+                    <Cog8ToothIcon />
+                    <DropdownLabel>Settings</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownDivider />
+                  <DropdownItem href="/privacy-policy">
+                    <ShieldCheckIcon />
+                    <DropdownLabel>Privacy policy</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownItem href="/share-feedback">
+                    <LightBulbIcon />
+                    <DropdownLabel>Share feedback</DropdownLabel>
+                  </DropdownItem>
+                  <DropdownDivider />
+                  <DropdownItem href="/logout">
+                    <ArrowRightStartOnRectangleIcon />
+                    <DropdownLabel>Sign out</DropdownLabel>
+                  </DropdownItem>
+                </DropdownMenu>
+              </Dropdown>
+            </NavbarSection>
+          )}
         </Navbar>
       }
       sidebar={
-        <Sidebar>
-          <SidebarHeader>
-            <Dropdown>
-              <DropdownButton as={SidebarItem} className="lg:mb-2.5">
-                <Avatar src="/tailwind-logo.svg" />
-                <SidebarLabel>Tailwind Labs</SidebarLabel>
-                <ChevronDownIcon />
-              </DropdownButton>
-              <TeamDropdownMenu />
-            </Dropdown>
-          </SidebarHeader>
-          <SidebarBody>
-            <SidebarSection>
-              {navItems.map(({ label, url }) => (
-                <SidebarItem key={label} href={url}>
-                  {label}
-                </SidebarItem>
-              ))}
-            </SidebarSection>
-          </SidebarBody>
-        </Sidebar>
+        isAuthenticated ? (
+          <Sidebar>
+            <SidebarHeader>
+              <Dropdown>
+                <DropdownButton as={SidebarItem} className="lg:mb-2.5">
+                  <Avatar src="/tailwind-logo.svg" />
+                  <SidebarLabel>Tailwind Labs</SidebarLabel>
+                  <ChevronDownIcon />
+                </DropdownButton>
+                <TeamDropdownMenu />
+              </Dropdown>
+            </SidebarHeader>
+            <SidebarBody>
+              <SidebarSection>
+                {sidebarNavItems.map(({ label, url }) => (
+                  <SidebarItem key={label} href={url}>
+                    {label}
+                  </SidebarItem>
+                ))}
+              </SidebarSection>
+            </SidebarBody>
+          </Sidebar>
+        ) : null
       }
     >
       {children}
