@@ -8,8 +8,10 @@ import { Strong, Text, TextLink } from "~/ui-kit/catalyst/text";
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { supabase } from '~/lib/supabaseClient';
+import { useAuthStore } from '~/stores/authStore';
 
 export default function LoginPage() {
+  const setAuthSession = useAuthStore((state) => state.setSession);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -41,6 +43,7 @@ export default function LoginPage() {
       }
     } else if (data.session) {
       setMessage('Login successful! Redirecting...');
+      setAuthSession(data.session); // Manually set session in the store
       navigate('/home');
     } else {
       setError('An unexpected error occurred. Please try again.');
