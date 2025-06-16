@@ -1,10 +1,11 @@
-import { useAuth } from '~/root';
+import { useAuthStore } from '~/stores/authStore';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import { Heading } from '~/ui-kit/catalyst/heading';
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuth();
+  const { session } = useAuthStore();
+  const isAuthenticated = !!session;
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -44,9 +45,7 @@ export default function LandingPage() {
           </a>
         </div>
         
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Press Ctrl+A to toggle authentication state (for testing)
-        </div>
+
       </div>
     </main>
   );

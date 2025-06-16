@@ -28,6 +28,7 @@ import {
 } from "../ui-kit/catalyst/sidebar";
 import { StackedLayout } from "../ui-kit/catalyst/stacked-layout";
 
+import { useAuthStore } from '~/stores/authStore';
 // Heroicons
 import {
   ArrowRightStartOnRectangleIcon,
@@ -56,8 +57,6 @@ const navItemsNonAuthenticated = [
 const navItemsAuthenticated = [
   { label: "Home", url: "/home" },
   { label: "2nd Page", url: "/2ndPage" },
-  { label: "Profile", url: "/profile" },
-  { label: "Logout", url: "/logout" },
 ];
 
 const sidebarNavItems = [
@@ -91,6 +90,13 @@ function TeamDropdownMenu() {
 }
 
 export default function AppLayout({ children, isAuthenticated }: AppLayoutProps) {
+  const { signOutUser } = useAuthStore();
+
+  const handleSignOut = async () => {
+    await signOutUser();
+    // Navigation should be handled by the auth state change and root.tsx redirection logic
+  };
+
   const currentNavItems = isAuthenticated
     ? navItemsAuthenticated
     : navItemsNonAuthenticated;
@@ -151,7 +157,7 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
                     <DropdownLabel>Share feedback</DropdownLabel>
                   </DropdownItem>
                   <DropdownDivider />
-                  <DropdownItem href="/logout">
+                  <DropdownItem onClick={handleSignOut}>
                     <ArrowRightStartOnRectangleIcon />
                     <DropdownLabel>Sign out</DropdownLabel>
                   </DropdownItem>

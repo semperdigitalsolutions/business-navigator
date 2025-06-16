@@ -6,28 +6,15 @@ import {
   ScrollRestoration,
   useLocation, // Added useLocation
   Outlet,      // Added Outlet for use in App
+  useNavigate, // Added useNavigate for redirection
 } from "react-router";
-import React, { createContext, useContext, useState, useEffect } from 'react'; // AuthContext imports
+import React, { useEffect } from 'react';
 import AppLayout from '~/layouts/AppLayout';   // Added AppLayout import
 import AuthLayout from '~/layouts/AuthLayout'; // Added AuthLayout import
+import { useAuthStore } from '~/stores/authStore'; // Import the auth store
 
 import type { Route } from "./+types/root";
 import "./app.css";
-
-// Context creation
-interface AuthContextType {
-  isAuthenticated: boolean;
-  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
-}
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
 
 export const links: Route.LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -61,26 +48,46 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // Mock state
+  const { session, authStatus, initializeAuthListener } = useAuthStore();
+  const isAuthenticated = !!session;
   const location = useLocation();
-  console.log('App component rendering, path:', location.pathname); // Debug log
+  const navigate = useNavigate();
+  console.log('App component rendering, path:', location.pathname, 'Auth Status:', authStatus, 'Session:', session);
 
-  // Optional: Add a simple way to toggle authentication for testing (Ctrl+A)
   useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'a' && event.ctrlKey) {
-        event.preventDefault(); // Prevent default browser action for Ctrl+A (select all)
-        setIsAuthenticated(prev => !prev);
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+    // Only initialize if we are in the very initial state.
+    // This prevents re-initializing if the component re-renders for other reasons
+    // and authStatus is already determined or actively loading.
+    if (authStatus === 'initial') {
+      const unsubscribe = initializeAuthListener();
+      return unsubscribe;
+    }
+  }, [initializeAuthListener, authStatus]); // Added authStatus to the dependency array
 
-  // Provide the context
+  useEffect(() => {
+    if (authStatus === 'loading' || authStatus === 'initial') {
+      return; // Don't redirect while auth state is loading
+    }
+
+    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/tos'];
+    const isPublicPath = publicPaths.includes(location.pathname);
+
+    if (isAuthenticated && isPublicPath && location.pathname !== '/home') {
+      console.log('Redirecting authenticated user from public page to /home');
+      navigate('/home', { replace: true });
+    } else if (!isAuthenticated && !isPublicPath) {
+      console.log('Redirecting unauthenticated user from protected page to /login');
+      navigate('/login', { replace: true });
+    }
+  }, [isAuthenticated, authStatus, location.pathname, navigate]);
+
+  // Render the main Layout once.
+  // Conditionally render content INSIDE the body based on authStatus.
   return (
-    <AuthContext.Provider value={{ isAuthenticated, setIsAuthenticated }}>
-      {location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' ? (
+    <Layout>
+      {authStatus === 'loading' || authStatus === 'initial' ? (
+        <div>Loading authentication state...</div>
+      ) : location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' ? (
         <AuthLayout>
           <Outlet />
         </AuthLayout>
@@ -89,7 +96,7 @@ export default function App() {
           <Outlet />
         </AppLayout>
       )}
-    </AuthContext.Provider>
+    </Layout>
   );
 }
 
