@@ -91,6 +91,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } else {
       // setSession(null) will handle setting user, authStatus, and loading to false
       get().setSession(null); 
+      window.location.href = '/';
       // console.log('User signed out successfully.');
     }
   },
