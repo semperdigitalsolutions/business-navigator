@@ -41,7 +41,7 @@ export default function LoginPage() {
       }
     } else if (data.session) {
       setMessage('Login successful! Redirecting...');
-      navigate('/'); 
+      navigate('/home');
     } else {
       setError('An unexpected error occurred. Please try again.');
     }
