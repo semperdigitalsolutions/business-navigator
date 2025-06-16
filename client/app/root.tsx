@@ -2,16 +2,17 @@ import {
   isRouteErrorResponse,
   Links,
   Meta,
+  Outlet,
   Scripts,
   ScrollRestoration,
-  useLocation, // Added useLocation
-  Outlet,      // Added Outlet for use in App
-  useNavigate, // Added useNavigate for redirection
-} from "react-router";
+  useLocation,
+  useNavigate,
+} from 'react-router';
 import React, { useEffect } from 'react';
-import AppLayout from '~/layouts/AppLayout';   // Added AppLayout import
-import AuthLayout from '~/layouts/AuthLayout'; // Added AuthLayout import
-import { useAuthStore } from '~/stores/authStore'; // Import the auth store
+import { useAuthStore } from '~/stores/authStore';
+import AuthLoader from './components/ui/AuthLoader';
+import AppLayout from './layouts/AppLayout';
+import AuthLayout from './layouts/AuthLayout';
 
 import type { Route } from "./+types/root";
 import "./app.css";
@@ -71,7 +72,7 @@ export default function DocumentRoot() {
       </head>
       <body>
         {authStatus === 'loading' || authStatus === 'initial' ? (
-          <div>Loading authentication state...</div> // Consider a more styled loader
+          <AuthLoader />
         ) : location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/forgot-password' ? (
           <AuthLayout>
             <Outlet />
