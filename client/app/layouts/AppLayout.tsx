@@ -1,6 +1,7 @@
 
 // Catalyst UI components
 import type { ReactNode } from "react";
+import type { User } from '@supabase/supabase-js';
 import { Avatar } from "../ui-kit/catalyst/avatar";
 import {
   Dropdown,
@@ -29,6 +30,7 @@ import {
 import { StackedLayout } from "../ui-kit/catalyst/stacked-layout";
 
 import { useAuthStore } from '~/stores/authStore';
+import { useBusinessStore } from '~/hooks/layouts/applayout/useBusiness';
 // Heroicons
 import {
   ArrowRightStartOnRectangleIcon,
@@ -64,33 +66,35 @@ const sidebarNavItems = [
   { label: "Legal Registration", url: "/legal-registration" },
 ];
 
-function TeamDropdownMenu() {
+function BusinessDropdownMenu() {
+  const { businesses, isSubscribed } = useBusinessStore();
   return (
     <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
-      <DropdownItem href="/teams/1/settings">
-        <Cog8ToothIcon />
-        <DropdownLabel>Settings</DropdownLabel>
-      </DropdownItem>
+      {businesses.map((business) => (
+        <DropdownItem key={business.id} href={`/business/${business.id}`}>
+          {/* The business name will be used for the avatar initials if no src is provided */}
+          <Avatar slot="icon" initials={business.name.charAt(0)} />
+          <DropdownLabel>{business.name}</DropdownLabel>
+        </DropdownItem>
+      ))}
       <DropdownDivider />
-      <DropdownItem href="/teams/1">
-        <Avatar slot="icon" src="/tailwind-logo.svg" />
-        <DropdownLabel>Tailwind Labs</DropdownLabel>
-      </DropdownItem>
-      <DropdownItem href="/teams/2">
-        <Avatar slot="icon" initials="WC" className="bg-purple-500 text-white" />
-        <DropdownLabel>Workcation</DropdownLabel>
-      </DropdownItem>
-      <DropdownDivider />
-      <DropdownItem href="/teams/create">
-        <PlusIcon />
-        <DropdownLabel>New team&hellip;</DropdownLabel>
-      </DropdownItem>
+      {isSubscribed ? (
+        <DropdownItem href="/new-business">
+          <PlusIcon />
+          <DropdownLabel>New business</DropdownLabel>
+        </DropdownItem>
+      ) : (
+        <DropdownItem href="/subscribe">
+          <PlusIcon />
+          <DropdownLabel>Subscribe to add more businesses</DropdownLabel>
+        </DropdownItem>
+      )}
     </DropdownMenu>
   );
 }
 
 export default function AppLayout({ children, isAuthenticated }: AppLayoutProps) {
-  const { signOutUser } = useAuthStore();
+  const { signOutUser, user } = useAuthStore();
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -101,6 +105,16 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
     ? navItemsAuthenticated
     : navItemsNonAuthenticated;
 
+  const getUserInitials = (user: User | null): string => {
+    if (!user) return '';
+    const name = user.user_metadata?.name || user.email;
+    if (!name) return '';
+    if (name.includes(' ')) {
+      return name.split(' ').map((part: string) => part[0]).join('').toUpperCase();
+    }
+    return name.charAt(0).toUpperCase();
+  };
+
   return (
     <StackedLayout
       navbar={
@@ -109,11 +123,11 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
             <>
               <Dropdown>
                 <DropdownButton as={NavbarItem} className="max-lg:hidden">
-                  <Avatar src="/tailwind-logo.svg" />
-                  <NavbarLabel>Tailwind Labs</NavbarLabel>
+                  <Avatar initials={useBusinessStore().currentBusiness.name.charAt(0)} />
+                  <NavbarLabel>{useBusinessStore().currentBusiness.name}</NavbarLabel>
                   <ChevronDownIcon />
                 </DropdownButton>
-                <TeamDropdownMenu />
+                <BusinessDropdownMenu />
               </Dropdown>
               <NavbarDivider className="max-lg:hidden" />
             </>
@@ -128,15 +142,9 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
           <NavbarSpacer />
           {isAuthenticated && (
             <NavbarSection>
-              <NavbarItem href="/search" aria-label="Search">
-                <MagnifyingGlassIcon />
-              </NavbarItem>
-              <NavbarItem href="/inbox" aria-label="Inbox">
-                <InboxIcon />
-              </NavbarItem>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Avatar src="/profile-photo.jpg" square />
+                  <Avatar src={user?.user_metadata?.avatar_url} initials={getUserInitials(user)} square />
                 </DropdownButton>
                 <DropdownMenu className="min-w-64" anchor="bottom end">
                   <DropdownItem href="/my-profile">
@@ -173,11 +181,11 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
             <SidebarHeader>
               <Dropdown>
                 <DropdownButton as={SidebarItem} className="lg:mb-2.5">
-                  <Avatar src="/tailwind-logo.svg" />
-                  <SidebarLabel>Tailwind Labs</SidebarLabel>
+                  <Avatar initials={useBusinessStore().currentBusiness.name.charAt(0)} />
+                  <SidebarLabel>{useBusinessStore().currentBusiness.name}</SidebarLabel>
                   <ChevronDownIcon />
                 </DropdownButton>
-                <TeamDropdownMenu />
+                <BusinessDropdownMenu />
               </Dropdown>
             </SidebarHeader>
             <SidebarBody>
