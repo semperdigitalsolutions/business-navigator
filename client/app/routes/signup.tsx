@@ -6,57 +6,20 @@ import { Heading } from "~/ui-kit/catalyst/heading";
 import { Input } from "~/ui-kit/catalyst/input";
 import { Select } from "~/ui-kit/catalyst/select";
 import { Strong, Text, TextLink } from "~/ui-kit/catalyst/text";
-import { useState } from 'react';
-import { useNavigate } from 'react-router'; // Or your preferred navigation method
-import { supabase } from "~/lib/supabaseClient";
+import { Alert, AlertActions, AlertDescription, AlertTitle } from '~/ui-kit/catalyst/alert';
+import { useSignupForm } from '~/hooks/auth/useSignupForm';
 
 export default function SignupPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleSignup = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setMessage(null);
-    setLoading(true);
-
-    const { data, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-        },
-      },
-    });
-
-    setLoading(false);
-
-    if (signUpError) {
-      setError(signUpError.message);
-    } else if (data.user && data.user.identities?.length === 0) {
-      // This case can happen with email confirmation disabled and auto-confirm enabled
-      // or if an unconfirmed user tries to sign up again with the same email.
-      // Supabase might return a user object but indicate it's an existing unconfirmed user.
-      setMessage("User already exists but is unconfirmed. Please check your email to confirm or try logging in.");
-    } else if (data.session) {
-      // User is signed up and logged in (e.g. if email confirmation is disabled)
-      setMessage("Signup successful! Redirecting...");
-      // You might want to redirect to a dashboard or home page
-      navigate('/'); // Adjust as needed
-    } else if (data.user) {
-      // User is signed up but needs to confirm their email
-      setMessage("Signup successful! Please check your email to confirm your account.");
-    } else {
-      // Fallback, should ideally not happen if Supabase returns user or error
-      setError("An unexpected issue occurred. Please try again.");
-    }
-  };
+  const {
+    email, setEmail,
+    password, setPassword,
+    fullName, setFullName,
+    error,
+    loading,
+    isAlertOpen,
+    handleSignup,
+    handleCloseAlert,
+  } = useSignupForm();
 
   return (
     <AuthLayout>
@@ -69,7 +32,6 @@ export default function SignupPage() {
         </div>
         <Heading>Create your account</Heading>
         {error && <Text className="text-red-600">{error}</Text>}
-        {message && <Text className="text-green-600">{message}</Text>}
         <Field>
           <Label>Email</Label>
           <Input 
@@ -122,6 +84,15 @@ export default function SignupPage() {
           </TextLink>
         </Text>
       </form>
+      <Alert open={isAlertOpen} onClose={handleCloseAlert}>
+        <AlertTitle>Check your email</AlertTitle>
+        <AlertDescription>
+          We've sent a confirmation link to your email address. Please check your inbox (and spam folder) to complete the signup process.
+        </AlertDescription>
+        <AlertActions>
+          <Button onClick={handleCloseAlert}>Got it!</Button>
+        </AlertActions>
+      </Alert>
     </AuthLayout>
   );
 }

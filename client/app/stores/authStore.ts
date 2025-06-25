@@ -4,14 +4,17 @@ import { supabase } from '~/lib/supabaseClient';
 
 type AuthStatus = 'initial' | 'loading' | 'authenticated' | 'unauthenticated';
 
-interface AuthState {
+export interface AuthState {
   session: Session | null;
   user: User | null;
+  onboardingCompleted: boolean | null;
   authStatus: AuthStatus;
   error: string | null;
   loading: boolean; // For initial load and onAuthStateChange processing
   setSession: (session: Session | null) => void;
+  setOnboardingCompleted: (status: boolean) => void;
   setError: (error: string | null) => void;
+  checkOnboardingStatus: (userId: string) => Promise<void>;
   initializeAuthListener: () => () => void; // Returns the unsubscribe function
   signOutUser: () => Promise<void>;
 }
@@ -19,6 +22,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
+  onboardingCompleted: null,
   authStatus: 'initial',
   error: null,
   loading: true, // Start as true until first auth state is determined
@@ -31,9 +35,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       loading: false,
       error: null, // Clear error on successful session update
     });
+
+    if (session?.user) {
+      get().checkOnboardingStatus(session.user.id);
+    } else {
+      // If there's no session, reset onboarding status
+      set({ onboardingCompleted: null });
+    }
   },
 
+  setOnboardingCompleted: (status: boolean) => set({ onboardingCompleted: status }),
+
   setError: (error) => set({ error, loading: false }),
+
+  checkOnboardingStatus: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('onboarding_completed')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      set({ onboardingCompleted: data?.onboarding_completed ?? false });
+    } catch (error: any) {
+      console.error('Error checking onboarding status:', error);
+      // Decide how to handle this - maybe set an error in the store
+      set({ onboardingCompleted: false }); // Default to false on error
+    }
+  },
 
   initializeAuthListener: () => {
     set({ loading: true, authStatus: 'loading' });

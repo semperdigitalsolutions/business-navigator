@@ -1,49 +1,181 @@
-# Project Planning: Business Setup Navigator
+# Project Plan: Business Navigator
 
-This document outlines the current state of mock features and a high-level roadmap for module development.
+This document outlines the project's vision, technical architecture, and a phased development roadmap. Its purpose is to serve as a central reference for all planning and development activities.
 
-## Authentication Flow (Initial Mock Version)
+## 1. Core Objective
 
-The application currently uses a mock authentication mechanism for development and testing purposes:
+The Business Navigator application will guide entrepreneurs and small business owners through the complex process of setting up and managing their business. It will provide a step-by-step, module-based journey covering legal registration, financial setup, operational readiness, and more.
 
--   **State Management**: An `isAuthenticated` boolean state is managed in `client/app/root.tsx`. This state is provided to the application components via React Context (`AuthContext`).
--   **Toggling Authentication**: For testing, the `isAuthenticated` state can be toggled by pressing `Ctrl+A` on the keyboard. This is a temporary developer feature.
--   **Layout Switching**:
-    -   If `isAuthenticated` is `false`, users accessing `/login` or `/signup` routes are presented with `AuthLayout.tsx`. This is a minimal layout designed to center authentication forms.
-    -   If `isAuthenticated` is `true` (or for any routes other than `/login` and `/signup`), `AppLayout.tsx` is used. This layout includes a full navbar, a sidebar (for authenticated users), and a footer.
-    -   Navigation links and UI elements within `AppLayout.tsx` (e.g., profile dropdown, module-specific sidebar links) are conditionally rendered based on the `isAuthenticated` state.
--   **Page Access**:
-    -   The main landing page (`/`) will show a welcome message and links to login/signup if the user is not authenticated. If authenticated, it will redirect to `/home`.
-    -   Authenticated routes (e.g., `/home`, `/profile`, `/2ndPage`, `/legal-registration`) check the `isAuthenticated` state (via `useAuth()` hook) and may redirect or show a message if accessed by a non-authenticated user.
+## 2. Phased Development Roadmap
 
--   **Future Plans**: The current mock authentication will be replaced with Supabase for actual user authentication, including user registration, login, session management, and potentially social providers.
+Development will proceed in logical phases to ensure a stable and scalable build-out of features.
 
-## Module Roadmap (High-Level)
+### Phase 1: Core User Foundation & Onboarding
 
-The following modules are planned for development for authenticated users. These modules aim to guide entrepreneurs through various stages of setting up their business.
+**Objective:** Establish the Supabase backend, implement a robust authentication system, and create a seamless user onboarding experience.
 
-1.  **Idea Validation & Naming**:
-    *   **Route**: `/2ndPage` (Current placeholder: `client/app/routes/2ndPage.tsx`)
-    *   **Description**: Tools and resources to help users validate their business ideas and choose effective names. May include market research tips, naming strategy guides, and domain/social media handle availability checks.
+**Key Tasks:**
 
-2.  **Legal Registration**:
-    *   **Route**: `/legal-registration` (Current placeholder: `client/app/routes/legal-registration.tsx`)
-    *   **Description**: Information and guidance on the legal aspects of starting a business, such as choosing a business structure (sole proprietorship, LLC, corporation), registering the business name, and obtaining necessary licenses and permits.
+1.  **Supabase Project Setup:**
+    *   Initialize a new Supabase project.
+    *   Configure environment variables for local and production environments.
+2.  **Database Schema (Core Tables):**
+    *   Implement the initial database schema focusing on user management and business profiles.
+    *   See **Section 3: Database Architecture** for detailed table definitions (`users`, `user_business_profiles`).
+3.  **Authentication Flow:**
+    *   Replace the current mock authentication with Supabase Auth.
+    *   Build login, signup, and password reset pages.
+    *   Implement session management (cookies or tokens).
+    *   Secure routes to ensure only authenticated users can access protected content.
+4.  **Onboarding Process:**
+    *   Create a multi-step onboarding form that appears after a user's first login.
+    *   The form will collect essential business information to populate the `user_business_profiles` table.
+    *   A modal or dedicated page will guide the user until `onboarding_completed` is `true`.
+5.  **Security Implementation:**
+    *   Enable Row Level Security (RLS) on all tables containing user data.
+    *   Write initial RLS policies to ensure users can only access their own information.
+    *   Implement basic duplicate account prevention measures (e.g., checking IP address, device info).
 
-3.  **Branding & Online Presence**:
-    *   **Route**: `/branding` (Planned)
-    *   **Description**: Assistance with creating a brand identity, including logo design concepts, color palette selection, and basic website/social media setup advice.
+### Phase 2: Module & Progress Tracking
 
-4.  **Financial Planning**:
-    *   **Route**: `/financial-planning` (Planned)
-    *   **Description**: Tools for basic financial forecasting, understanding startup costs, and an introduction to funding options.
+**Objective:** Build the core functionality of the navigator, allowing users to progress through business setup modules and track their completion.
 
-5.  **Marketing & Sales Strategy**:
-    *   **Route**: `/marketing-sales` (Planned)
-    *   **Description**: Introduction to basic marketing principles, identifying target audiences, and initial sales strategies.
+**Key Tasks:**
 
-6.  **Operational Setup**:
-    *   **Route**: `/operations` (Planned)
-    *   **Description**: Guidance on setting up operational aspects like choosing business software, understanding basic HR needs (if applicable), and setting up supplier relationships.
+1.  **Module & Step Definition:**
+    *   For the MVP, module and step content can be hardcoded in the application.
+    *   For scalability, implement `modules` and `steps` tables in the database (see **Section 3**).
+2.  **User Progress Schema:**
+    *   Implement `user_step_progress` and `user_step_notes` tables to track user interactions.
+3.  **UI Development:**
+    *   Create a main dashboard (`/home`) to display modules and overall progress.
+    *   Build the UI for individual steps, including checklists, informational content, and input fields for notes.
+4.  **Backend Logic:**
+    *   Develop API endpoints to fetch module/step data and save user progress and notes.
 
-Each module will likely consist of informational content, interactive tools or checklists, and links to external resources. The AI assistant will be integrated to provide personalized guidance within these modules.
+### Phase 3: Subscriptions & Payments
+
+**Objective:** Integrate a payment system to manage user subscriptions for premium features.
+
+**Key Tasks:**
+
+1.  **Subscription Schema:**
+    *   Implement `subscriptions` and `payments` tables.
+2.  **Payment Gateway Integration:**
+    *   Integrate with a payment provider like Stripe.
+    *   Set up webhooks to handle payment events and update subscription statuses.
+3.  **UI/UX for Subscriptions:**
+    *   Create a pricing page.
+    *   Build a user-facing dashboard to manage subscription plans.
+    *   Gate premium features based on the user's subscription tier.
+
+### Phase 4: Resource Hub & Advanced Features
+
+**Objective:** Provide additional value through a curated resource hub and introduce AI-powered assistance.
+
+**Key Tasks:**
+
+1.  **Resource Hub:**
+    *   Implement the `resources` table.
+    *   Build a searchable and filterable UI for users to find articles, tools, and guides.
+2.  **AI Integration (Future):**
+    *   Explore using AI to generate suggestions, summarize notes, or provide personalized guidance based on user data.
+    *   The `content_type` field in `user_step_notes` is designed for future compatibility with AI-generated content.
+
+---
+
+## 3. Database Architecture (Supabase)
+
+This section details the planned schema for the PostgreSQL database managed by Supabase.
+
+### `users`
+
+Stores core user authentication data, managed primarily by Supabase Auth.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `UUID` | Primary Key (References `auth.users.id`). |
+| `email` | `Text` | User's email address. |
+| `onboarding_completed`| `Boolean` | `false` by default. Triggers onboarding flow. |
+| `ip_address` | `Text` | For duplicate account detection. |
+| `device_info` | `JSONB` | For duplicate account detection. |
+| `account_creation_source`| `Text` | e.g., 'WebApp', 'MobileApp'. |
+
+### `user_business_profiles`
+
+Stores detailed information about a user's business.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `profile_id` | `UUID` | Primary Key. |
+| `user_id` | `UUID` | Foreign Key to `users.id`. |
+| `business_name` | `Text` | Legal name of the business. |
+| `industry` | `Text` | e.g., 'Technology', 'Retail'. |
+| `entity_type` | `Text` | e.g., 'Sole Proprietorship', 'LLC'. |
+| `state_of_incorporation`| `Text` | State where the business is registered. |
+| `is_primary` | `Boolean` | `true` for the user's main business profile. |
+| `subscription_tier` | `Text` | e.g., 'Free', 'Premium'. Default 'Free'. |
+
+### `modules`
+
+Defines the high-level sections of the business navigator.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `module_id` | `UUID` | Primary Key. |
+| `module_name` | `Text` | e.g., 'Legal & Registration'. |
+| `description` | `Text` | Brief overview of the module. |
+| `module_order` | `Integer` | Defines the display sequence. |
+
+### `steps`
+
+Defines the individual tasks within each module.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `step_id` | `UUID` | Primary Key. |
+| `module_id` | `UUID` | Foreign Key to `modules.module_id`. |
+| `step_name` | `Text` | e.g., 'Register for an EIN'. |
+| `step_type` | `Text` | 'Informational', 'Action', 'Decision'. |
+| `step_order` | `Integer` | Defines the display sequence within a module. |
+
+### `user_step_progress`
+
+Tracks a user's completion status for each step.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `progress_id` | `UUID` | Primary Key. |
+| `user_id` | `UUID` | Foreign Key to `users.id`. |
+| `step_id` | `UUID` | Foreign Key to `steps.step_id`. |
+| `status` | `Text` | 'Not Started', 'In Progress', 'Completed'. |
+| `completed_at` | `Timestamp` | When the step was marked as completed. |
+
+### `user_step_notes`
+
+Stores user-generated notes and data for each step.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `note_id` | `UUID` | Primary Key. |
+| `user_id` | `UUID` | Foreign Key to `users.id`. |
+| `step_id` | `UUID` | Foreign Key to `steps.step_id`. |
+| `content` | `Text` | User's notes. |
+| `content_type` | `Text` | 'Text', 'JSON', 'AI_Generated'. |
+
+### `subscriptions` & `payments`
+
+(Schema to be detailed in Phase 3)
+
+### `resources`
+
+(Schema to be detailed in Phase 4)
+
+---
+
+## 4. Security & Best Practices
+
+-   **Row Level Security (RLS):** RLS will be enabled on all tables. Policies will strictly enforce that users can only access data linked to their `user_id`.
+-   **Input Validation:** All user inputs will be validated on both the client and server to prevent injection attacks.
+-   **Environment Variables:** All sensitive keys (Supabase URL, anon key, service role key) will be managed through environment variables and never hardcoded.
+-   **Code Conventions:** The project will follow standard coding conventions for TypeScript, React, and SQL to maintain readability and consistency.

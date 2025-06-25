@@ -31,11 +31,10 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export default function DocumentRoot() {
-  const { session, authStatus, initializeAuthListener } = useAuthStore();
+  const { session, authStatus, initializeAuthListener, onboardingCompleted } = useAuthStore();
   const isAuthenticated = !!session;
   const location = useLocation();
   const navigate = useNavigate();
-  // console.log('DocumentRoot rendering, path:', location.pathname, 'Auth Status:', authStatus, 'Session:', session); // Adjusted console log
 
   useEffect(() => {
     if (authStatus === 'initial') {
@@ -45,21 +44,30 @@ export default function DocumentRoot() {
   }, [initializeAuthListener, authStatus]);
 
   useEffect(() => {
-    if (authStatus === 'loading' || authStatus === 'initial') {
+    // Wait for auth and onboarding status to be determined
+    if (authStatus === 'loading' || authStatus === 'initial' || (isAuthenticated && onboardingCompleted === null)) {
       return;
     }
 
-    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/tos'];
+    const publicPaths = ['/', '/login', '/signup', '/forgot-password', '/tos', '/privacy'];
     const isPublicPath = publicPaths.includes(location.pathname);
+    const isOnboardingPath = location.pathname === '/onboarding';
 
-    if (isAuthenticated && isPublicPath && location.pathname !== '/home') {
-      // console.log('Redirecting authenticated user from public page to /home');
-      navigate('/home', { replace: true });
-    } else if (!isAuthenticated && !isPublicPath) {
-      // console.log('Redirecting unauthenticated user from protected page to /login');
-      navigate('/login', { replace: true });
+    if (isAuthenticated) {
+      if (!onboardingCompleted && !isOnboardingPath) {
+        // If onboarding is not complete, force user to the onboarding page
+        navigate('/onboarding', { replace: true });
+      } else if (onboardingCompleted && (isOnboardingPath || isPublicPath)) {
+        // If onboarding is complete, send them home from onboarding or public pages
+        navigate('/home', { replace: true });
+      }
+    } else {
+      // Unauthenticated users on a protected page get sent to login
+      if (!isPublicPath && !isOnboardingPath) {
+        navigate('/login', { replace: true });
+      }
     }
-  }, [isAuthenticated, authStatus, location.pathname, navigate]);
+  }, [isAuthenticated, authStatus, onboardingCompleted, location.pathname, navigate]);
 
   return (
     <html lang="en">
@@ -68,7 +76,6 @@ export default function DocumentRoot() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        {/* You might want to add a <title> tag here or manage it via Meta component */}
       </head>
       <body>
         {authStatus === 'loading' || authStatus === 'initial' ? (

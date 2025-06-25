@@ -11,19 +11,19 @@
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
-    "@react-router/node": "^7.5.3",
-    "@react-router/serve": "^7.5.3",
+    "@react-router/node": "^7.6.3-pre.0",
+    "@react-router/serve": "^7.6.3-pre.0",
     "@supabase/supabase-js": "^2.50.0",
     "clsx": "^2.1.1",
     "framer-motion": "^12.18.1",
     "isbot": "^5.1.27",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-router": "^7.5.3",
+    "react-router": "^7.6.3-pre.0",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
-    "@react-router/dev": "^7.5.3",
+    "@react-router/dev": "^7.6.3-pre.0",
     "@tailwindcss/vite": "^4.1.10",
     "@types/node": "^20",
     "@types/react": "^19.1.2",

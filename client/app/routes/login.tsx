@@ -5,50 +5,16 @@ import { Field, Label } from "~/ui-kit/catalyst/fieldset";
 import { Heading } from "~/ui-kit/catalyst/heading";
 import { Input } from "~/ui-kit/catalyst/input";
 import { Strong, Text, TextLink } from "~/ui-kit/catalyst/text";
-import { useState } from 'react';
-import { useNavigate } from 'react-router';
-import { supabase } from '~/lib/supabaseClient';
-import { useAuthStore } from '~/stores/authStore';
+import { useLoginForm } from '~/hooks/auth/useLoginForm';
 
 export default function LoginPage() {
-  const setAuthSession = useAuthStore((state) => state.setSession);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [message, setMessage] = useState<string | null>(null); 
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError(null);
-    setMessage(null);
-    setLoading(true);
-
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    setLoading(false);
-
-    if (signInError) {
-      if (signInError.message === 'Invalid login credentials') {
-        setError('Invalid email or password. Please try again.');
-      } else if (signInError.message === 'Email not confirmed') {
-        setError('Email not confirmed. Please check your inbox for a confirmation link.');
-        setMessage('You can request a new confirmation email if needed.'); 
-      } else {
-        setError(signInError.message);
-      }
-    } else if (data.session) {
-      setMessage('Login successful! Redirecting...');
-      setAuthSession(data.session); // Manually set session in the store
-      navigate('/home');
-    } else {
-      setError('An unexpected error occurred. Please try again.');
-    }
-  };
+  const {
+    email, setEmail,
+    password, setPassword,
+    error,
+    loading,
+    handleLogin,
+  } = useLoginForm();
 
   return (
     <AuthLayout>
@@ -61,7 +27,6 @@ export default function LoginPage() {
         </div>{" "}
         <Heading>Sign in to your account</Heading>
         {error && <Text className="text-red-600">{error}</Text>}
-        {message && <Text className="text-green-600">{message}</Text>}
         <Field>
           <Label>Email</Label>
           <Input 

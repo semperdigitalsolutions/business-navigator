@@ -6,6 +6,9 @@ export default [
   route("signup", "routes/signup.tsx"),
   route("forgot-password", "routes/forgot-password.tsx"),
   route("home", "routes/home.tsx"),
+  route("onboarding", "routes/onboarding.tsx"), // Add the new onboarding route
+  route("module/:moduleId", "routes/module.tsx"), // Dynamic route for module details
+  route("pricing", "routes/pricing.tsx"),
   route("2ndPage", "routes/2ndPage.tsx"),
   route("profile", "routes/profile.tsx"),
   route("privacy", "routes/privacy.tsx"),
