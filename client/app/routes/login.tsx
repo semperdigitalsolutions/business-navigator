@@ -26,7 +26,7 @@ export default function LoginPage() {
           <h1>Logo</h1>
         </div>{" "}
         <Heading>Sign in to your account</Heading>
-        {error && <Text className="text-red-600">{error}</Text>}
+        {error && <Text className="text-red-600 login-error-message">{error}</Text>}
         <Field>
           <Label>Email</Label>
           <Input 

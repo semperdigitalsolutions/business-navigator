@@ -13,3 +13,4 @@ body {
     color-scheme: dark;
   }
 }
+.login-error-message { color: red !important; }
