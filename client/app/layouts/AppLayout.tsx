@@ -72,8 +72,6 @@ function BusinessDropdownMenu() {
     <DropdownMenu className="min-w-80 lg:min-w-64" anchor="bottom start">
       {businesses.map((business) => (
         <DropdownItem key={business.id} href={`/business/${business.id}`}>
-          {/* The business name will be used for the avatar initials if no src is provided */}
-          <Avatar slot="icon" initials={business.name.charAt(0)} />
           <DropdownLabel>{business.name}</DropdownLabel>
         </DropdownItem>
       ))}
@@ -95,6 +93,7 @@ function BusinessDropdownMenu() {
 
 export default function AppLayout({ children, isAuthenticated }: AppLayoutProps) {
   const { signOutUser, user } = useAuthStore();
+  const { currentBusiness } = useBusinessStore();
 
   const handleSignOut = async () => {
     await signOutUser();
@@ -123,9 +122,14 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
             <>
               <Dropdown>
                 <DropdownButton as={NavbarItem} className="max-lg:hidden">
-                  <Avatar initials={useBusinessStore().currentBusiness.name.charAt(0)} />
-                  <NavbarLabel>{useBusinessStore().currentBusiness.name}</NavbarLabel>
-                  <ChevronDownIcon />
+                  {currentBusiness ? (
+                    <>
+                      <NavbarLabel>{currentBusiness.name}</NavbarLabel>
+                      <ChevronDownIcon />
+                    </>
+                  ) : (
+                    <div className="h-6 w-40 animate-pulse rounded-lg bg-zinc-950/5 dark:bg-white/5" />
+                  )}
                 </DropdownButton>
                 <BusinessDropdownMenu />
               </Dropdown>
@@ -181,9 +185,15 @@ export default function AppLayout({ children, isAuthenticated }: AppLayoutProps)
             <SidebarHeader>
               <Dropdown>
                 <DropdownButton as={SidebarItem} className="lg:mb-2.5">
-                  <Avatar initials={useBusinessStore().currentBusiness.name.charAt(0)} />
-                  <SidebarLabel>{useBusinessStore().currentBusiness.name}</SidebarLabel>
-                  <ChevronDownIcon />
+                  {currentBusiness ? (
+                    <>
+                      <SidebarLabel>{currentBusiness.name}</SidebarLabel>
+                      <ChevronDownIcon />
+                    </>
+                  ) : (
+                    // Placeholder for loading state
+                    <div className="h-9 w-full animate-pulse rounded-lg bg-zinc-950/5 dark:bg-white/5" />
+                  )}
                 </DropdownButton>
                 <BusinessDropdownMenu />
               </Dropdown>

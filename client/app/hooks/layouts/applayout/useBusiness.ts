@@ -1,18 +1,76 @@
-// Placeholder for business store
-export const useBusinessStore = () => {
-  // This is placeholder data. In a real application, you would fetch this
-  // from your backend and manage it in a global state manager like Zustand or Redux.
-  // The business_name would be pulled from the 'profiles' table in your database.
-  const isSubscribed = false; // Toggle this to see the subscribed state
+import { create } from 'zustand';
+import { supabase } from '~/lib/supabaseClient';
+import { useAuthStore } from '~/stores/authStore';
 
-  const businesses = isSubscribed
-    ? [
-        { id: 1, name: 'Semper Digital' },
-        { id: 2, name: 'Another Business' },
-      ]
-    : [{ id: 1, name: 'Semper Digital' }];
+interface Business {
+  id: string;
+  name: string;
+}
 
-  const currentBusiness = businesses[0];
+interface BusinessState {
+  businesses: Business[];
+  currentBusiness: Business | null;
+  isSubscribed: boolean;
+  fetchBusinesses: () => Promise<void>;
+}
 
-  return { businesses, currentBusiness, isSubscribed };
-};
+export const useBusinessStore = create<BusinessState>((set) => ({
+  businesses: [],
+  currentBusiness: null,
+  isSubscribed: false,
+
+  fetchBusinesses: async () => {
+    const { user } = useAuthStore.getState();
+    if (!user) {
+      set({ businesses: [], currentBusiness: null, isSubscribed: false });
+      return;
+    }
+
+    try {
+      const [profilesResult, subscriptionResult] = await Promise.all([
+        supabase.from('profiles').select('id, business_name').eq('id', user.id),
+        supabase
+          .from('subscriptions')
+          .select('status')
+          .eq('user_id', user.id)
+          .in('status', ['trialing', 'active'])
+          .maybeSingle(),
+      ]);
+
+      const { data: profilesData, error: profilesError } = profilesResult;
+      const { data: subscriptionData, error: subscriptionError } = subscriptionResult;
+
+      if (profilesError) throw profilesError;
+      if (subscriptionError) throw subscriptionError;
+
+      const isSubscribed = !!subscriptionData;
+
+      if (profilesData && profilesData.length > 0) {
+        const businesses = profilesData.map((profile) => ({
+          id: profile.id,
+          name: profile.business_name,
+        }));
+
+        set({
+          businesses,
+          currentBusiness: businesses[0],
+          isSubscribed,
+        });
+      } else {
+        set({ businesses: [], currentBusiness: null, isSubscribed });
+      }
+    } catch (error) {
+      console.error('Error fetching business data:', error);
+      set({ businesses: [], currentBusiness: null, isSubscribed: false });
+    }
+  },
+}));
+
+// Automatically fetch businesses when the user is authenticated and clear on logout.
+useAuthStore.subscribe((state, prevState) => {
+  if (state.user && !prevState.user) {
+    useBusinessStore.getState().fetchBusinesses();
+  } else if (!state.user && prevState.user) {
+    useBusinessStore.setState({ businesses: [], currentBusiness: null, isSubscribed: false });
+  }
+});
