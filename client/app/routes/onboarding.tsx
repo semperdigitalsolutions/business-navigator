@@ -4,7 +4,7 @@ import { Heading } from '~/ui-kit/catalyst/heading';
 import { Input } from '~/ui-kit/catalyst/input';
 import { Select } from '~/ui-kit/catalyst/select';
 import { useOnboardingData } from '~/hooks/onboarding/useOnboardingData';
-import { useOnboardingForm, UNDECIDED_OPTION } from '~/hooks/onboarding/useOnboardingForm';
+import { useOnboardingForm } from '~/hooks/onboarding/useOnboardingForm';
 
 export default function OnboardingPage() {
   const { industryOptions, entityTypeOptions, stateOptions, loading: dataLoading, error: dataError } = useOnboardingData();
@@ -22,6 +22,7 @@ export default function OnboardingPage() {
     handleEntityTypeChange,
     handleStateChange,
     handleSubmit,
+    handleSkip,
   } = useOnboardingForm();
 
   if (dataLoading) {
@@ -40,6 +41,13 @@ export default function OnboardingPage() {
           <p className="mt-2 text-center text-sm text-gray-600">
             Let's set up your business profile to get started.
           </p>
+          <p className="mt-4 text-center text-sm text-gray-500">
+            Unsure of the details? No worries,{' '}
+            <button type="button" onClick={handleSkip} className="font-medium text-indigo-600 hover:text-indigo-500">
+              we can figure it out as we go
+            </button>
+            .
+          </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <Field>
@@ -54,7 +62,6 @@ export default function OnboardingPage() {
                 <option key={option.name} value={option.name}>{option.name}</option>
               ))}
               <option value="Other">Other</option>
-              <option value={UNDECIDED_OPTION}>{UNDECIDED_OPTION}</option>
             </Select>
             {industry === 'Other' && (
               <Input type="text" value={otherIndustry} onChange={(e) => setOtherIndustry(e.target.value)} placeholder="Please specify your industry" className="mt-2" required />
@@ -76,7 +83,6 @@ export default function OnboardingPage() {
                 <option key={option.name} value={option.name}>{option.name}</option>
               ))}
               <option value="Other">Other</option>
-              <option value={UNDECIDED_OPTION}>{UNDECIDED_OPTION}</option>
             </Select>
             {entityType === 'Other' && (
               <Input type="text" value={otherEntityType} onChange={(e) => setOtherEntityType(e.target.value)} placeholder="Please specify your entity type" className="mt-2" required />
@@ -117,7 +123,6 @@ export default function OnboardingPage() {
                 <option key={option.name} value={option.name}>{option.name}</option>
               ))}
               <option value="Other">Other</option>
-              <option value={UNDECIDED_OPTION}>{UNDECIDED_OPTION}</option>
             </Select>
             {stateOfIncorporation === 'Other' && (
               <Input type="text" value={otherState} onChange={(e) => setOtherState(e.target.value)} placeholder="Please specify your state" className="mt-2" required />

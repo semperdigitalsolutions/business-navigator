@@ -2,15 +2,8 @@ import { useState } from 'react';
 import { supabase } from '~/lib/supabaseClient';
 import { useAuthStore } from '~/stores/authStore';
 import type { Industry, EntityType, State } from './useOnboardingData';
-
 import { useNavigate } from 'react-router';
 
-export const UNDECIDED_OPTION = "I'm still deciding";
-
-/**
- * Custom hook to manage the state and logic of the onboarding form.
- * It handles form input state, selection logic, and submission.
- */
 export function useOnboardingForm() {
   const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
@@ -37,7 +30,7 @@ export function useOnboardingForm() {
   const handleIndustryChange = (e: React.ChangeEvent<HTMLSelectElement>, options: Industry[]) => {
     const selectedName = e.target.value;
     setIndustry(selectedName);
-    if (selectedName === 'Other' || selectedName === UNDECIDED_OPTION) {
+    if (selectedName === 'Other') {
       setSelectedIndustry(null);
     } else {
       const details = options.find(opt => opt.name === selectedName) || null;
@@ -48,7 +41,7 @@ export function useOnboardingForm() {
   const handleEntityTypeChange = (e: React.ChangeEvent<HTMLSelectElement>, options: EntityType[]) => {
     const selectedName = e.target.value;
     setEntityType(selectedName);
-    if (selectedName === 'Other' || selectedName === UNDECIDED_OPTION) {
+    if (selectedName === 'Other') {
       setSelectedEntityType(null);
     } else {
       const details = options.find(opt => opt.name === selectedName) || null;
@@ -59,7 +52,7 @@ export function useOnboardingForm() {
   const handleStateChange = (e: React.ChangeEvent<HTMLSelectElement>, options: State[]) => {
     const selectedName = e.target.value;
     setStateOfIncorporation(selectedName);
-    if (selectedName === 'Other' || selectedName === UNDECIDED_OPTION) {
+    if (selectedName === 'Other') {
       setSelectedState(null);
     } else {
       const details = options.find(opt => opt.name === selectedName) || null;
@@ -78,9 +71,9 @@ export function useOnboardingForm() {
       return;
     }
 
-    const finalIndustry = industry === 'Other' ? otherIndustry : (industry === UNDECIDED_OPTION ? null : industry);
-    const finalEntityType = entityType === 'Other' ? otherEntityType : (entityType === UNDECIDED_OPTION ? null : entityType);
-    const finalState = stateOfIncorporation === 'Other' ? otherState : (stateOfIncorporation === UNDECIDED_OPTION ? null : stateOfIncorporation);
+    const finalIndustry = industry === 'Other' ? otherIndustry : industry;
+    const finalEntityType = entityType === 'Other' ? otherEntityType : entityType;
+    const finalState = stateOfIncorporation === 'Other' ? otherState : stateOfIncorporation;
 
     const profileData = {
       id: user.id,
@@ -103,6 +96,40 @@ export function useOnboardingForm() {
     }
   };
 
+  const handleSkip = async () => {
+    setLoading(true);
+    setError(null);
+
+    if (!user) {
+      setError('You must be logged in to create a profile.');
+      setLoading(false);
+      return;
+    }
+
+    // Default business name from user's email, or a fallback
+    const defaultBusinessName = user.email ? user.email.split('@')[0] + "'s Business" : 'My Business';
+
+    const profileData = {
+      id: user.id,
+      business_name: defaultBusinessName,
+      industry: null,
+      entity_type: null,
+      state_of_incorporation: null,
+      updated_at: new Date(),
+    };
+
+    const { error } = await supabase.from('profiles').upsert(profileData);
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      setLoading(false);
+      setOnboardingCompleted(true);
+      navigate('/home');
+    }
+  };
+
   return {
     businessName, setBusinessName,
     industry, otherIndustry, setOtherIndustry,
@@ -117,5 +144,6 @@ export function useOnboardingForm() {
     handleEntityTypeChange,
     handleStateChange,
     handleSubmit,
+    handleSkip,
   };
 }
