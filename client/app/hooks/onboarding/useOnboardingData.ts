@@ -3,18 +3,21 @@ import { supabase } from '~/lib/supabaseClient';
 
 // Define the shapes of our data
 export interface Industry {
+  id: string;
   name: string;
   description: string;
   examples: string[];
 }
 
 export interface State {
+  id: string;
   name: string;
   status: string;
   notes: string;
 }
 
 export interface EntityType {
+  id: string;
   name: string;
   description: string;
   key_features: string[];
@@ -28,9 +31,9 @@ export interface EntityType {
  * It handles loading and error states for the data fetching process.
  */
 export function useOnboardingData() {
-  const [industryOptions, setIndustryOptions] = useState<Industry[]>([]);
-  const [entityTypeOptions, setEntityTypeOptions] = useState<EntityType[]>([]);
-  const [stateOptions, setStateOptions] = useState<State[]>([]);
+  const [industries, setIndustries] = useState<Industry[]>([]);
+  const [entityTypes, setEntityTypes] = useState<EntityType[]>([]);
+  const [states, setStates] = useState<State[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -39,18 +42,18 @@ export function useOnboardingData() {
       try {
         setLoading(true);
         const [industriesRes, entityTypesRes, statesRes] = await Promise.all([
-          supabase.from('industries').select('name, description, examples'),
-          supabase.from('entity_types').select('name, description, key_features, advantages, considerations, availability'),
-          supabase.from('states').select('name, status, notes'),
+          supabase.from('industries').select('id, name, description, examples'),
+          supabase.from('entity_types').select('id, name, description, key_features, advantages, considerations, availability'),
+          supabase.from('states').select('id, name, status, notes'),
         ]);
 
         if (industriesRes.error) throw industriesRes.error;
         if (entityTypesRes.error) throw entityTypesRes.error;
         if (statesRes.error) throw statesRes.error;
 
-        setIndustryOptions(industriesRes.data || []);
-        setEntityTypeOptions(entityTypesRes.data || []);
-        setStateOptions(statesRes.data || []);
+        setIndustries(industriesRes.data || []);
+        setEntityTypes(entityTypesRes.data || []);
+        setStates(statesRes.data || []);
       } catch (error: any) {
         setError('Failed to load form options. Please try again later.');
         console.error('Error fetching options:', error.message);
@@ -62,5 +65,5 @@ export function useOnboardingData() {
     fetchOptions();
   }, []);
 
-  return { industryOptions, entityTypeOptions, stateOptions, loading, error };
+  return { industries, entityTypes, states, loading, error };
 }

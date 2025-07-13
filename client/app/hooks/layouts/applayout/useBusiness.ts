@@ -27,8 +27,8 @@ export const useBusinessStore = create<BusinessState>((set) => ({
     }
 
     try {
-      const [profilesResult, subscriptionResult] = await Promise.all([
-        supabase.from('profiles').select('id, business_name').eq('id', user.id),
+      const [projectsResult, subscriptionResult] = await Promise.all([
+        supabase.from('business_projects').select('id, business_name').eq('user_id', user.id),
         supabase
           .from('subscriptions')
           .select('status')
@@ -37,18 +37,18 @@ export const useBusinessStore = create<BusinessState>((set) => ({
           .maybeSingle(),
       ]);
 
-      const { data: profilesData, error: profilesError } = profilesResult;
+      const { data: projectsData, error: projectsError } = projectsResult;
       const { data: subscriptionData, error: subscriptionError } = subscriptionResult;
 
-      if (profilesError) throw profilesError;
+      if (projectsError) throw projectsError;
       if (subscriptionError) throw subscriptionError;
 
       const isSubscribed = !!subscriptionData;
 
-      if (profilesData && profilesData.length > 0) {
-        const businesses = profilesData.map((profile) => ({
-          id: profile.id,
-          name: profile.business_name,
+      if (projectsData && projectsData.length > 0) {
+        const businesses = projectsData.map((project) => ({
+          id: project.id,
+          name: project.business_name,
         }));
 
         set({
