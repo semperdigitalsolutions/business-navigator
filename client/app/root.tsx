@@ -31,7 +31,7 @@ export const links: Route.LinksFunction = () => [
 ];
 
 export default function DocumentRoot() {
-  const { session, authStatus, initializeAuthListener, onboardingCompleted } = useAuthStore();
+  const { session, authStatus, initializeAuthListener, onboardingCompleted, isSubscribed } = useAuthStore();
   const isAuthenticated = !!session;
   const location = useLocation();
   const navigate = useNavigate();
@@ -44,8 +44,12 @@ export default function DocumentRoot() {
   }, [initializeAuthListener, authStatus]);
 
   useEffect(() => {
-    // Wait for auth and onboarding status to be determined
-    if (authStatus === 'loading' || authStatus === 'initial' || (isAuthenticated && onboardingCompleted === null)) {
+    // Wait for auth, onboarding, and subscription status to be determined
+    if (
+      authStatus === 'loading' ||
+      authStatus === 'initial' ||
+      (isAuthenticated && (onboardingCompleted === null || isSubscribed === null))
+    ) {
       return;
     }
 
@@ -57,7 +61,10 @@ export default function DocumentRoot() {
       if (!onboardingCompleted && !isOnboardingPath) {
         // If onboarding is not complete, force user to the onboarding page
         navigate('/onboarding', { replace: true });
-      } else if (onboardingCompleted && (isOnboardingPath || isPublicPath)) {
+      } else if (onboardingCompleted && !isSubscribed && !isOnboardingPath) {
+        // If onboarded but not subscribed, force to subscription step
+        navigate('/onboarding', { replace: true });
+      } else if (onboardingCompleted && isSubscribed && (isOnboardingPath || isPublicPath)) {
         // If onboarding is complete, send them home from onboarding or public pages
         navigate('/home', { replace: true });
       }
@@ -67,7 +74,7 @@ export default function DocumentRoot() {
         navigate('/login', { replace: true });
       }
     }
-  }, [isAuthenticated, authStatus, onboardingCompleted, location.pathname, navigate]);
+  }, [isAuthenticated, authStatus, onboardingCompleted, isSubscribed, location.pathname, navigate]);
 
   return (
     <html lang="en">

@@ -8,13 +8,16 @@ export interface AuthState {
   session: Session | null;
   user: User | null;
   onboardingCompleted: boolean | null;
+  isSubscribed: boolean | null;
   authStatus: AuthStatus;
   error: string | null;
   loading: boolean; // For initial load and onAuthStateChange processing
   setSession: (session: Session | null) => void;
   setOnboardingCompleted: (status: boolean) => void;
+  setSubscriptionStatus: (status: boolean) => void;
   setError: (error: string | null) => void;
   checkOnboardingStatus: (userId: string) => Promise<void>;
+  checkSubscriptionStatus: (userId: string) => Promise<void>;
   initializeAuthListener: () => () => void; // Returns the unsubscribe function
   signOutUser: () => Promise<void>;
 }
@@ -23,6 +26,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   session: null,
   user: null,
   onboardingCompleted: null,
+  isSubscribed: null,
   authStatus: 'initial',
   error: null,
   loading: true, // Start as true until first auth state is determined
@@ -38,13 +42,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
     if (session?.user) {
       get().checkOnboardingStatus(session.user.id);
+      get().checkSubscriptionStatus(session.user.id);
     } else {
       // If there's no session, reset onboarding status
-      set({ onboardingCompleted: null });
+      set({ onboardingCompleted: null, isSubscribed: null });
     }
   },
 
   setOnboardingCompleted: (status: boolean) => set({ onboardingCompleted: status }),
+
+  setSubscriptionStatus: (status: boolean) => set({ isSubscribed: status }),
 
   setError: (error) => set({ error, loading: false }),
 
@@ -65,6 +72,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       console.error('Error checking onboarding status:', error);
       // Decide how to handle this - maybe set an error in the store
       set({ onboardingCompleted: false }); // Default to false on error
+    }
+  },
+
+  checkSubscriptionStatus: async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('subscription_plan_id')
+        .eq('id', userId)
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      set({ isSubscribed: !!data?.subscription_plan_id });
+    } catch (error: any) {
+      console.error('Error checking subscription status:', error);
     }
   },
 

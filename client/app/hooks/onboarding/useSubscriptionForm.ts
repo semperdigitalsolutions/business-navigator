@@ -7,7 +7,7 @@ export function useSubscriptionForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const user = useAuthStore((state) => state.user);
-  const setOnboardingCompleted = useAuthStore((state) => state.setOnboardingCompleted);
+  const setSubscriptionStatus = useAuthStore((state) => state.setSubscriptionStatus);
   const navigate = useNavigate();
 
   const handleSelectPlan = async (planId: string) => {
@@ -30,7 +30,7 @@ export function useSubscriptionForm() {
       setLoading(false);
     } else {
       setLoading(false);
-      setOnboardingCompleted(true);
+      setSubscriptionStatus(true);
       navigate('/home');
     }
   };
