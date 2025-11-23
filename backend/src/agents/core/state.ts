@@ -56,12 +56,8 @@ export const AgentState = Annotation.Root({
   }),
 
   // LLM configuration (from user settings or defaults)
-  llmProvider: Annotation<'openrouter' | 'openai' | 'anthropic'>({
-    default: () => 'openrouter',
-  }),
-  llmModel: Annotation<string>({
-    default: () => 'openai/gpt-4-turbo',
-  }),
+  llmProvider: Annotation<'openrouter' | 'openai' | 'anthropic' | undefined>(),
+  llmModel: Annotation<string | undefined>(),
   llmApiKey: Annotation<string | undefined>(),
 
   // Additional metadata
@@ -73,6 +69,7 @@ export const AgentState = Annotation.Root({
   // Error handling
   error: Annotation<string | undefined>(),
   retryCount: Annotation<number>({
+    reducer: (prev, next) => prev + next,
     default: () => 0,
   }),
 })
@@ -99,9 +96,11 @@ export const LegalState = Annotation.Root({
     'structure' | 'formation' | 'compliance' | 'documents' | undefined
   >(),
   recommendedActions: Annotation<string[]>({
+    reducer: (prev, next) => [...prev, ...next],
     default: () => [],
   }),
   documentsGenerated: Annotation<string[]>({
+    reducer: (prev, next) => [...prev, ...next],
     default: () => [],
   }),
 })
@@ -122,6 +121,7 @@ export const FinancialState = Annotation.Root({
     cashFlow?: number[]
   } | undefined>(),
   recommendations: Annotation<string[]>({
+    reducer: (prev, next) => [...prev, ...next],
     default: () => [],
   }),
 })
@@ -138,6 +138,7 @@ export const TaskState = Annotation.Root({
   >(),
   taskStatus: Annotation<'pending' | 'in_progress' | 'completed' | 'blocked' | undefined>(),
   nextTasks: Annotation<string[]>({
+    reducer: (prev, next) => [...prev, ...next],
     default: () => [],
   }),
 })

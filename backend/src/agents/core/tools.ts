@@ -23,15 +23,16 @@ export const getUserBusinessTool = tool(
       return JSON.stringify({ found: false, message: 'No business found for user' })
     }
 
+    const business = data as any
     return JSON.stringify({
       found: true,
       business: {
-        id: data.id,
-        name: data.name,
-        type: data.type,
-        state: data.state,
-        status: data.status,
-        createdAt: data.created_at,
+        id: business.id,
+        name: business.name,
+        type: business.type,
+        state: business.state,
+        status: business.status,
+        createdAt: business.created_at,
       },
     })
   },
@@ -129,9 +130,9 @@ export const completeTaskTool = tool(
     const { data, error } = await supabase
       .from('user_tasks')
       .update({
-        status: 'completed',
-        completed_at: new Date().toISOString(),
-      })
+        status: 'completed' as any,
+        completed_at: new Date().toISOString() as any,
+      } as any)
       .eq('id', taskId)
       .eq('user_id', userId)
       .select()
@@ -141,10 +142,11 @@ export const completeTaskTool = tool(
       return JSON.stringify({ success: false, error: error.message })
     }
 
+    const task = data as any
     return JSON.stringify({
       success: true,
       task: data,
-      message: `Task "${data.title}" marked as completed!`,
+      message: `Task "${task.title}" marked as completed!`,
     })
   },
   {
@@ -176,7 +178,7 @@ export const createUserTaskTool = tool(
     category: string
     priority: string
   }) => {
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('user_tasks')
       .insert({
         user_id: userId,
@@ -186,7 +188,7 @@ export const createUserTaskTool = tool(
         category,
         priority,
         status: 'pending',
-      })
+      } as any)
       .select()
       .single()
 

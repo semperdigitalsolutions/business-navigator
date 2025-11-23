@@ -9,7 +9,16 @@ export interface AuthUser {
   email: string
 }
 
-export async function authMiddleware(context: Context) {
+export interface AuthResult {
+  success: boolean
+  userId?: string
+  email?: string
+  user?: AuthUser
+  error?: string
+  status?: number
+}
+
+export async function authMiddleware(context: Context): Promise<AuthResult> {
   const authorization = context.request.headers.get('Authorization')
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
@@ -36,9 +45,11 @@ export async function authMiddleware(context: Context) {
       }
     }
 
-    // Attach user to context
+    // Return with both userId and user for compatibility
     return {
       success: true,
+      userId: user.id,
+      email: user.email!,
       user: {
         id: user.id,
         email: user.email!,
@@ -54,13 +65,12 @@ export async function authMiddleware(context: Context) {
 }
 
 // Optional auth middleware (doesn't fail if no token)
-export async function optionalAuthMiddleware(context: Context) {
+export async function optionalAuthMiddleware(context: Context): Promise<AuthResult> {
   const authorization = context.request.headers.get('Authorization')
 
   if (!authorization || !authorization.startsWith('Bearer ')) {
     return {
       success: true,
-      user: null,
     }
   }
 

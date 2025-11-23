@@ -38,9 +38,10 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
             .single()
 
           if (apiKeyData) {
-            llmApiKey = apiKeyData.api_key_encrypted // TODO: Decrypt
-            llmModel = apiKeyData.preferred_model
-            llmProvider = apiKeyData.provider as any
+            const keyData = apiKeyData as any
+            llmApiKey = keyData.api_key_encrypted // TODO: Decrypt
+            llmModel = keyData.preferred_model
+            llmProvider = keyData.provider as 'openrouter' | 'openai' | 'anthropic'
           }
         }
 
@@ -88,11 +89,12 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
                 thread_id: threadId,
                 agent_type: result.activeAgent || 'triage',
                 status: 'active',
-              })
+              } as any)
               .select()
               .single()
 
-            sessionId = session?.id
+            const sess = session as any
+            sessionId = sess?.id
           }
 
           // Save messages
@@ -102,7 +104,7 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
                 session_id: sessionId,
                 role: 'user',
                 content: body.message,
-              },
+              } as any,
               {
                 session_id: sessionId,
                 role: 'assistant',
@@ -111,9 +113,9 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
                 metadata: {
                   agent: result.activeAgent,
                   confidence: result.confidence,
-                },
-              },
-            ])
+                } as any,
+              } as any,
+            ] as any)
           }
         }
 

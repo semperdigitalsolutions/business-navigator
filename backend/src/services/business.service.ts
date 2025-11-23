@@ -54,7 +54,7 @@ export class BusinessService {
         state: data.state,
         owner_id: user.id,
         status: 'DRAFT' as BusinessStatus,
-      })
+      } as any)
       .select()
       .single()
 
@@ -77,7 +77,7 @@ export class BusinessService {
   ) {
     const { data: business, error } = await supabase
       .from('businesses')
-      .update(data)
+      .update(data as any)
       .eq('id', id)
       .eq('owner_id', userId)
       .select()
