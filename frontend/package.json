@@ -8,6 +8,10 @@
     "build": "bunx --bun vite build",
     "type-check": "bun tsc --noEmit",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json}\"",
+    "check:file-length": "eslint . --no-eslintrc --rule 'max-lines: [error, {max: 300, skipBlankLines: true, skipComments: true}]'",
     "preview": "bunx --bun vite preview"
   },
   "dependencies": {

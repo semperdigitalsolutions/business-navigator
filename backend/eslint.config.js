@@ -1,23 +1,18 @@
 import js from '@eslint/js'
-import globals from 'globals'
-import reactHooks from 'eslint-plugin-react-hooks'
-import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
   globalIgnores(['dist', 'node_modules', '*.config.js', '*.config.ts']),
   {
-    files: ['**/*.{ts,tsx}'],
+    files: ['**/*.{ts,js}'],
     extends: [
       js.configs.recommended,
-      tseslint.configs.recommended,
-      reactHooks.configs.flat.recommended,
-      reactRefresh.configs.vite,
+      ...tseslint.configs.recommended,
     ],
     languageOptions: {
-      ecmaVersion: 2020,
-      globals: globals.browser,
+      ecmaVersion: 2022,
+      sourceType: 'module',
     },
     rules: {
       // File Length Rules - Enforce Clean Code
@@ -39,9 +34,8 @@ export default defineConfig([
       'max-params': ['warn', 4],
 
       // Code Quality
-      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-console': 'off', // Allowed in backend for logging
       'no-debugger': 'error',
-      'no-alert': 'warn',
       'no-var': 'error',
       'prefer-const': 'error',
       'prefer-arrow-callback': 'warn',
@@ -57,13 +51,6 @@ export default defineConfig([
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-non-null-assertion': 'warn',
 
-      // React Specific
-      'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', {
-        allowConstantExport: true,
-      }],
-
       // Import Organization
       'no-duplicate-imports': 'error',
       'sort-imports': ['warn', {
@@ -76,6 +63,13 @@ export default defineConfig([
       'no-throw-literal': 'error',
       'prefer-template': 'warn',
       'no-nested-ternary': 'warn',
+      'require-await': 'warn',
+      'no-return-await': 'warn',
+
+      // Security
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
     },
   },
 ])

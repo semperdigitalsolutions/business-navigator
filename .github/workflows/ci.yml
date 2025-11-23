@@ -1,0 +1,148 @@
+name: CI - Code Quality & Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js (for npm packages compatibility)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: bun install
+
+      - name: Lint root
+        run: bun run lint
+        continue-on-error: false
+
+      - name: Format check
+        run: bun run format:check
+        continue-on-error: false
+
+  frontend-checks:
+    name: Frontend - Lint, Type-check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run ESLint
+        working-directory: ./frontend
+        run: bun run lint
+
+      - name: Check file lengths
+        working-directory: ./frontend
+        run: bun run check:file-length
+
+      - name: TypeScript type check
+        working-directory: ./frontend
+        run: bun run type-check
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: bun run build
+
+      - name: Upload frontend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-build
+          path: frontend/dist
+          retention-days: 7
+
+  backend-checks:
+    name: Backend - Lint, Type-check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: ./backend
+        run: npm install
+
+      - name: Run ESLint
+        working-directory: ./backend
+        run: bun run lint
+
+      - name: Check file lengths
+        working-directory: ./backend
+        run: bun run check:file-length
+
+      - name: TypeScript type check
+        working-directory: ./backend
+        run: bun run type-check
+
+      - name: Build backend
+        working-directory: ./backend
+        run: bun run build
+
+      - name: Upload backend build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-build
+          path: backend/dist
+          retention-days: 7
+
+  shared-checks:
+    name: Shared Package - Type-check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      - name: Install shared dependencies
+        working-directory: ./shared
+        run: bun install
+
+      - name: TypeScript type check
+        working-directory: ./shared
+        run: bun run type-check
