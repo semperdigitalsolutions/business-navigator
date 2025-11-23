@@ -1,0 +1,24 @@
+{
+  "name": "@business-navigator/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "type-check": "bun tsc --noEmit",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "elysia": "^1.2.17",
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/jwt": "^1.2.0",
+    "@supabase/supabase-js": "^2.49.2",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.15",
+    "typescript": "~5.9.3"
+  }
+}
