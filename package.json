@@ -1,0 +1,24 @@
+{
+  "name": "business-navigator",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "bun run --filter frontend dev & bun run --filter backend dev",
+    "dev:backend": "bun --filter backend dev",
+    "dev:frontend": "bun --filter frontend dev",
+    "build": "bun run build:shared && bun run build:backend && bun run build:frontend",
+    "build:shared": "bun --filter shared build",
+    "build:backend": "bun --filter backend build",
+    "build:frontend": "bun --filter frontend build",
+    "type-check": "bun run type-check:shared && bun run type-check:backend && bun run type-check:frontend",
+    "type-check:shared": "bun --filter shared type-check",
+    "type-check:backend": "bun --filter backend type-check",
+    "type-check:frontend": "bun --filter frontend type-check",
+    "install:all": "bun install"
+  }
+}
