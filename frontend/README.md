@@ -1,73 +1,156 @@
-# React + TypeScript + Vite
+# Business Navigator - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The frontend application for Business Navigator, an AI-powered business formation platform.
 
-Currently, two official plugins are available:
+## Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 19** - UI library
+- **TypeScript** - Type safety
+- **Vite** - Build tool and dev server
+- **Tailwind CSS** - Utility-first CSS framework
+- **Bun** - JavaScript runtime and package manager
+- **TanStack Query** - Data fetching and caching
+- **Zustand** - State management
+- **Axios** - HTTP client
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Prerequisites
 
-## Expanding the ESLint configuration
+- [Bun](https://bun.sh/) installed on your system
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Installation
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Install dependencies
+bun install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+# Start development server
+bun run dev
 ```
+
+The application will be available at `http://localhost:5173`
+
+### Building
+
+```bash
+# Type check
+bun run type-check
+
+# Build for production
+bun run build
+
+# Preview production build
+bun run preview
+```
+
+## Project Structure
+
+```
+frontend/
+├── src/
+│   ├── assets/          # Static assets (images, fonts, etc.)
+│   ├── styles/          # Global styles and Tailwind configuration
+│   │   └── globals.css  # Global CSS with Tailwind directives
+│   ├── App.tsx          # Main application component
+│   └── main.tsx         # Application entry point
+├── public/              # Public static files
+├── .env.example         # Environment variables template
+├── index.html           # HTML template
+├── package.json         # Dependencies and scripts
+├── tailwind.config.js   # Tailwind CSS configuration
+├── tsconfig.app.json    # TypeScript configuration for app
+├── tsconfig.json        # TypeScript base configuration
+├── tsconfig.node.json   # TypeScript configuration for Node
+└── vite.config.ts       # Vite configuration
+```
+
+## Configuration
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and configure:
+
+```env
+VITE_API_URL=http://localhost:3000
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### Path Aliases
+
+The following path aliases are configured:
+
+- `@/*` - Maps to `./src/*`
+- `@shared/*` - Maps to `../shared/src/*` (monorepo shared code)
+
+Example usage:
+
+```typescript
+import { Button } from '@/components/Button'
+import { User, ApiResponse } from '@shared/types'
+import { APP_NAME } from '@shared/constants'
+```
+
+### Vite Configuration
+
+The Vite server is configured with:
+
+- **Port**: 5173
+- **API Proxy**: `/api` routes are proxied to `http://localhost:3000`
+
+## Available Scripts
+
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run type-check` - Run TypeScript type checking
+- `bun run lint` - Run ESLint
+- `bun run preview` - Preview production build
+
+## Development Guidelines
+
+### Code Style
+
+- Use TypeScript for all new files
+- Follow the existing code structure and naming conventions
+- Use Tailwind CSS for styling
+- Keep components small and focused
+
+### State Management
+
+- Use **TanStack Query** for server state (data fetching, caching)
+- Use **Zustand** for client state (UI state, user preferences)
+
+### API Calls
+
+- Use the configured Axios instance
+- Leverage TanStack Query for data fetching
+- Handle errors gracefully with proper user feedback
+
+## Monorepo Structure
+
+This frontend is part of the Business Navigator monorepo:
+
+```
+business-navigator/
+├── frontend/    # This package (React frontend)
+├── backend/     # Backend API (ElysiaJS)
+├── shared/      # Shared types and utilities
+└── docs/        # Documentation
+```
+
+## Contributing
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Run `bun run type-check` and `bun run lint`
+4. Test your changes thoroughly
+5. Submit a pull request
+
+## License
+
+Proprietary - All rights reserved

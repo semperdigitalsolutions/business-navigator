@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { APP_NAME, APP_VERSION } from '@shared/constants'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -8,7 +9,7 @@ function App() {
       <div className="max-w-2xl mx-auto px-4 py-16">
         <div className="text-center space-y-8">
           <h1 className="text-6xl font-bold text-gray-900 dark:text-white">
-            Business Navigator
+            {APP_NAME}
           </h1>
 
           <p className="text-xl text-gray-600 dark:text-gray-300">
@@ -26,6 +27,10 @@ function App() {
 
           <p className="text-lg text-green-600 dark:text-green-400 font-medium">
             Frontend is ready! 🚀 (Powered by Bun)
+          </p>
+
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            v{APP_VERSION}
           </p>
         </div>
       </div>
