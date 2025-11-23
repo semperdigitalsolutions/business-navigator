@@ -1,0 +1,213 @@
+/**
+ * Main LangGraph Orchestration
+ * Routes user queries through triage to appropriate specialist agents
+ */
+import { StateGraph, START, END } from '@langchain/langgraph'
+import { HumanMessage, AIMessage } from '@langchain/core/messages'
+import { AgentState, type AgentStateType } from './core/state.js'
+import { getCheckpointerWithFallback } from './core/checkpoint.js'
+import { createTriageAgent } from './triage/router.js'
+import { createLegalNavigatorAgent } from './legal/legal-navigator.js'
+import { createFinancialPlannerAgent } from './financial/financial-planner.js'
+import { createTaskAssistantAgent } from './tasks/task-assistant.js'
+import { GENERAL_SYSTEM_PROMPT } from './core/prompts.js'
+import { createLLM, getLLMConfigFromState } from './core/llm.js'
+
+/**
+ * Initialize all specialist agents
+ */
+const triageAgent = createTriageAgent()
+const legalAgent = createLegalNavigatorAgent()
+const financialAgent = createFinancialPlannerAgent()
+const taskAgent = createTaskAssistantAgent()
+
+/**
+ * Route to triage agent
+ */
+async function routeToTriage(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  try {
+    const result = await triageAgent.invoke(state)
+    return {
+      activeAgent: result.activeAgent || 'triage',
+      intent: result.intent,
+      routingReason: result.routingReason,
+      confidence: result.intentConfidence,
+    }
+  } catch (error) {
+    console.error('Error in triage routing:', error)
+    return {
+      activeAgent: 'triage',
+      error: error instanceof Error ? error.message : 'Unknown routing error',
+    }
+  }
+}
+
+/**
+ * Route to legal agent
+ */
+async function routeToLegal(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  try {
+    const result = await legalAgent.invoke(state)
+    return {
+      messages: result.messages,
+      tokensUsed: result.tokensUsed || 0,
+      confidence: result.confidence,
+      metadata: result.metadata,
+    }
+  } catch (error) {
+    console.error('Error in legal agent:', error)
+    return {
+      messages: [
+        new AIMessage(
+          'I apologize, but I encountered an error processing your legal query. Please try again.'
+        ),
+      ],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+/**
+ * Route to financial agent
+ */
+async function routeToFinancial(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  try {
+    const result = await financialAgent.invoke(state)
+    return {
+      messages: result.messages,
+      tokensUsed: result.tokensUsed || 0,
+      confidence: result.confidence,
+      metadata: result.metadata,
+    }
+  } catch (error) {
+    console.error('Error in financial agent:', error)
+    return {
+      messages: [
+        new AIMessage(
+          'I apologize, but I encountered an error processing your financial query. Please try again.'
+        ),
+      ],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+/**
+ * Route to task agent
+ */
+async function routeToTask(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  try {
+    const result = await taskAgent.invoke(state)
+    return {
+      messages: result.messages,
+      tokensUsed: result.tokensUsed || 0,
+      confidence: result.confidence,
+      completedSteps: result.completedSteps || [],
+      metadata: result.metadata,
+    }
+  } catch (error) {
+    console.error('Error in task agent:', error)
+    return {
+      messages: [
+        new AIMessage(
+          'I apologize, but I encountered an error processing your task query. Please try again.'
+        ),
+      ],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+/**
+ * Handle general queries
+ */
+async function handleGeneral(state: AgentStateType): Promise<Partial<AgentStateType>> {
+  try {
+    const llmConfig = getLLMConfigFromState(state)
+    const llm = createLLM(llmConfig)
+
+    const lastMessage = state.messages[state.messages.length - 1]
+    const response = await llm.invoke([
+      { role: 'system', content: GENERAL_SYSTEM_PROMPT },
+      ...state.messages,
+    ])
+
+    const tokensUsed = Math.ceil(
+      (GENERAL_SYSTEM_PROMPT.length +
+        (lastMessage.content as string).length +
+        (response.content as string).length) /
+        4
+    )
+
+    return {
+      messages: [response],
+      tokensUsed,
+      confidence: 0.80,
+    }
+  } catch (error) {
+    console.error('Error in general handler:', error)
+    return {
+      messages: [
+        new AIMessage('I apologize, but I encountered an error. How else can I help you today?'),
+      ],
+      error: error instanceof Error ? error.message : 'Unknown error',
+    }
+  }
+}
+
+/**
+ * Determine next step based on active agent
+ */
+function routeByAgent(state: AgentStateType): string {
+  switch (state.activeAgent) {
+    case 'legal':
+      return 'legal'
+    case 'financial':
+      return 'financial'
+    case 'tasks':
+      return 'tasks'
+    case 'triage':
+    default:
+      return 'general'
+  }
+}
+
+/**
+ * Create the main agent graph
+ */
+export async function createMainGraph() {
+  const checkpointer = await getCheckpointerWithFallback()
+
+  const graph = new StateGraph(AgentState)
+    .addNode('triage', routeToTriage)
+    .addNode('legal', routeToLegal)
+    .addNode('financial', routeToFinancial)
+    .addNode('tasks', routeToTask)
+    .addNode('general', handleGeneral)
+    .addEdge(START, 'triage')
+    .addConditionalEdges('triage', routeByAgent, {
+      legal: 'legal',
+      financial: 'financial',
+      tasks: 'tasks',
+      general: 'general',
+    })
+    .addEdge('legal', END)
+    .addEdge('financial', END)
+    .addEdge('tasks', END)
+    .addEdge('general', END)
+
+  // @ts-expect-error - LangGraph MemoryCheckpointer type mismatch with BaseCheckpointSaver interface
+  return graph.compile({ checkpointer })
+}
+
+/**
+ * Initialize the main graph (singleton)
+ */
+let mainGraph: Awaited<ReturnType<typeof createMainGraph>> | null = null
+
+export async function getMainGraph() {
+  if (!mainGraph) {
+    mainGraph = await createMainGraph()
+  }
+  return mainGraph
+}

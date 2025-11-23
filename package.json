@@ -19,6 +19,20 @@
     "type-check:shared": "bun --filter shared type-check",
     "type-check:backend": "bun --filter backend type-check",
     "type-check:frontend": "bun --filter frontend type-check",
+    "lint": "bun run lint:frontend && bun run lint:backend",
+    "lint:frontend": "bun --filter frontend lint",
+    "lint:backend": "bun --filter backend lint",
+    "lint:fix": "bun run lint:fix:frontend && bun run lint:fix:backend",
+    "lint:fix:frontend": "bun --filter frontend lint:fix",
+    "lint:fix:backend": "bun --filter backend lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "quality": "bun run format:check && bun run lint && bun run type-check",
+    "prepare": "husky",
     "install:all": "bun install"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "prettier": "^3.6.2"
   }
 }
