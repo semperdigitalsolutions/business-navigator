@@ -16,9 +16,14 @@ const envSchema = z.object({
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
 
-  // AI/LLM
+  // Database (for LangGraph checkpoints)
+  DATABASE_URL: z.string().url().optional(),
+
+  // AI/LLM - Default keys (can be overridden by user-provided keys)
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
+  DEFAULT_LLM_MODEL: z.string().default('openai/gpt-4-turbo'),
 
   // CORS
   FRONTEND_URL: z.string().url().default('http://localhost:5173'),

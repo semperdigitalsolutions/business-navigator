@@ -9,6 +9,7 @@ import { checkDatabaseConnection } from './config/database.js'
 import { authRoutes } from './routes/auth.routes.js'
 import { businessRoutes } from './routes/business.routes.js'
 import { agentRoutes } from './routes/agent.routes.js'
+import { settingsRoutes } from './routes/settings.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
@@ -41,6 +42,7 @@ const app = new Elysia()
   .use(authRoutes)
   .use(businessRoutes)
   .use(agentRoutes)
+  .use(settingsRoutes)
 
   // Global error handler
   .onError(({ code, error, set }) => {
@@ -97,9 +99,17 @@ Available Routes:
   PATCH /api/businesses/:id - Update business
   DELETE /api/businesses/:id - Delete business
 
-  AI Agent:
-  POST /api/agent/chat      - Chat with AI agent
-  GET  /api/agent/info      - Get agent information
+  AI Agents (LangGraph):
+  POST /api/agent/chat           - Chat with AI agents
+  GET  /api/agent/sessions       - Get chat sessions
+  GET  /api/agent/sessions/:id/messages - Get session messages
+  GET  /api/agent/info           - Get agent information
+
+  Settings:
+  GET  /api/settings/api-keys    - Get user API keys
+  POST /api/settings/api-keys    - Add/update API key
+  DELETE /api/settings/api-keys/:id - Delete API key
+  GET  /api/settings/models/:provider - Get available models
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)
