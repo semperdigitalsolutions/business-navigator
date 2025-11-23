@@ -23,6 +23,7 @@ async function loadFinancialContext(
       let tasksInfo = null
 
       if (businessTool) {
+        // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const result = await businessTool.invoke({ userId: state.userId })
         const parsed = JSON.parse(result as string)
         if (parsed.found) {
@@ -31,6 +32,7 @@ async function loadFinancialContext(
       }
 
       if (tasksTool) {
+            // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const result = await tasksTool.invoke({ userId: state.userId, status: 'completed' })
         const parsed = JSON.parse(result as string)
         tasksInfo = parsed.tasks
@@ -96,6 +98,7 @@ async function processFinancialQuery(
       for (const toolCall of toolCalls) {
         const tool = agentTools.find((t) => t.name === toolCall.name)
         if (tool) {
+            // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
           try {
             const toolResult = await tool.invoke(toolCall.args)
             responseMessages.push(

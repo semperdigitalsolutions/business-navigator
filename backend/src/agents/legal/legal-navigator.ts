@@ -17,6 +17,7 @@ async function loadContext(state: LegalStateType): Promise<Partial<LegalStateTyp
     if (state.userId) {
       const businessTool = agentTools.find((t) => t.name === 'get_user_business')
       if (businessTool) {
+        // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const businessInfo = await businessTool.invoke({ userId: state.userId })
         const parsed = JSON.parse(businessInfo as string)
 
@@ -84,6 +85,7 @@ async function processLegalQuery(state: LegalStateType): Promise<Partial<LegalSt
         const tool = agentTools.find((t) => t.name === toolCall.name)
         if (tool) {
           try {
+            // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
             const toolResult = await tool.invoke(toolCall.args)
             responseMessages.push(
               new AIMessage({

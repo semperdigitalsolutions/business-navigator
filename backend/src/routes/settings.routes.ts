@@ -5,6 +5,7 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@/middleware/auth.js'
 import { successResponse, errorResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
+import type { UserApiKeyInsert } from '@/types/supabase-helpers.js'
 
 // Simple XOR encryption for API keys (in production, use proper encryption)
 function encryptApiKey(apiKey: string): string {
@@ -22,6 +23,10 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
   // Get user's API keys and preferences
   .get('/api-keys', async ({ request }) => {
     const auth = await authMiddleware({ request } as any)
+
+    if (!auth.success || !auth.userId) {
+      return errorResponse('Unauthorized', 401)
+    }
 
     try {
       const { data, error } = await supabase
@@ -44,32 +49,41 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
       const auth = await authMiddleware({ request } as any)
 
       try {
-        const encrypted = encryptApiKey(body.apiKey)
+        const { provider, apiKey, preferredModel } = body
+        const encrypted = encryptApiKey(apiKey)
+
+        const insertData: UserApiKeyInsert = {
+          user_id: auth.userId!,
+          provider,
+          api_key_encrypted: encrypted,
+          preferred_model: preferredModel,
+          is_active: true,
+        }
 
         const { data, error } = await supabase
           .from('user_api_keys')
-          .upsert(
-            {
-              user_id: auth.userId,
-              provider: body.provider,
-              api_key_encrypted: encrypted,
-              preferred_model: body.preferredModel,
-              is_active: true,
-            },
-            {
-              onConflict: 'user_id,provider',
-            }
-          )
+          // @ts-expect-error - Supabase type inference issue with Database generics
+          .upsert(insertData, {
+            onConflict: 'user_id,provider',
+          })
           .select()
           .single()
 
         if (error) throw error
 
+        if (!data) {
+          throw new Error('Failed to save API key')
+        }
+
         return successResponse({
           apiKey: {
+            // @ts-expect-error - Data exists but TypeScript infers never
             id: data.id,
+            // @ts-expect-error - Data exists but TypeScript infers never
             provider: data.provider,
+            // @ts-expect-error - Data exists but TypeScript infers never
             preferred_model: data.preferred_model,
+            // @ts-expect-error - Data exists but TypeScript infers never
             is_active: data.is_active,
           },
           message: 'API key saved successfully',
@@ -92,6 +106,10 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
     '/api-keys/:id',
     async ({ params, request }) => {
       const auth = await authMiddleware({ request } as any)
+
+      if (!auth.success || !auth.userId) {
+        return errorResponse('Unauthorized', 401)
+      }
 
       try {
         const { error } = await supabase

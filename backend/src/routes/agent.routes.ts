@@ -8,6 +8,7 @@ import { optionalAuthMiddleware } from '@/middleware/auth.js'
 import { successResponse, errorResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
 import { v4 as uuidv4 } from 'uuid'
+import type { AgentSessionInsert, ChatMessageInsert } from '@/types/supabase-helpers.js'
 
 export const agentRoutes = new Elysia({ prefix: '/api/agent' })
   // Chat with AI agents (with LangGraph orchestration)
@@ -38,10 +39,12 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
             .single()
 
           if (apiKeyData) {
-            const keyData = apiKeyData as any
-            llmApiKey = keyData.api_key_encrypted // TODO: Decrypt
-            llmModel = keyData.preferred_model
-            llmProvider = keyData.provider as 'openrouter' | 'openai' | 'anthropic'
+            // @ts-expect-error - Supabase returns data but TypeScript infers never
+            llmApiKey = apiKeyData.api_key_encrypted // TODO: Decrypt
+            // @ts-expect-error - Supabase returns data but TypeScript infers never
+            llmModel = apiKeyData.preferred_model
+            // @ts-expect-error - Supabase returns data but TypeScript infers never
+            llmProvider = apiKeyData.provider as 'openrouter' | 'openai' | 'anthropic'
           }
         }
 
@@ -50,7 +53,7 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
           llmApiKey = body.apiKey
         }
         if (body.provider) {
-          llmProvider = body.provider as any
+          llmProvider = body.provider
         }
 
         // Build initial state
@@ -82,29 +85,32 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
           // Create or get session
           let sessionId = body.sessionId
           if (!sessionId) {
+            const sessionInsert: AgentSessionInsert = {
+              user_id: auth.userId,
+              thread_id: threadId,
+              agent_type: result.activeAgent || 'triage',
+              status: 'active',
+            }
+
             const { data: session } = await supabase
               .from('agent_sessions')
-              .insert({
-                user_id: auth.userId,
-                thread_id: threadId,
-                agent_type: result.activeAgent || 'triage',
-                status: 'active',
-              } as any)
+              // @ts-expect-error - Supabase type inference issue with Database generics
+              .insert(sessionInsert)
               .select()
               .single()
 
-            const sess = session as any
-            sessionId = sess?.id
+            // @ts-expect-error - Session data exists but TypeScript infers never
+            sessionId = session?.id
           }
 
           // Save messages
           if (sessionId) {
-            await supabase.from('chat_messages').insert([
+            const messages: ChatMessageInsert[] = [
               {
                 session_id: sessionId,
                 role: 'user',
                 content: body.message,
-              } as any,
+              },
               {
                 session_id: sessionId,
                 role: 'assistant',
@@ -113,9 +119,12 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
                 metadata: {
                   agent: result.activeAgent,
                   confidence: result.confidence,
-                } as any,
-              } as any,
-            ] as any)
+                },
+              },
+            ]
+
+            // @ts-expect-error - Supabase type inference issue with Database generics
+            await supabase.from('chat_messages').insert(messages)
           }
         }
 

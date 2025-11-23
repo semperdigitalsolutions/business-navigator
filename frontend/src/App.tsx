@@ -1,40 +1,71 @@
-import { useState } from 'react'
-import { APP_NAME, APP_VERSION } from '@shared/constants'
+/**
+ * Main App Component with React Router
+ */
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
+import { AppLayout } from '@/layouts/AppLayout'
+import { LoginForm } from '@/features/auth/components/LoginForm'
+import { RegisterForm } from '@/features/auth/components/RegisterForm'
+import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
+import { ChatInterface } from '@/features/chat/components/ChatInterface'
+import { TaskDashboard } from '@/features/tasks/components/TaskDashboard'
+import { ApiKeySettings } from '@/features/settings/components/ApiKeySettings'
+
+// Protected Route wrapper
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
+}
+
+// Public Route wrapper (redirect to dashboard if already authenticated)
+function PublicRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
-      <div className="max-w-2xl mx-auto px-4 py-16">
-        <div className="text-center space-y-8">
-          <h1 className="text-6xl font-bold text-gray-900 dark:text-white">
-            {APP_NAME}
-          </h1>
+    <BrowserRouter>
+      <Routes>
+        {/* Public Routes */}
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <LoginForm />
+            </PublicRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <RegisterForm />
+            </PublicRoute>
+          }
+        />
 
-          <p className="text-xl text-gray-600 dark:text-gray-300">
-            Your AI-powered business formation platform
-          </p>
+        {/* Protected Routes */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/chat" element={<ChatInterface />} />
+          <Route path="/tasks" element={<TaskDashboard />} />
+          <Route path="/settings" element={<ApiKeySettings />} />
+        </Route>
 
-          <div className="flex justify-center">
-            <button
-              onClick={() => setCount((count) => count + 1)}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg shadow-md transition-colors duration-200"
-            >
-              Count: {count}
-            </button>
-          </div>
+        {/* Redirect root to dashboard or login */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-          <p className="text-lg text-green-600 dark:text-green-400 font-medium">
-            Frontend is ready! 🚀 (Powered by Bun)
-          </p>
-
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            v{APP_VERSION}
-          </p>
-        </div>
-      </div>
-    </div>
+        {/* 404 */}
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 

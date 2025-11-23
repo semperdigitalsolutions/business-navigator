@@ -5,6 +5,7 @@
 import { tool } from '@langchain/core/tools'
 import { z } from 'zod'
 import { supabase } from '@/config/database.js'
+import type { UserTaskUpdate } from '@/types/supabase-helpers.js'
 
 /**
  * Get user's business information
@@ -127,12 +128,15 @@ export const getTaskTemplatesTool = tool(
  */
 export const completeTaskTool = tool(
   async ({ taskId, userId }: { taskId: string; userId: string }) => {
+    const updateData: UserTaskUpdate = {
+      status: 'completed',
+      completed_at: new Date().toISOString(),
+    }
+
     const { data, error } = await supabase
       .from('user_tasks')
-      .update({
-        status: 'completed' as any,
-        completed_at: new Date().toISOString() as any,
-      } as any)
+      // @ts-expect-error - Supabase type inference issue with Database generics
+      .update(updateData)
       .eq('id', taskId)
       .eq('user_id', userId)
       .select()
@@ -142,11 +146,15 @@ export const completeTaskTool = tool(
       return JSON.stringify({ success: false, error: error.message })
     }
 
-    const task = data as any
+    if (!data) {
+      return JSON.stringify({ success: false, error: 'Task not found' })
+    }
+
     return JSON.stringify({
       success: true,
       task: data,
-      message: `Task "${task.title}" marked as completed!`,
+      // @ts-expect-error - Data exists but TypeScript infers never
+      message: `Task "${data.title}" marked as completed!`,
     })
   },
   {

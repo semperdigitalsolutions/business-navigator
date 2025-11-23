@@ -99,23 +99,31 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
   })
 
   // Refresh token
-  .post('/refresh', async ({ body }) => {
-    try {
-      const { data, error } = await supabase.auth.refreshSession({
-        refresh_token: body.refreshToken,
-      })
+  .post(
+    '/refresh',
+    async ({ body }) => {
+      try {
+        const { data, error } = await supabase.auth.refreshSession({
+          refresh_token: body.refreshToken,
+        })
 
-      if (error) {
-        return errorResponse(error.message, 401)
+        if (error) {
+          return errorResponse(error.message, 401)
+        }
+
+        return successResponse({
+          session: data.session,
+        })
+      } catch (error: any) {
+        return errorResponse(error.message)
       }
-
-      return successResponse({
-        session: data.session,
-      })
-    } catch (error: any) {
-      return errorResponse(error.message)
+    },
+    {
+      body: t.Object({
+        refreshToken: t.String(),
+      }),
     }
-  })
+  )
 
   // Get current user
   .get('/me', async ({ request }) => {

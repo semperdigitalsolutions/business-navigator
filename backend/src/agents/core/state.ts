@@ -46,6 +46,7 @@ export const AgentState = Annotation.Root({
 
   // Agent routing
   activeAgent: Annotation<'triage' | 'legal' | 'financial' | 'tasks' | undefined>(),
+  intent: Annotation<'legal' | 'financial' | 'tasks' | 'general' | undefined>(),
   routingReason: Annotation<string | undefined>(),
 
   // Response metadata
@@ -81,7 +82,6 @@ export type AgentStateType = typeof AgentState.State
  */
 export const TriageState = Annotation.Root({
   ...AgentState.spec,
-  intent: Annotation<'legal' | 'financial' | 'tasks' | 'general' | undefined>(),
   intentConfidence: Annotation<number | undefined>(),
 })
 

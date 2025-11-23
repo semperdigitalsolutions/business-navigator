@@ -42,6 +42,8 @@ export interface Database {
           state: string
           status: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
           owner_id: string
+          ein: string | null
+          formation_date: string | null
           created_at: string
           updated_at: string
         }
@@ -52,6 +54,8 @@ export interface Database {
           state: string
           status?: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
           owner_id: string
+          ein?: string | null
+          formation_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -62,6 +66,8 @@ export interface Database {
           state?: string
           status?: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
           owner_id?: string
+          ein?: string | null
+          formation_date?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -98,16 +104,170 @@ export interface Database {
           updated_at?: string
         }
       }
+      agent_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          thread_id: string
+          agent_type: string
+          status: string
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          thread_id: string
+          agent_type: string
+          status?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          thread_id?: string
+          agent_type?: string
+          status?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      chat_messages: {
+        Row: {
+          id: string
+          session_id: string
+          role: 'user' | 'assistant' | 'system'
+          content: string
+          metadata: Json
+          tokens_used: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          role: 'user' | 'assistant' | 'system'
+          content: string
+          metadata?: Json
+          tokens_used?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          session_id?: string
+          role?: 'user' | 'assistant' | 'system'
+          content?: string
+          metadata?: Json
+          tokens_used?: number | null
+          created_at?: string
+        }
+      }
+      user_api_keys: {
+        Row: {
+          id: string
+          user_id: string
+          provider: string
+          api_key_encrypted: string
+          preferred_model: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: string
+          api_key_encrypted: string
+          preferred_model?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: string
+          api_key_encrypted?: string
+          preferred_model?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      task_templates: {
+        Row: {
+          id: string
+          title: string
+          description: string
+          category: string
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description: string
+          category: string
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string
+          category?: string
+          order_index?: number
+          created_at?: string
+        }
+      }
+      user_tasks: {
+        Row: {
+          id: string
+          user_id: string
+          business_id: string | null
+          template_id: string | null
+          title: string
+          description: string | null
+          status: 'pending' | 'in_progress' | 'completed' | 'skipped'
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          business_id?: string | null
+          template_id?: string | null
+          title: string
+          description?: string | null
+          status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          business_id?: string | null
+          template_id?: string | null
+          title?: string
+          description?: string | null
+          status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
+    Views: Record<string, never>
+    Functions: Record<string, never>
     Enums: {
       business_type: 'LLC' | 'CORPORATION' | 'SOLE_PROPRIETORSHIP' | 'PARTNERSHIP'
       business_status: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
+      task_status: 'pending' | 'in_progress' | 'completed' | 'skipped'
     }
   }
 }
