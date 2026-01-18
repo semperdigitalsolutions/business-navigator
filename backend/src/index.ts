@@ -10,6 +10,8 @@ import { authRoutes } from './routes/auth.routes.js'
 import { businessRoutes } from './routes/business.routes.js'
 import { agentRoutes } from './routes/agent.routes.js'
 import { settingsRoutes } from './routes/settings.routes.js'
+import { onboardingRoutes } from './routes/onboarding.routes.js'
+import { dashboardRoutes } from './routes/dashboard.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
@@ -43,6 +45,8 @@ const _app = new Elysia()
   .use(businessRoutes)
   .use(agentRoutes)
   .use(settingsRoutes)
+  .use(onboardingRoutes)
+  .use(dashboardRoutes)
 
   // Global error handler
   .onError(({ code, error, set }) => {

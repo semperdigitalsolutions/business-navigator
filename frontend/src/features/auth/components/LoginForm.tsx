@@ -1,5 +1,6 @@
 /**
  * Login Form Component - Uses Catalyst UI components
+ * Week 2: Enhanced with password visibility toggle and Google OAuth
  */
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -14,6 +15,8 @@ import { Input } from '@/components/catalyst-ui-kit/typescript/input'
 import { Text } from '@/components/catalyst-ui-kit/typescript/text'
 import { authApi } from '../api/auth.api'
 import { useAuthStore } from '../hooks/useAuthStore'
+import { PasswordInput } from './PasswordInput'
+import { GoogleOAuthButton } from './GoogleOAuthButton'
 
 export function LoginForm() {
   const navigate = useNavigate()
@@ -77,21 +80,34 @@ export function LoginForm() {
 
               <Field>
                 <Label>Password</Label>
-                <Input
+                <PasswordInput
                   name="password"
-                  type="password"
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
+                  required
+                  autoComplete="current-password"
                 />
               </Field>
             </FieldGroup>
 
-            <div className="mt-8">
+            <div className="mt-8 space-y-3">
               <Button type="submit" color="indigo" disabled={loading} className="w-full">
                 {loading ? 'Signing in...' : 'Sign in'}
               </Button>
+
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="bg-white dark:bg-zinc-900 px-2 text-gray-500 dark:text-gray-400">
+                    Or continue with
+                  </span>
+                </div>
+              </div>
+
+              <GoogleOAuthButton mode="signin" onError={setError} disabled={loading} />
             </div>
 
             <div className="mt-6 text-center">
