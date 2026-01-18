@@ -68,3 +68,7 @@ export type {
 // Empty State
 export { EmptyState } from './empty-state'
 export type { EmptyStateProps } from './empty-state'
+
+// Tooltip
+export { Tooltip } from './tooltip'
+export type { TooltipPlacement, TooltipSize, TooltipProps } from './tooltip'
