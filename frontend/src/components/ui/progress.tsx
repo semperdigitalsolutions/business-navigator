@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 
 export type ProgressSize = 'sm' | 'md' | 'lg'
 export type ProgressColor = 'primary' | 'success' | 'warning' | 'error' | 'accent'
@@ -34,19 +34,19 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
     const percentage = Math.min(100, Math.max(0, (value / max) * 100))
 
     return (
-      <div ref={ref} className={clsx('w-full', className)} {...props}>
+      <div ref={ref} className={cn('w-full', className)} {...props}>
         <div
           role="progressbar"
           aria-valuenow={value}
           aria-valuemin={0}
           aria-valuemax={max}
-          className={clsx(
+          className={cn(
             'w-full overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700',
             sizeClasses[size]
           )}
         >
           <div
-            className={clsx(
+            className={cn(
               'h-full rounded-full transition-all duration-300 ease-out',
               colorClasses[color]
             )}
@@ -62,3 +62,5 @@ export const Progress = forwardRef<HTMLDivElement, ProgressProps>(
     )
   }
 )
+
+Progress.displayName = 'Progress'
