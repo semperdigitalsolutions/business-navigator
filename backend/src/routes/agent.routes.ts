@@ -7,6 +7,7 @@ import { getMainGraph } from '@/agents/graph.js'
 import { optionalAuthMiddleware } from '@/middleware/auth.js'
 import { errorResponse, successResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
+import { decrypt } from '@/utils/crypto.js'
 import { v4 as uuidv4 } from 'uuid'
 import type { AgentSessionInsert, ChatMessageInsert } from '@/types/supabase-helpers.js'
 
@@ -40,7 +41,8 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
 
           if (apiKeyData) {
             // @ts-expect-error - Supabase returns data but TypeScript infers never
-            llmApiKey = apiKeyData.api_key_encrypted // TODO: Decrypt
+            const encryptedKey = apiKeyData.api_key_encrypted as string
+            llmApiKey = decrypt(encryptedKey)
             // @ts-expect-error - Supabase returns data but TypeScript infers never
             llmModel = apiKeyData.preferred_model
             // @ts-expect-error - Supabase returns data but TypeScript infers never

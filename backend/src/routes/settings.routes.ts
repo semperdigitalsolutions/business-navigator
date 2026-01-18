@@ -5,19 +5,8 @@ import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@/middleware/auth.js'
 import { errorResponse, successResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
+import { encrypt } from '@/utils/crypto.js'
 import type { UserApiKeyInsert } from '@/types/supabase-helpers.js'
-
-// Simple XOR encryption for API keys (in production, use proper encryption)
-function encryptApiKey(apiKey: string): string {
-  // TODO: Implement proper encryption (e.g., AES-256)
-  // For now, just base64 encode (NOT SECURE - replace in production)
-  return Buffer.from(apiKey).toString('base64')
-}
-
-function _decryptApiKey(encrypted: string): string {
-  // TODO: Implement proper decryption
-  return Buffer.from(encrypted, 'base64').toString('utf-8')
-}
 
 export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
   // Get user's API keys and preferences
@@ -50,7 +39,7 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
 
       try {
         const { provider, apiKey, preferredModel } = body
-        const encrypted = encryptApiKey(apiKey)
+        const encrypted = encrypt(apiKey)
 
         const insertData: UserApiKeyInsert = {
           user_id: auth.userId!,
