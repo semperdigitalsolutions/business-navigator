@@ -16,6 +16,10 @@ const envSchema = z.object({
   // JWT
   JWT_SECRET: z.string().min(32, 'JWT secret must be at least 32 characters'),
 
+  // Encryption key for API keys (32 bytes / 64 hex chars recommended)
+  // Optional at startup, but required when encrypting/decrypting API keys
+  API_KEY_ENCRYPTION_KEY: z.string().min(32).optional(),
+
   // Database (for LangGraph checkpoints)
   DATABASE_URL: z.string().url().optional(),
 
