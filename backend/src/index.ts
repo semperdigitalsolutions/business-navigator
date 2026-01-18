@@ -13,7 +13,7 @@ import { settingsRoutes } from './routes/settings.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
-const app = new Elysia()
+const _app = new Elysia()
   // CORS configuration
   .use(
     cors({
@@ -114,4 +114,4 @@ Available Routes:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)
 
-export type App = typeof app
+export type App = typeof _app

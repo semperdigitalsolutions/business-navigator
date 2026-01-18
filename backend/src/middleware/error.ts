@@ -14,7 +14,7 @@ export class AppError extends Error {
   }
 }
 
-export function errorResponse(message: string, statusCode: number = 500): ApiResponse {
+export function errorResponse(message: string, _statusCode: number = 500): ApiResponse {
   return {
     success: false,
     error: message,
@@ -33,8 +33,7 @@ export function successResponse<T>(data: T, message?: string): ApiResponse<T> {
 export const errors = {
   unauthorized: () => errorResponse('Unauthorized', 401),
   forbidden: () => errorResponse('Forbidden', 403),
-  notFound: (resource: string = 'Resource') =>
-    errorResponse(`${resource} not found`, 404),
+  notFound: (resource: string = 'Resource') => errorResponse(`${resource} not found`, 404),
   badRequest: (message: string) => errorResponse(message, 400),
   internal: (message: string = 'Internal server error') => errorResponse(message, 500),
 }

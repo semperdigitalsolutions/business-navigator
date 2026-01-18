@@ -6,29 +6,32 @@ export default defineConfig([
   globalIgnores(['dist', 'node_modules', '*.config.js', '*.config.ts']),
   {
     files: ['**/*.{ts,js}'],
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended,
-    ],
+    extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'module',
     },
     rules: {
       // File Length Rules - Enforce Clean Code
-      'max-lines': ['error', {
-        max: 300,
-        skipBlankLines: true,
-        skipComments: true,
-      }],
-      'max-lines-per-function': ['warn', {
-        max: 50,
-        skipBlankLines: true,
-        skipComments: true,
-      }],
+      'max-lines': [
+        'error',
+        {
+          max: 300,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      'max-lines-per-function': [
+        'warn',
+        {
+          max: 50,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
 
       // Function Complexity
-      'complexity': ['warn', 10],
+      complexity: ['warn', 10],
       'max-depth': ['error', 4],
       'max-nested-callbacks': ['error', 3],
       'max-params': ['warn', 4],
@@ -42,10 +45,13 @@ export default defineConfig([
       'arrow-body-style': ['warn', 'as-needed'],
 
       // TypeScript Specific
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -53,13 +59,16 @@ export default defineConfig([
 
       // Import Organization
       'no-duplicate-imports': 'error',
-      'sort-imports': ['warn', {
-        ignoreCase: true,
-        ignoreDeclarationSort: true,
-      }],
+      'sort-imports': [
+        'warn',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true,
+        },
+      ],
 
       // Best Practices
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
       'no-throw-literal': 'error',
       'prefer-template': 'warn',
       'no-nested-ternary': 'warn',

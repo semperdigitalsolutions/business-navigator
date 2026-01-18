@@ -2,7 +2,7 @@
  * Business formation service
  */
 import { supabase } from '@/config/database.js'
-import type { Business, BusinessType, BusinessStatus } from '@shared/types'
+import type { BusinessStatus, BusinessType } from '@shared/types'
 import type { AuthUser } from '@/middleware/auth.js'
 
 export class BusinessService {
@@ -77,6 +77,7 @@ export class BusinessService {
   ) {
     const { data: business, error } = await supabase
       .from('businesses')
+      // @ts-expect-error - Supabase type inference issue with Database generics
       .update(data as any)
       .eq('id', id)
       .eq('owner_id', userId)
@@ -91,11 +92,7 @@ export class BusinessService {
    * Delete a business
    */
   async deleteBusiness(id: string, userId: string) {
-    const { error } = await supabase
-      .from('businesses')
-      .delete()
-      .eq('id', id)
-      .eq('owner_id', userId)
+    const { error } = await supabase.from('businesses').delete().eq('id', id).eq('owner_id', userId)
 
     if (error) throw new Error(error.message)
     return { success: true }

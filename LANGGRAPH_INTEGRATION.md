@@ -34,6 +34,7 @@ Built a production-ready LangGraph multi-agent architecture with 4 specialized a
 ### ✅ Database Schema Extensions
 
 Created comprehensive schema (`002_langgraph_checkpoints.sql`):
+
 - `checkpoints`, `checkpoint_writes`, `checkpoint_blobs` - LangGraph state
 - `agent_sessions` - User conversation sessions
 - `chat_messages` - Full message history
@@ -45,6 +46,7 @@ Created comprehensive schema (`002_langgraph_checkpoints.sql`):
 ### ✅ Agent Tools (Function Calling)
 
 Six tools for database interaction:
+
 - `getUserBusiness` - Fetch user's business context
 - `getUserTasks` - Get tasks with status filtering
 - `getTaskTemplates` - Browse available templates
@@ -55,12 +57,14 @@ Six tools for database interaction:
 ### ✅ API Routes
 
 **Agent Routes (`/api/agent/*`):**
+
 - `POST /chat` - Multi-agent chat with checkpointing
 - `GET /sessions` - List user's conversations
 - `GET /sessions/:id/messages` - Get conversation history
 - `GET /info` - Agent capabilities
 
 **Settings Routes (`/api/settings/*`):**
+
 - `GET /api-keys` - User's API keys
 - `POST /api-keys` - Add/update API key
 - `DELETE /api-keys/:id` - Remove API key
@@ -114,16 +118,19 @@ scripts/database/
 ### TypeScript Compilation Errors (~44 remaining)
 
 **Root Causes:**
+
 1. **Supabase Type Inference** - Tables inferred as `never` (needs `supabase gen types`)
 2. **LangGraph Tool Signatures** - Complex generic type mismatches
 3. **State Type Propagation** - Type narrowing through graph nodes
 
 **Impact:** ✅ **Code will run with Bun despite type errors**
+
 - These are compile-time type checks only
 - Runtime behavior is correct
 - Bun's fast transpiler handles the code fine
 
 **Temporary Fixes Applied:**
+
 - `as any` assertions on Supabase queries
 - Disabled strict mode in tsconfig
 - AuthResult interface for consistent auth returns
@@ -161,6 +168,7 @@ Return response to user
 ### State Persistence
 
 Every step automatically saves to PostgreSQL:
+
 ```typescript
 const result = await graph.invoke(initialState, {
   configurable: {
@@ -170,6 +178,7 @@ const result = await graph.invoke(initialState, {
 ```
 
 Resume later:
+
 ```typescript
 const continued = await graph.invoke(newMessage, {
   configurable: {
@@ -185,18 +194,21 @@ const continued = await graph.invoke(newMessage, {
 ### Immediate (To Get Running)
 
 1. **Generate Supabase Types**
+
    ```bash
    cd backend
    npx supabase gen types typescript --project-id YOUR_PROJECT_ID > src/types/supabase.ts
    ```
 
 2. **Run Database Migration**
+
    ```sql
    -- In Supabase SQL editor
    -- Execute: scripts/database/002_langgraph_checkpoints.sql
    ```
 
 3. **Configure Environment**
+
    ```env
    # backend/.env
    DATABASE_URL=postgresql://...  # Your Supabase connection string
@@ -213,6 +225,7 @@ const continued = await graph.invoke(newMessage, {
 ### Short Term (Frontend Integration)
 
 1. **Refactor Frontend to Feature-Based Structure**
+
    ```
    frontend/src/
    ├── features/
@@ -283,19 +296,19 @@ const response = await fetch('/api/agent/chat', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
-    message: "Should I form an LLC or Corporation in California?",
-    threadId: "optional-resume-conversation",
-    provider: "openrouter",  // optional override
-    model: "anthropic/claude-3-5-sonnet",  // optional override
+    message: 'Should I form an LLC or Corporation in California?',
+    threadId: 'optional-resume-conversation',
+    provider: 'openrouter', // optional override
+    model: 'anthropic/claude-3-5-sonnet', // optional override
   }),
 })
 
 const data = await response.json()
 console.log(data.message) // AI response
-console.log(data.agent)   // "legal" - which specialist responded
+console.log(data.agent) // "legal" - which specialist responded
 console.log(data.threadId) // Save for resuming conversation
 ```
 
@@ -306,12 +319,12 @@ await fetch('/api/settings/api-keys', {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    Authorization: `Bearer ${token}`,
   },
   body: JSON.stringify({
-    provider: "openrouter",
-    apiKey: "sk-or-v1-...",
-    preferredModel: "anthropic/claude-3-5-sonnet",
+    provider: 'openrouter',
+    apiKey: 'sk-or-v1-...',
+    preferredModel: 'anthropic/claude-3-5-sonnet',
   }),
 })
 ```
@@ -321,15 +334,19 @@ await fetch('/api/settings/api-keys', {
 ## 🔧 Troubleshooting
 
 ### "LangGraph errors on startup"
+
 → Ensure DATABASE_URL is set and points to Supabase PostgreSQL
 
 ### "Tool errors in agent responses"
+
 → Run the migration to create user_tasks, task_templates tables
 
 ### "No API key errors"
+
 → Either set OPENROUTER_API_KEY in .env OR have users add their keys via settings
 
 ### "TypeScript errors preventing build"
+
 → Bun will run despite errors. For clean builds, generate Supabase types.
 
 ---

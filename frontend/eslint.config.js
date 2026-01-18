@@ -6,7 +6,13 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', '*.config.js', '*.config.ts']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    '*.config.js',
+    '*.config.ts',
+    'src/components/catalyst-ui-kit',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [
@@ -21,19 +27,25 @@ export default defineConfig([
     },
     rules: {
       // File Length Rules - Enforce Clean Code
-      'max-lines': ['error', {
-        max: 300,
-        skipBlankLines: true,
-        skipComments: true,
-      }],
-      'max-lines-per-function': ['warn', {
-        max: 50,
-        skipBlankLines: true,
-        skipComments: true,
-      }],
+      'max-lines': [
+        'error',
+        {
+          max: 300,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      'max-lines-per-function': [
+        'warn',
+        {
+          max: 50,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
 
       // Function Complexity
-      'complexity': ['warn', 10],
+      complexity: ['warn', 10],
       'max-depth': ['error', 4],
       'max-nested-callbacks': ['error', 3],
       'max-params': ['warn', 4],
@@ -48,10 +60,13 @@ export default defineConfig([
       'arrow-body-style': ['warn', 'as-needed'],
 
       // TypeScript Specific
-      '@typescript-eslint/no-unused-vars': ['error', {
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_',
-      }],
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+        },
+      ],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -60,19 +75,25 @@ export default defineConfig([
       // React Specific
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
-      'react-refresh/only-export-components': ['warn', {
-        allowConstantExport: true,
-      }],
+      'react-refresh/only-export-components': [
+        'warn',
+        {
+          allowConstantExport: true,
+        },
+      ],
 
       // Import Organization
       'no-duplicate-imports': 'error',
-      'sort-imports': ['warn', {
-        ignoreCase: true,
-        ignoreDeclarationSort: true,
-      }],
+      'sort-imports': [
+        'warn',
+        {
+          ignoreCase: true,
+          ignoreDeclarationSort: true,
+        },
+      ],
 
       // Best Practices
-      'eqeqeq': ['error', 'always'],
+      eqeqeq: ['error', 'always'],
       'no-throw-literal': 'error',
       'prefer-template': 'warn',
       'no-nested-ternary': 'warn',

@@ -19,6 +19,7 @@ Execute the SQL scripts in numerical order:
 File: `001_initial_schema.sql`
 
 This script creates:
+
 - Custom PostgreSQL types (`business_type`, `business_status`)
 - Core tables (`users`, `businesses`, `business_formation_sessions`)
 - Indexes for performance
@@ -27,6 +28,7 @@ This script creates:
 - User profile creation trigger
 
 **To run:**
+
 1. Open Supabase SQL Editor
 2. Copy the contents of `001_initial_schema.sql`
 3. Paste and run the script
@@ -62,50 +64,51 @@ WHERE schemaname = 'public';
 
 Stores user profile information (extends Supabase auth.users).
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key (references auth.users) |
-| email | TEXT | User email address |
-| first_name | TEXT | User first name |
-| last_name | TEXT | User last name |
-| created_at | TIMESTAMPTZ | Account creation timestamp |
-| updated_at | TIMESTAMPTZ | Last update timestamp |
+| Column     | Type        | Description                         |
+| ---------- | ----------- | ----------------------------------- |
+| id         | UUID        | Primary key (references auth.users) |
+| email      | TEXT        | User email address                  |
+| first_name | TEXT        | User first name                     |
+| last_name  | TEXT        | User last name                      |
+| created_at | TIMESTAMPTZ | Account creation timestamp          |
+| updated_at | TIMESTAMPTZ | Last update timestamp               |
 
 #### Businesses Table
 
 Stores business entities created by users.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| name | TEXT | Business name |
-| type | business_type | LLC, CORPORATION, SOLE_PROPRIETORSHIP, or PARTNERSHIP |
-| state | TEXT | Two-letter state code (e.g., 'CA', 'NY') |
-| status | business_status | DRAFT, IN_PROGRESS, SUBMITTED, APPROVED, or REJECTED |
-| owner_id | UUID | References users(id) |
-| created_at | TIMESTAMPTZ | Creation timestamp |
-| updated_at | TIMESTAMPTZ | Last update timestamp |
+| Column     | Type            | Description                                           |
+| ---------- | --------------- | ----------------------------------------------------- |
+| id         | UUID            | Primary key                                           |
+| name       | TEXT            | Business name                                         |
+| type       | business_type   | LLC, CORPORATION, SOLE_PROPRIETORSHIP, or PARTNERSHIP |
+| state      | TEXT            | Two-letter state code (e.g., 'CA', 'NY')              |
+| status     | business_status | DRAFT, IN_PROGRESS, SUBMITTED, APPROVED, or REJECTED  |
+| owner_id   | UUID            | References users(id)                                  |
+| created_at | TIMESTAMPTZ     | Creation timestamp                                    |
+| updated_at | TIMESTAMPTZ     | Last update timestamp                                 |
 
 #### Business Formation Sessions Table
 
 Tracks AI agent interactions and formation progress.
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | UUID | Primary key |
-| business_id | UUID | References businesses(id) |
-| user_id | UUID | References users(id) |
-| agent_responses | JSONB | Array of AI agent responses |
-| current_step | TEXT | Current formation step |
-| completed | BOOLEAN | Whether formation is complete |
-| created_at | TIMESTAMPTZ | Session creation timestamp |
-| updated_at | TIMESTAMPTZ | Last update timestamp |
+| Column          | Type        | Description                   |
+| --------------- | ----------- | ----------------------------- |
+| id              | UUID        | Primary key                   |
+| business_id     | UUID        | References businesses(id)     |
+| user_id         | UUID        | References users(id)          |
+| agent_responses | JSONB       | Array of AI agent responses   |
+| current_step    | TEXT        | Current formation step        |
+| completed       | BOOLEAN     | Whether formation is complete |
+| created_at      | TIMESTAMPTZ | Session creation timestamp    |
+| updated_at      | TIMESTAMPTZ | Last update timestamp         |
 
 ### Security
 
 #### Row Level Security (RLS)
 
 All tables have RLS enabled with policies ensuring:
+
 - Users can only access their own data
 - No cross-user data access
 - Authenticated users required for all operations
@@ -129,6 +132,7 @@ When a new user signs up via Supabase Auth, a trigger automatically creates a co
 ### Indexes
 
 Performance indexes are created on:
+
 - User email addresses
 - Business owner IDs and statuses
 - Formation session relationships
@@ -175,6 +179,7 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key-here
 ```
 
 You can find these values in:
+
 - Supabase Dashboard → Settings → API
 
 ### Troubleshooting
@@ -200,6 +205,7 @@ Solution: This usually means a user is trying to signup with an existing email. 
 ### Next Steps
 
 After database setup:
+
 1. ✅ Update backend `.env` file with Supabase credentials
 2. ✅ Start the backend server: `cd backend && bun run dev`
 3. ✅ Test API endpoints using the health check: `curl http://localhost:3000/health`
@@ -209,6 +215,7 @@ After database setup:
 ### Support
 
 For Supabase-specific issues, refer to:
+
 - [Supabase Documentation](https://supabase.com/docs)
 - [Supabase RLS Guide](https://supabase.com/docs/guides/auth/row-level-security)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)

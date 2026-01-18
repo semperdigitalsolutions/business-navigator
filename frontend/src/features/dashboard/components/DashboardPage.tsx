@@ -49,7 +49,9 @@ export function DashboardPage() {
             to={action.link}
             className="p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 hover:shadow-md transition-shadow"
           >
-            <div className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center text-2xl mb-4`}>
+            <div
+              className={`w-12 h-12 ${action.color} rounded-lg flex items-center justify-center text-2xl mb-4`}
+            >
               {action.icon}
             </div>
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">

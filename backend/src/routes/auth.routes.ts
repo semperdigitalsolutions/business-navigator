@@ -3,7 +3,7 @@
  */
 import { Elysia, t } from 'elysia'
 import { supabase } from '@/config/database.js'
-import { successResponse, errorResponse } from '@/middleware/error.js'
+import { errorResponse, successResponse } from '@/middleware/error.js'
 
 export const authRoutes = new Elysia({ prefix: '/api/auth' })
   // Register a new user
@@ -85,7 +85,7 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
         return errorResponse('No authorization header', 401)
       }
 
-      const token = authorization.replace('Bearer ', '')
+      const _token = authorization.replace('Bearer ', '')
       const { error } = await supabase.auth.signOut()
 
       if (error) {

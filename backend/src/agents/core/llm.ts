@@ -20,14 +20,7 @@ export interface LLMConfig {
  * Create an LLM instance based on provider and configuration
  */
 export function createLLM(config: LLMConfig) {
-  const {
-    provider,
-    model,
-    apiKey,
-    temperature = 0.7,
-    maxTokens = 2000,
-    streaming = false,
-  } = config
+  const { provider, model, apiKey, temperature = 0.7, maxTokens = 2000, streaming = false } = config
 
   // Determine API key (user-provided or environment default)
   let resolvedApiKey: string | undefined

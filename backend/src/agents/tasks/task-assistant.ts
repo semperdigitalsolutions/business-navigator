@@ -1,8 +1,8 @@
 /**
  * Task Assistant Agent - Task management and progress tracking
  */
-import { StateGraph, START, END } from '@langchain/langgraph'
-import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages'
+import { END, START, StateGraph } from '@langchain/langgraph'
+import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import { TaskState, type TaskStateType } from '../core/state.js'
 import { createLLM, getLLMConfigFromState } from '../core/llm.js'
 import { TASK_SYSTEM_PROMPT } from '../core/prompts.js'
@@ -21,12 +21,14 @@ async function loadTaskContext(state: TaskStateType): Promise<Partial<TaskStateT
       let businessInfo = null
 
       if (tasksTool) {
+        // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const result = await tasksTool.invoke({ userId: state.userId })
         const parsed = JSON.parse(result as string)
         tasksInfo = parsed.tasks
       }
 
       if (businessTool) {
+        // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const result = await businessTool.invoke({ userId: state.userId })
         const parsed = JSON.parse(result as string)
         if (parsed.found) {
@@ -97,41 +99,39 @@ async function processTaskQuery(state: TaskStateType): Promise<Partial<TaskState
   const systemPrompt = TASK_SYSTEM_PROMPT + contextInfo
 
   try {
-    const response = await llmWithTools.invoke([
-      new SystemMessage(systemPrompt),
-      ...state.messages,
-    ])
+    const response = await llmWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
 
     const toolCalls = response.tool_calls || []
     const responseMessages: any[] = [response]
 
     // Execute tool calls
-    if (toolCalls.length > 0) {
-      for (const toolCall of toolCalls) {
-        const tool = agentTools.find((t) => t.name === toolCall.name)
-        if (tool) {
-          try {
-            const toolResult = await tool.invoke(toolCall.args)
-            responseMessages.push(
-              new AIMessage({
-                content: `Tool ${toolCall.name} executed: ${toolResult}`,
-                tool_calls: [],
-              })
-            )
+    for (const toolCall of toolCalls) {
+      const tool = agentTools.find((t) => t.name === toolCall.name)
+      if (!tool) continue
 
-            // If task was completed, add to completedSteps
-            if (toolCall.name === 'complete_task') {
-              const result = JSON.parse(toolResult as string)
-              if (result.success) {
-                return {
-                  messages: responseMessages,
-                  completedSteps: [result.task.title],
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`Tool ${toolCall.name} error:`, error)
-          }
+      // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
+      const toolResult = await tool.invoke(toolCall.args).catch((err: Error) => {
+        console.error(`Tool ${toolCall.name} error:`, err)
+        return null
+      })
+
+      if (!toolResult) continue
+
+      responseMessages.push(
+        new AIMessage({
+          content: `Tool ${toolCall.name} executed: ${toolResult}`,
+          tool_calls: [],
+        })
+      )
+
+      // If task was completed, add to completedSteps and return early
+      if (toolCall.name !== 'complete_task') continue
+
+      const parsed = JSON.parse(toolResult as string)
+      if (parsed.success) {
+        return {
+          messages: responseMessages,
+          completedSteps: [parsed.task.title],
         }
       }
     }
@@ -143,7 +143,7 @@ async function processTaskQuery(state: TaskStateType): Promise<Partial<TaskState
     return {
       messages: responseMessages,
       tokensUsed,
-      confidence: 0.90,
+      confidence: 0.9,
       metadata: {
         ...state.metadata,
         lastResponse: new Date().toISOString(),
@@ -171,7 +171,8 @@ function shouldContinue(state: TaskStateType): string {
   }
 
   const lastMessage = state.messages[state.messages.length - 1]
-  if ('tool_calls' in lastMessage && lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+  const toolCalls = 'tool_calls' in lastMessage ? lastMessage.tool_calls : null
+  if (toolCalls && Array.isArray(toolCalls) && toolCalls.length > 0) {
     return 'process'
   }
 

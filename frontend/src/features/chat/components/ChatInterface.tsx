@@ -1,7 +1,7 @@
 /**
  * Chat Interface - Main chat component with LangGraph agents
  */
-import { useState, useRef, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useChat } from '../hooks/useChat'
 import { MessageBubble } from './MessageBubble'
 import { AgentIndicator } from './AgentIndicator'

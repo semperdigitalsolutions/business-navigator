@@ -31,12 +31,15 @@ export const AgentState = Annotation.Root({
   hasEmployees: Annotation<boolean | undefined>(),
 
   // Current task context
-  currentTask: Annotation<{
-    id: string
-    title: string
-    category: string
-    status: string
-  } | undefined>(),
+  currentTask: Annotation<
+    | {
+        id: string
+        title: string
+        category: string
+        status: string
+      }
+    | undefined
+  >(),
 
   // Progress tracking
   completedSteps: Annotation<string[]>({
@@ -92,9 +95,7 @@ export type TriageStateType = typeof TriageState.State
  */
 export const LegalState = Annotation.Root({
   ...AgentState.spec,
-  legalCategory: Annotation<
-    'structure' | 'formation' | 'compliance' | 'documents' | undefined
-  >(),
+  legalCategory: Annotation<'structure' | 'formation' | 'compliance' | 'documents' | undefined>(),
   recommendedActions: Annotation<string[]>({
     reducer: (prev, next) => [...prev, ...next],
     default: () => [],
@@ -112,14 +113,15 @@ export type LegalStateType = typeof LegalState.State
  */
 export const FinancialState = Annotation.Root({
   ...AgentState.spec,
-  financialCategory: Annotation<
-    'projections' | 'taxes' | 'funding' | 'accounting' | undefined
+  financialCategory: Annotation<'projections' | 'taxes' | 'funding' | 'accounting' | undefined>(),
+  projections: Annotation<
+    | {
+        revenue?: number[]
+        expenses?: number[]
+        cashFlow?: number[]
+      }
+    | undefined
   >(),
-  projections: Annotation<{
-    revenue?: number[]
-    expenses?: number[]
-    cashFlow?: number[]
-  } | undefined>(),
   recommendations: Annotation<string[]>({
     reducer: (prev, next) => [...prev, ...next],
     default: () => [],

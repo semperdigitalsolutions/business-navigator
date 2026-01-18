@@ -104,7 +104,7 @@ export class MemoryCheckpointer {
 export async function getCheckpointerWithFallback(): Promise<PostgresSaver | MemoryCheckpointer> {
   try {
     return await getCheckpointer()
-  } catch (error) {
+  } catch {
     console.warn('⚠️  Using in-memory checkpointer (conversations will not persist)')
     return new MemoryCheckpointer()
   }

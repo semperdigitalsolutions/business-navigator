@@ -41,3 +41,6 @@ Thumbs.db
 # Database
 *.sqlite
 *.db
+
+# Vendored UI components
+frontend/src/components/catalyst-ui-kit

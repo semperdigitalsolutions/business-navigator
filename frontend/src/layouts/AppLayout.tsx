@@ -1,7 +1,7 @@
 /**
  * App Layout - Main authenticated layout with navigation
  */
-import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 
 export function AppLayout() {

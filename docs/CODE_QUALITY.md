@@ -19,6 +19,7 @@ To ensure maintainability and clean code architecture, we enforce strict file le
 ### Maximum Lines Per File: 300
 
 Files should not exceed 300 lines (excluding blank lines and comments). This encourages:
+
 - Single Responsibility Principle
 - Better code organization
 - Easier code review
@@ -27,6 +28,7 @@ Files should not exceed 300 lines (excluding blank lines and comments). This enc
 ### Maximum Lines Per Function: 50
 
 Functions should not exceed 50 lines (excluding blank lines and comments). This promotes:
+
 - Function decomposition
 - Clearer intent
 - Easier debugging
@@ -46,6 +48,7 @@ If a file exceeds these limits, consider:
 ### Cyclomatic Complexity: 10
 
 Functions should have a cyclomatic complexity of 10 or less. Reduce complexity by:
+
 - Extracting conditional logic to separate functions
 - Using early returns
 - Simplifying nested conditions
@@ -54,6 +57,7 @@ Functions should have a cyclomatic complexity of 10 or less. Reduce complexity b
 ### Maximum Nesting Depth: 4
 
 Code should not be nested more than 4 levels deep. Flatten code by:
+
 - Using early returns
 - Extracting nested blocks to functions
 - Refactoring to reduce conditional depth
@@ -61,6 +65,7 @@ Code should not be nested more than 4 levels deep. Flatten code by:
 ### Maximum Parameters: 4
 
 Functions should accept no more than 4 parameters. When you need more:
+
 - Use object parameters
 - Group related parameters
 - Consider if function is doing too much
@@ -68,6 +73,7 @@ Functions should accept no more than 4 parameters. When you need more:
 ### Maximum Nested Callbacks: 3
 
 Avoid deeply nested callbacks. Instead:
+
 - Use async/await
 - Extract callback logic to named functions
 - Use Promise chains
@@ -81,6 +87,7 @@ bun run quality
 ```
 
 This runs all quality checks in sequence:
+
 1. Format check (Prettier)
 2. Linting (ESLint)
 3. Type checking (TypeScript)
@@ -190,32 +197,43 @@ Consistency standards in `.editorconfig`:
 
 ## Pre-commit Hooks
 
-Husky automatically runs quality checks before each commit:
-
-1. Format check (Prettier)
-2. Linting (ESLint)
-3. Type checking (TypeScript)
-
-If any check fails, the commit is blocked. Fix the issues before committing.
+Husky automatically runs quality checks before each commit. See the CI/CD section above for details.
 
 ## CI/CD Automation
 
-GitHub Actions runs comprehensive checks on every push and pull request:
+GitHub Actions runs comprehensive checks on every push and pull request.
 
-### Frontend Pipeline
-- ESLint checks
-- File length validation
-- TypeScript type checking
-- Production build
+### Workflow: `.github/workflows/ci.yml`
 
-### Backend Pipeline
-- ESLint checks
-- File length validation
-- TypeScript type checking
-- Production build
+| Job       | Runs          | Purpose                        |
+| --------- | ------------- | ------------------------------ |
+| `quality` | First         | Format check, lint, type-check |
+| `build`   | After quality | Build all packages             |
+| `test`    | After quality | Run backend tests              |
 
-### Shared Package Pipeline
-- TypeScript type checking
+### Branch Protection Rules (GitHub Settings)
+
+To enable branch protection on `main`:
+
+1. Go to **GitHub → Settings → Branches → Add rule**
+2. Branch name pattern: `main`
+3. Enable these protections:
+   - ☑️ **Require a pull request before merging**
+   - ☑️ **Require status checks to pass before merging**
+     - Add required checks: `quality`, `build`
+   - ☑️ **Require branches to be up to date before merging**
+   - ☑️ **Do not allow bypassing the above settings**
+4. Click **Create** or **Save changes**
+
+### Pre-commit Hooks (Local)
+
+Husky runs quality checks before each commit:
+
+```
+.husky/pre-commit → bun run format:check && bun run lint && bun run type-check
+```
+
+If any check fails, the commit is blocked. Fix issues before committing.
 
 ## Best Practices
 
@@ -281,6 +299,7 @@ function processUser(e: any, n: any, p: any, a: any, ph: any, addr: any) {
 ### "File exceeds maximum line count"
 
 Extract code into separate modules:
+
 - Create utility functions
 - Split large components
 - Separate concerns
@@ -288,6 +307,7 @@ Extract code into separate modules:
 ### "Function is too complex"
 
 Reduce cyclomatic complexity:
+
 - Extract conditions to functions
 - Use early returns
 - Simplify nested logic
@@ -295,6 +315,7 @@ Reduce cyclomatic complexity:
 ### "Too many nested callbacks"
 
 Use modern async patterns:
+
 - async/await instead of callbacks
 - Promise chains
 - Named functions

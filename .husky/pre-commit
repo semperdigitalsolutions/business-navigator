@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# Run quality checks before committing
+# This ensures code meets formatting, linting, and type-check standards
+
+echo "Running pre-commit quality checks..."
+
+# Format check (fast)
+bun run format:check
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Format check failed. Run 'bun run format' to fix."
+  exit 1
+fi
+
+# Lint check
+bun run lint
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Lint check failed. Run 'bun run lint:fix' to auto-fix issues."
+  exit 1
+fi
+
+# Type check
+bun run type-check
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "Type check failed. Fix TypeScript errors before committing."
+  exit 1
+fi
+
+echo "All quality checks passed!"

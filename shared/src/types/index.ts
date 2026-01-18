@@ -4,24 +4,24 @@
 
 // User types
 export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  email: string
+  firstName: string
+  lastName: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 // Business formation types
 export interface Business {
-  id: string;
-  name: string;
-  type: BusinessType;
-  state: string;
-  status: BusinessStatus;
-  ownerId: string;
-  createdAt: Date;
-  updatedAt: Date;
+  id: string
+  name: string
+  type: BusinessType
+  state: string
+  status: BusinessStatus
+  ownerId: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 export enum BusinessType {
@@ -41,16 +41,16 @@ export enum BusinessStatus {
 
 // API Response types
 export interface ApiResponse<T = unknown> {
-  success: boolean;
-  data?: T;
-  error?: string;
-  message?: string;
+  success: boolean
+  data?: T
+  error?: string
+  message?: string
 }
 
 export interface PaginatedResponse<T> {
-  items: T[];
-  total: number;
-  page: number;
-  pageSize: number;
-  hasMore: boolean;
+  items: T[]
+  total: number
+  page: number
+  pageSize: number
+  hasMore: boolean
 }

@@ -4,8 +4,8 @@
 import { Elysia, t } from 'elysia'
 import { businessService } from '@/services/business.service.js'
 import { authMiddleware } from '@/middleware/auth.js'
-import { successResponse, errorResponse } from '@/middleware/error.js'
-import { BusinessType, BusinessStatus } from '@shared/types'
+import { errorResponse, successResponse } from '@/middleware/error.js'
+import { BusinessStatus, BusinessType } from '@shared/types'
 
 export const businessRoutes = new Elysia({ prefix: '/api/businesses' })
   // Get all businesses for authenticated user

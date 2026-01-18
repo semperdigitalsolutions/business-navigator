@@ -154,6 +154,7 @@ GET /health
 Returns server health status and database connection.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -197,6 +198,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -302,6 +304,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -338,6 +341,7 @@ All errors follow a consistent format:
 ```
 
 HTTP Status Codes:
+
 - `200` - Success
 - `400` - Bad Request (validation error)
 - `401` - Unauthorized (missing/invalid token)
@@ -350,6 +354,7 @@ HTTP Status Codes:
 ### Business Formation Agent
 
 The Business Formation Agent provides intelligent guidance for:
+
 - Choosing the right business structure
 - Understanding state-specific requirements
 - Step-by-step formation process
@@ -385,11 +390,13 @@ export class TaxAdvisorAgent extends BaseAgent {
 The current agent uses mock responses. To integrate real AI:
 
 1. Install LLM SDK:
+
 ```bash
 bun add openai  # or @anthropic-ai/sdk
 ```
 
 2. Update agent to call API:
+
 ```typescript
 import OpenAI from 'openai'
 const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY })
