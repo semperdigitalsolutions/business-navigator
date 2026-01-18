@@ -2,7 +2,7 @@
  * Financial Planner Agent - Financial projections and guidance
  */
 import { END, START, StateGraph } from '@langchain/langgraph'
-import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
+import { AIMessage, SystemMessage } from '@langchain/core/messages'
 import { FinancialState, type FinancialStateType } from '../core/state.js'
 import { createLLM, getLLMConfigFromState } from '../core/llm.js'
 import { FINANCIAL_SYSTEM_PROMPT } from '../core/prompts.js'
@@ -91,23 +91,23 @@ async function processFinancialQuery(
     const responseMessages: any[] = [response]
 
     // Execute tool calls
-    if (toolCalls.length > 0) {
-      for (const toolCall of toolCalls) {
-        const tool = agentTools.find((t) => t.name === toolCall.name)
-        if (tool) {
-          // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
-          try {
-            const toolResult = await tool.invoke(toolCall.args)
-            responseMessages.push(
-              new AIMessage({
-                content: `Tool ${toolCall.name} executed: ${toolResult}`,
-                tool_calls: [],
-              })
-            )
-          } catch (error) {
-            console.error(`Tool ${toolCall.name} error:`, error)
-          }
-        }
+    for (const toolCall of toolCalls) {
+      const tool = agentTools.find((t) => t.name === toolCall.name)
+      if (!tool) continue
+
+      // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
+      const toolResult = await tool.invoke(toolCall.args).catch((err: Error) => {
+        console.error(`Tool ${toolCall.name} error:`, err)
+        return null
+      })
+
+      if (toolResult) {
+        responseMessages.push(
+          new AIMessage({
+            content: `Tool ${toolCall.name} executed: ${toolResult}`,
+            tool_calls: [],
+          })
+        )
       }
     }
 
@@ -146,7 +146,8 @@ function shouldContinue(state: FinancialStateType): string {
   }
 
   const lastMessage = state.messages[state.messages.length - 1]
-  if ('tool_calls' in lastMessage && lastMessage.tool_calls && lastMessage.tool_calls.length > 0) {
+  const toolCalls = 'tool_calls' in lastMessage ? lastMessage.tool_calls : null
+  if (toolCalls && Array.isArray(toolCalls) && toolCalls.length > 0) {
     return 'process'
   }
 

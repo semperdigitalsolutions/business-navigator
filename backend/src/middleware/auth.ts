@@ -55,7 +55,7 @@ export async function authMiddleware(context: Context): Promise<AuthResult> {
         email: user.email!,
       } as AuthUser,
     }
-  } catch (error) {
+  } catch {
     return {
       success: false,
       error: 'Authentication failed',

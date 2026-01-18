@@ -85,7 +85,7 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
         return errorResponse('No authorization header', 401)
       }
 
-      const token = authorization.replace('Bearer ', '')
+      const _token = authorization.replace('Bearer ', '')
       const { error } = await supabase.auth.signOut()
 
       if (error) {

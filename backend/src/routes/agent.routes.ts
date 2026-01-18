@@ -222,7 +222,8 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
   })
 
   // Get agent capabilities
-  .get('/info', async () => successResponse({
+  .get('/info', async () =>
+    successResponse({
       name: 'Business Navigator AI',
       description: 'Multi-agent AI system for business formation guidance',
       agents: [
@@ -266,4 +267,5 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
         'Tool calling',
         'Context awareness',
       ],
-    }))
+    })
+  )

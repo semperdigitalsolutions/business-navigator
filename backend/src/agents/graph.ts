@@ -3,7 +3,7 @@
  * Routes user queries through triage to appropriate specialist agents
  */
 import { END, START, StateGraph } from '@langchain/langgraph'
-import { AIMessage, HumanMessage } from '@langchain/core/messages'
+import { AIMessage } from '@langchain/core/messages'
 import { AgentState, type AgentStateType } from './core/state.js'
 import { getCheckpointerWithFallback } from './core/checkpoint.js'
 import { createTriageAgent } from './triage/router.js'

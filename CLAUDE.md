@@ -37,7 +37,7 @@ bun run lint                 # ESLint
 bun run lint:fix             # Auto-fix lint issues
 bun run format               # Prettier formatting
 
-# Testing
+# Testing (infrastructure ready, add *.test.ts files as needed)
 cd backend && bun test                    # Run all backend tests
 cd backend && bun test src/path/file.test.ts  # Run single test file
 ```
@@ -67,12 +67,19 @@ agents/
     ├── state.ts          # LangGraph state annotations (AgentState, TriageState, etc.)
     ├── checkpoint.ts     # PostgreSQL checkpointing for conversation persistence
     ├── llm.ts            # LLM configuration (OpenRouter, OpenAI, Anthropic)
-    └── prompts.ts        # System prompts for each agent
+    ├── prompts.ts        # System prompts for each agent
+    └── tools.ts          # Shared tools available to agents
 ```
 
 **Flow:** User message → Triage Agent (classifies intent) → Specialist Agent (legal/financial/tasks/general) → Response
 
 State is persisted to PostgreSQL via LangGraph checkpoints, enabling conversation continuity across sessions.
+
+**LangGraph Implementation Patterns:**
+
+- **Context Pre-loading**: Every specialist graph MUST start with a `loadContext` node that fetches business state before LLM invocation
+- **Manual Tool Execution**: DO NOT use `ToolNode` from `@langchain/langgraph/prebuilt`. Iterate through `tool_calls` manually for verified execution
+- **Safety Guardrails**: NEVER provide definitive legal/tax advice. Use educational framing ("Commonly, LLCs are used for...") and always include professional consultation disclaimers
 
 ### Frontend Feature Structure
 
@@ -102,17 +109,32 @@ Uses Supabase (PostgreSQL). Types are in `backend/src/types/database.ts`.
 ## Code Style & Conventions
 
 **Formatting (Prettier):**
+
 - No semicolons (ASI)
 - Single quotes
 - 2-space indentation
 - 100 character line width
 
 **TypeScript:**
+
 - Path aliases: `@/*` for local src, `@shared/*` for shared package
 - Backend imports MUST use `.js` extension for local files (e.g., `import { x } from './utils.js'`)
 - Naming: `camelCase` for vars/funcs, `PascalCase` for components/classes, `kebab-case` for files
+- Strict: No `any` (use `unknown`), no `@ts-ignore`, no `!` assertions
+- Prefix unused vars with `_` to satisfy ESLint (e.g., `_unusedParam`)
+
+**Backend API:**
+
+- Validation uses **TypeBox** (`t.Object`), NOT Zod for route schemas
+- Error handling: Use `@/middleware/error.js` helpers (`successResponse`, `errors.notFound`)
+
+**Console Logging:**
+
+- Frontend: `console.log` is forbidden; use `console.warn/error` only
+- Backend: Console logging allowed for debugging/logging
 
 **Enforced limits (see `docs/CODE_QUALITY.md`):**
+
 - Max 300 lines per file
 - Max 50 lines per function
 - Max cyclomatic complexity: 10
@@ -125,11 +147,14 @@ Pre-commit hooks run format, lint, and type-check automatically.
 
 Check `docs/Notion/` for exported Notion specs. Key documents:
 
-- **User Flows** - Task interaction patterns (wizard, checklist, tool), navigation, user journeys
+- **User Flows** - Task interaction patterns, navigation, user journeys
 - **Auth & Onboarding** - 7-step onboarding quiz, validation rules, data storage
 - **8-Week Build Plan** - Sprint timeline and milestones
 - **AI Chat System** - Chat system design
 - **Architecture Implementation Details** - Technical implementation specifics
+- **Design Specs** - UI/UX design specifications
+- **Product Overview** - Product vision and feature descriptions
+- **Security & Performance** - Security requirements and performance targets
 
 **Note:** Codebase patterns may diverge from Notion documentation. When conflicts occur, prioritize actual codebase patterns over documentation.
 

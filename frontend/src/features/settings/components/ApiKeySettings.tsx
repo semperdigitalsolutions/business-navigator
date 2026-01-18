@@ -1,11 +1,24 @@
 /**
  * API Key Settings - Manage user's LLM API keys
+ * Uses Catalyst UI components
  */
 import { useState } from 'react'
+import { Button } from '@/components/catalyst-ui-kit/typescript/button'
+import {
+  Description,
+  Field,
+  FieldGroup,
+  Fieldset,
+  Label,
+} from '@/components/catalyst-ui-kit/typescript/fieldset'
+import { Input } from '@/components/catalyst-ui-kit/typescript/input'
+import { Select } from '@/components/catalyst-ui-kit/typescript/select'
 import { apiClient } from '@/lib/api/client'
 
+type Provider = 'openrouter' | 'openai' | 'anthropic'
+
 export function ApiKeySettings() {
-  const [provider, setProvider] = useState<'openrouter' | 'openai' | 'anthropic'>('openrouter')
+  const [provider, setProvider] = useState<Provider>('openrouter')
   const [apiKey, setApiKey] = useState('')
   const [model, setModel] = useState('openai/gpt-4-turbo')
   const [saving, setSaving] = useState(false)
@@ -24,82 +37,79 @@ export function ApiKeySettings() {
       })
       setMessage('API key saved successfully!')
       setApiKey('')
-    } catch (err: any) {
-      setMessage(err.error || 'Failed to save API key')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to save API key'
+      setMessage(message)
     } finally {
       setSaving(false)
     }
   }
 
+  const isSuccess = message.includes('success')
+
   return (
     <div className="max-w-2xl">
-      <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">API Key Settings</h2>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
+      <h2 className="text-2xl font-bold text-zinc-950 dark:text-white mb-2">API Key Settings</h2>
+      <p className="text-zinc-500 dark:text-zinc-400 mb-8">
         Configure your LLM provider API keys. Your keys are encrypted and stored securely.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Provider
-          </label>
-          <select
-            value={provider}
-            onChange={(e) => setProvider(e.target.value as any)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-          >
-            <option value="openrouter">OpenRouter (100+ models)</option>
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-          </select>
-        </div>
+      <form onSubmit={handleSubmit}>
+        <Fieldset>
+          <FieldGroup>
+            <Field>
+              <Label>Provider</Label>
+              <Select value={provider} onChange={(e) => setProvider(e.target.value as Provider)}>
+                <option value="openrouter">OpenRouter (100+ models)</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+              </Select>
+            </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            API Key
-          </label>
-          <input
-            type="password"
-            value={apiKey}
-            onChange={(e) => setApiKey(e.target.value)}
-            placeholder="sk-..."
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-          />
-        </div>
+            <Field>
+              <Label>API Key</Label>
+              <Input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-..."
+                required
+              />
+            </Field>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Preferred Model
-          </label>
-          <input
-            type="text"
-            value={model}
-            onChange={(e) => setModel(e.target.value)}
-            placeholder="openai/gpt-4-turbo"
-            required
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:text-white"
-          />
-          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-            For OpenRouter, use format: provider/model (e.g., anthropic/claude-3-5-sonnet)
-          </p>
-        </div>
+            <Field>
+              <Label>Preferred Model</Label>
+              <Input
+                type="text"
+                value={model}
+                onChange={(e) => setModel(e.target.value)}
+                placeholder="openai/gpt-4-turbo"
+                required
+              />
+              <Description>
+                For OpenRouter, use format: provider/model (e.g., anthropic/claude-3-5-sonnet)
+              </Description>
+            </Field>
+          </FieldGroup>
 
-        {message && (
-          <div
-            className={`px-4 py-3 rounded-md ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}
-          >
-            {message}
+          {message && (
+            <div
+              className={`mt-6 px-4 py-3 rounded-lg ${
+                isSuccess
+                  ? 'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400'
+                  : 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400'
+              }`}
+            >
+              {message}
+            </div>
+          )}
+
+          <div className="mt-8">
+            <Button type="submit" color="indigo" disabled={saving}>
+              {saving ? 'Saving...' : 'Save API Key'}
+            </Button>
           </div>
-        )}
-
-        <button
-          type="submit"
-          disabled={saving}
-          className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
-        >
-          {saving ? 'Saving...' : 'Save API Key'}
-        </button>
+        </Fieldset>
       </form>
     </div>
   )
