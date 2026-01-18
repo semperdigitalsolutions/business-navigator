@@ -1,8 +1,8 @@
 /**
  * Legal Navigator Agent - Business formation and legal guidance
  */
-import { StateGraph, START, END } from '@langchain/langgraph'
-import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages'
+import { END, START, StateGraph } from '@langchain/langgraph'
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { LegalState, type LegalStateType } from '../core/state.js'
 import { createLLM, getLLMConfigFromState } from '../core/llm.js'
 import { LEGAL_SYSTEM_PROMPT } from '../core/prompts.js'
@@ -70,10 +70,7 @@ async function processLegalQuery(state: LegalStateType): Promise<Partial<LegalSt
   const systemPrompt = LEGAL_SYSTEM_PROMPT + contextInfo
 
   try {
-    const response = await llmWithTools.invoke([
-      new SystemMessage(systemPrompt),
-      ...state.messages,
-    ])
+    const response = await llmWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
 
     // Extract tool calls if any
     const toolCalls = response.tool_calls || []

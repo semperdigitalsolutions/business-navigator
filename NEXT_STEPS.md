@@ -28,6 +28,7 @@ cat backend/.env
 ```
 
 **Required variables:**
+
 ```env
 # Server
 PORT=3000
@@ -55,6 +56,7 @@ FRONTEND_URL=http://localhost:5173
 ```
 
 **Where to find Supabase credentials:**
+
 1. Go to your Supabase project dashboard
 2. **Settings** → **API**
    - Copy `Project URL` → `SUPABASE_URL`
@@ -93,12 +95,14 @@ bun run dev
 ```
 
 **Expected output:**
+
 ```
 🚀 Backend server running on http://localhost:3000
 ✅ Database connected
 ```
 
 **Test the API:**
+
 ```bash
 # In another terminal
 curl http://localhost:3000/api/agent/info
@@ -107,6 +111,7 @@ curl http://localhost:3000/api/agent/info
 Should return agent information JSON.
 
 **If you see errors:**
+
 - Check that `DATABASE_URL` is correct
 - Verify Supabase is running
 - Check that migrations ran successfully
@@ -122,6 +127,7 @@ bun run dev
 ```
 
 **Expected output:**
+
 ```
   VITE v7.2.4  ready in XXX ms
 
@@ -130,11 +136,13 @@ bun run dev
 ```
 
 **Test the app:**
+
 1. Open http://localhost:5173/
 2. You should see the login page
 3. Try to register a new account
 
 **If you see errors:**
+
 - Check that `VITE_API_URL` points to running backend
 - Verify `VITE_SUPABASE_URL` is correct
 - Check browser console for errors
@@ -151,11 +159,13 @@ bun run build
 ```
 
 This will build:
+
 1. Shared package
 2. Backend
 3. Frontend
 
 **Expected output:**
+
 ```
 ✓ shared built successfully
 ✓ backend built successfully
@@ -169,6 +179,7 @@ This will build:
 ### Backend Won't Start
 
 **Issue: "Database connection failed"**
+
 ```bash
 # Verify DATABASE_URL format
 echo $DATABASE_URL
@@ -176,12 +187,14 @@ echo $DATABASE_URL
 ```
 
 **Issue: "Port 3000 already in use"**
+
 ```bash
 # Change PORT in backend/.env
 PORT=3001
 ```
 
 **Issue: "Cannot find module '@langchain/...'"**
+
 ```bash
 # Reinstall backend dependencies
 cd backend
@@ -191,15 +204,18 @@ bun install
 ### Frontend Won't Start
 
 **Issue: "Failed to fetch"**
+
 - Backend must be running first
 - Check `VITE_API_URL` in frontend/.env
 
 **Issue: "Supabase client error"**
+
 - Verify `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`
 
 ### Build Errors
 
 **TypeScript errors in backend:**
+
 - This is expected (9 errors remaining)
 - They're documented as known LangChain generic issues
 - CI handles them gracefully
@@ -263,11 +279,13 @@ bun run type-check
 ```
 
 **Files to fix:**
+
 - `agents/financial/financial-planner.ts` (3 errors)
 - `agents/legal/legal-navigator.ts` (3 errors)
 - `agents/tasks/task-assistant.ts` (3 errors)
 
 **How to fix:**
+
 - Add proper tool type annotations
 - Use explicit generics for tool.invoke() calls
 - Or add more `@ts-expect-error` comments with explanations
@@ -275,6 +293,7 @@ bun run type-check
 ### Priority 2: Add Tests (2-3 hours)
 
 **Backend tests:**
+
 ```bash
 # Set up test structure
 backend/
@@ -288,6 +307,7 @@ backend/
 ```
 
 **Frontend tests:**
+
 ```bash
 # Set up test structure
 frontend/
@@ -311,6 +331,7 @@ function encryptApiKey(apiKey: string): string {
 ```
 
 **Implement:**
+
 - Use `crypto` module for AES-256 encryption
 - Store encryption key in environment variable
 - Add key rotation support
@@ -321,10 +342,7 @@ function encryptApiKey(apiKey: string): string {
 // frontend/src/components/ErrorBoundary.tsx
 import { Component, ErrorInfo, ReactNode } from 'react'
 
-class ErrorBoundary extends Component<
-  { children: ReactNode },
-  { hasError: boolean }
-> {
+class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   // Implement error boundary
 }
 ```
@@ -332,6 +350,7 @@ class ErrorBoundary extends Component<
 ### Priority 5: Add Loading States (1 hour)
 
 Add proper loading states to:
+
 - Chat interface while waiting for agent response
 - Auth forms during login/register
 - API key settings during save
@@ -346,14 +365,14 @@ services:
   backend:
     build: ./backend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     env_file:
       - ./backend/.env
 
   frontend:
     build: ./frontend
     ports:
-      - "5173:5173"
+      - '5173:5173'
     depends_on:
       - backend
 ```
@@ -382,6 +401,7 @@ Before deploying to production:
 ### Update README.md
 
 Add sections:
+
 - Architecture overview
 - API documentation
 - Deployment guide
@@ -390,6 +410,7 @@ Add sections:
 ### API Documentation
 
 Consider adding:
+
 - Swagger/OpenAPI spec
 - Postman collection
 - API examples
@@ -397,6 +418,7 @@ Consider adding:
 ### Architecture Docs
 
 Document:
+
 - LangGraph flow diagrams
 - Database schema diagrams
 - Agent interaction patterns
@@ -431,6 +453,7 @@ railway up
 ### Supabase (Database)
 
 Already set up! Just:
+
 - Add production environment variables
 - Enable RLS policies
 - Set up backups

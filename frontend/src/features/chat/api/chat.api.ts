@@ -55,30 +55,22 @@ export const chatApi = {
   /**
    * Send a message to the AI agents
    */
-  sendMessage: async (request: ChatRequest): Promise<ChatResponse> => {
-    return apiClient.post('/api/agent/chat', request)
-  },
+  sendMessage: async (request: ChatRequest): Promise<ChatResponse> => apiClient.post('/api/agent/chat', request),
 
   /**
    * Get user's chat sessions
    */
-  getSessions: async (): Promise<{ success: boolean; data?: { sessions: ChatSession[] } }> => {
-    return apiClient.get('/api/agent/sessions')
-  },
+  getSessions: async (): Promise<{ success: boolean; data?: { sessions: ChatSession[] } }> => apiClient.get('/api/agent/sessions'),
 
   /**
    * Get messages for a session
    */
   getSessionMessages: async (
     sessionId: string
-  ): Promise<{ success: boolean; data?: { messages: ChatMessage[] } }> => {
-    return apiClient.get(`/api/agent/sessions/${sessionId}/messages`)
-  },
+  ): Promise<{ success: boolean; data?: { messages: ChatMessage[] } }> => apiClient.get(`/api/agent/sessions/${sessionId}/messages`),
 
   /**
    * Get agent information
    */
-  getAgentInfo: async (): Promise<any> => {
-    return apiClient.get('/api/agent/info')
-  },
+  getAgentInfo: async (): Promise<any> => apiClient.get('/api/agent/info'),
 }

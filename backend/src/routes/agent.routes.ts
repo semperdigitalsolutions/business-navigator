@@ -5,7 +5,7 @@ import { Elysia, t } from 'elysia'
 import { HumanMessage } from '@langchain/core/messages'
 import { getMainGraph } from '@/agents/graph.js'
 import { optionalAuthMiddleware } from '@/middleware/auth.js'
-import { successResponse, errorResponse } from '@/middleware/error.js'
+import { errorResponse, successResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
 import { v4 as uuidv4 } from 'uuid'
 import type { AgentSessionInsert, ChatMessageInsert } from '@/types/supabase-helpers.js'
@@ -77,8 +77,10 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
 
         // Extract the response
         const lastMessage = result.messages[result.messages.length - 1]
-        const content = typeof lastMessage.content === 'string' ? lastMessage.content :
-          JSON.stringify(lastMessage.content)
+        const content =
+          typeof lastMessage.content === 'string'
+            ? lastMessage.content
+            : JSON.stringify(lastMessage.content)
 
         // Save to database if authenticated
         if (auth?.userId) {
@@ -152,7 +154,9 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
         sessionId: t.Optional(t.String()),
         businessId: t.Optional(t.String()),
         // User can override LLM settings per-request
-        provider: t.Optional(t.Union([t.Literal('openrouter'), t.Literal('openai'), t.Literal('anthropic')])),
+        provider: t.Optional(
+          t.Union([t.Literal('openrouter'), t.Literal('openai'), t.Literal('anthropic')])
+        ),
         model: t.Optional(t.String()),
         apiKey: t.Optional(t.String()),
       }),
@@ -218,8 +222,7 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
   })
 
   // Get agent capabilities
-  .get('/info', async () => {
-    return successResponse({
+  .get('/info', async () => successResponse({
       name: 'Business Navigator AI',
       description: 'Multi-agent AI system for business formation guidance',
       agents: [
@@ -249,9 +252,18 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
           name: 'Task Assistant',
           type: 'tasks',
           description: 'Task management and progress tracking',
-          capabilities: ['Progress tracking', 'Task management', 'Next steps guidance', 'Completion tracking'],
+          capabilities: [
+            'Progress tracking',
+            'Task management',
+            'Next steps guidance',
+            'Completion tracking',
+          ],
         },
       ],
-      features: ['Multi-agent routing', 'Conversation persistence', 'Tool calling', 'Context awareness'],
-    })
-  })
+      features: [
+        'Multi-agent routing',
+        'Conversation persistence',
+        'Tool calling',
+        'Context awareness',
+      ],
+    }))

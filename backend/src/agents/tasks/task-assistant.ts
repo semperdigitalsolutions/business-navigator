@@ -1,8 +1,8 @@
 /**
  * Task Assistant Agent - Task management and progress tracking
  */
-import { StateGraph, START, END } from '@langchain/langgraph'
-import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages'
+import { END, START, StateGraph } from '@langchain/langgraph'
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { TaskState, type TaskStateType } from '../core/state.js'
 import { createLLM, getLLMConfigFromState } from '../core/llm.js'
 import { TASK_SYSTEM_PROMPT } from '../core/prompts.js'
@@ -97,10 +97,7 @@ async function processTaskQuery(state: TaskStateType): Promise<Partial<TaskState
   const systemPrompt = TASK_SYSTEM_PROMPT + contextInfo
 
   try {
-    const response = await llmWithTools.invoke([
-      new SystemMessage(systemPrompt),
-      ...state.messages,
-    ])
+    const response = await llmWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
 
     const toolCalls = response.tool_calls || []
     const responseMessages: any[] = [response]
@@ -143,7 +140,7 @@ async function processTaskQuery(state: TaskStateType): Promise<Partial<TaskState
     return {
       messages: responseMessages,
       tokensUsed,
-      confidence: 0.90,
+      confidence: 0.9,
       metadata: {
         ...state.metadata,
         lastResponse: new Date().toISOString(),

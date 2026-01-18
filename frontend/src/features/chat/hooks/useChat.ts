@@ -1,7 +1,7 @@
 /**
  * useChat Hook - Manage chat state and interactions
  */
-import { useState, useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import { chatApi, type ChatMessage, type ChatRequest } from '../api/chat.api'
 
 export function useChat() {

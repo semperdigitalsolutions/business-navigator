@@ -30,19 +30,11 @@ export interface AuthResponse {
 }
 
 export const authApi = {
-  login: async (credentials: LoginRequest): Promise<AuthResponse> => {
-    return apiClient.post('/api/auth/login', credentials)
-  },
+  login: async (credentials: LoginRequest): Promise<AuthResponse> => apiClient.post('/api/auth/login', credentials),
 
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    return apiClient.post('/api/auth/register', data)
-  },
+  register: async (data: RegisterRequest): Promise<AuthResponse> => apiClient.post('/api/auth/register', data),
 
-  logout: async (): Promise<void> => {
-    return apiClient.post('/api/auth/logout')
-  },
+  logout: async (): Promise<void> => apiClient.post('/api/auth/logout'),
 
-  me: async (): Promise<AuthResponse> => {
-    return apiClient.get('/api/auth/me')
-  },
+  me: async (): Promise<AuthResponse> => apiClient.get('/api/auth/me'),
 }

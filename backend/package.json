@@ -24,6 +24,7 @@
     "@langchain/langgraph": "^1.0.2",
     "@langchain/langgraph-checkpoint-postgres": "^1.0.0",
     "@langchain/openai": "^1.1.2",
+    "@sinclair/typebox": "^0.34.47",
     "@supabase/supabase-js": "^2.49.2",
     "@types/pg": "^8.15.6",
     "@types/uuid": "^10.0.0",

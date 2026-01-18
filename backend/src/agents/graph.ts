@@ -2,8 +2,8 @@
  * Main LangGraph Orchestration
  * Routes user queries through triage to appropriate specialist agents
  */
-import { StateGraph, START, END } from '@langchain/langgraph'
-import { HumanMessage, AIMessage } from '@langchain/core/messages'
+import { END, START, StateGraph } from '@langchain/langgraph'
+import { AIMessage, HumanMessage } from '@langchain/core/messages'
 import { AgentState, type AgentStateType } from './core/state.js'
 import { getCheckpointerWithFallback } from './core/checkpoint.js'
 import { createTriageAgent } from './triage/router.js'
@@ -142,7 +142,7 @@ async function handleGeneral(state: AgentStateType): Promise<Partial<AgentStateT
     return {
       messages: [response],
       tokensUsed,
-      confidence: 0.80,
+      confidence: 0.8,
     }
   } catch (error) {
     console.error('Error in general handler:', error)

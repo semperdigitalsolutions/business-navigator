@@ -8,23 +8,23 @@
     "shared"
   ],
   "scripts": {
-    "dev": "bun run --filter frontend dev & bun run --filter backend dev",
-    "dev:backend": "bun --filter backend dev",
-    "dev:frontend": "bun --filter frontend dev",
+    "dev": "bun run dev:frontend & bun run dev:backend",
+    "dev:backend": "cd backend && bun run dev",
+    "dev:frontend": "cd frontend && bun run dev",
     "build": "bun run build:shared && bun run build:backend && bun run build:frontend",
-    "build:shared": "bun --filter shared build",
-    "build:backend": "bun --filter backend build",
-    "build:frontend": "bun --filter frontend build",
+    "build:shared": "cd shared && bun run build",
+    "build:backend": "cd backend && bun run build",
+    "build:frontend": "cd frontend && bun run build",
     "type-check": "bun run type-check:shared && bun run type-check:backend && bun run type-check:frontend",
-    "type-check:shared": "bun --filter shared type-check",
-    "type-check:backend": "bun --filter backend type-check",
-    "type-check:frontend": "bun --filter frontend type-check",
+    "type-check:shared": "cd shared && bun run type-check",
+    "type-check:backend": "cd backend && bun run type-check",
+    "type-check:frontend": "cd frontend && bun run type-check",
     "lint": "bun run lint:frontend && bun run lint:backend",
-    "lint:frontend": "bun --filter frontend lint",
-    "lint:backend": "bun --filter backend lint",
+    "lint:frontend": "cd frontend && bun run lint",
+    "lint:backend": "cd backend && bun run lint",
     "lint:fix": "bun run lint:fix:frontend && bun run lint:fix:backend",
-    "lint:fix:frontend": "bun --filter frontend lint:fix",
-    "lint:fix:backend": "bun --filter backend lint:fix",
+    "lint:fix:frontend": "cd frontend && bun run lint:fix",
+    "lint:fix:backend": "cd backend && bun run lint:fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "quality": "bun run format:check && bun run lint && bun run type-check",
@@ -32,7 +32,13 @@
     "install:all": "bun install"
   },
   "devDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.55.1",
     "husky": "^9.1.7",
     "prettier": "^3.6.2"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.9",
+    "clsx": "^2.1.1",
+    "motion": "^12.26.2"
   }
 }

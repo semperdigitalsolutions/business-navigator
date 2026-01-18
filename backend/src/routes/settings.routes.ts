@@ -3,7 +3,7 @@
  */
 import { Elysia, t } from 'elysia'
 import { authMiddleware } from '@/middleware/auth.js'
-import { successResponse, errorResponse } from '@/middleware/error.js'
+import { errorResponse, successResponse } from '@/middleware/error.js'
 import { supabase } from '@/config/database.js'
 import type { UserApiKeyInsert } from '@/types/supabase-helpers.js'
 
@@ -137,7 +137,11 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
     const models = {
       openrouter: [
         { id: 'openai/gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Most capable OpenAI model' },
-        { id: 'openai/gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective' },
+        {
+          id: 'openai/gpt-3.5-turbo',
+          name: 'GPT-3.5 Turbo',
+          description: 'Fast and cost-effective',
+        },
         {
           id: 'anthropic/claude-3-5-sonnet',
           name: 'Claude 3.5 Sonnet',
@@ -151,7 +155,7 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
         {
           id: 'google/gemini-pro-1.5',
           name: 'Gemini Pro 1.5',
-          description: 'Google\'s advanced model',
+          description: "Google's advanced model",
         },
       ],
       openai: [

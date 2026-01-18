@@ -1,7 +1,7 @@
 /**
  * Main App Component with React Router
  */
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginForm } from '@/features/auth/components/LoginForm'

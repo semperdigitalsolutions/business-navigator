@@ -2,7 +2,7 @@
  * Login Form Component
  */
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { authApi } from '../api/auth.api'
 import { useAuthStore } from '../hooks/useAuthStore'
 

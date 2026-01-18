@@ -40,7 +40,7 @@ export const getUserBusinessTool = tool(
   {
     name: 'get_user_business',
     description:
-      'Get information about the user\'s business including name, type, state, and formation status',
+      "Get information about the user's business including name, type, state, and formation status",
     schema: z.object({
       userId: z.string().describe('The user ID to look up business information for'),
     }),
@@ -77,7 +77,7 @@ export const getUserTasksTool = tool(
   {
     name: 'get_user_tasks',
     description:
-      'Get the user\'s tasks, optionally filtered by status (pending, in_progress, completed, blocked)',
+      "Get the user's tasks, optionally filtered by status (pending, in_progress, completed, blocked)",
     schema: z.object({
       userId: z.string().describe('The user ID'),
       status: z
@@ -93,7 +93,10 @@ export const getUserTasksTool = tool(
  */
 export const getTaskTemplatesTool = tool(
   async ({ category }: { category?: string }) => {
-    let query = supabase.from('task_templates').select('*').order('week_number', { ascending: true })
+    let query = supabase
+      .from('task_templates')
+      .select('*')
+      .order('week_number', { ascending: true })
 
     if (category) {
       query = query.eq('category', category)
@@ -186,7 +189,7 @@ export const createUserTaskTool = tool(
     category: string
     priority: string
   }) => {
-    const { data, error} = await supabase
+    const { data, error } = await supabase
       .from('user_tasks')
       .insert({
         user_id: userId,

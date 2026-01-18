@@ -3,6 +3,7 @@
 AI-powered business formation platform that guides first-time founders through launching their first US business in 8 weeks.
 
 ## Project Structure
+
 ```
 business-navigator/
 ├── frontend/          # React + Vite application
@@ -22,6 +23,7 @@ business-navigator/
 - **Deployment:** Railway (backend), Netlify (frontend)
 
 ## Quick Start
+
 ```bash
 # Install all dependencies (uses Bun workspaces)
 bun install
@@ -49,6 +51,7 @@ bun run dev
 ## Documentation
 
 See `/docs` folder for detailed documentation:
+
 - Database Schema
 - API Documentation
 - Architecture Decisions

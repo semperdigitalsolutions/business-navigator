@@ -3,7 +3,7 @@
  */
 import { Elysia, t } from 'elysia'
 import { supabase } from '@/config/database.js'
-import { successResponse, errorResponse } from '@/middleware/error.js'
+import { errorResponse, successResponse } from '@/middleware/error.js'
 
 export const authRoutes = new Elysia({ prefix: '/api/auth' })
   // Register a new user

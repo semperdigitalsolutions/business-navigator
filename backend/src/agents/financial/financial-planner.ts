@@ -1,8 +1,8 @@
 /**
  * Financial Planner Agent - Financial projections and guidance
  */
-import { StateGraph, START, END } from '@langchain/langgraph'
-import { HumanMessage, SystemMessage, AIMessage } from '@langchain/core/messages'
+import { END, START, StateGraph } from '@langchain/langgraph'
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages'
 import { FinancialState, type FinancialStateType } from '../core/state.js'
 import { createLLM, getLLMConfigFromState } from '../core/llm.js'
 import { FINANCIAL_SYSTEM_PROMPT } from '../core/prompts.js'
@@ -32,7 +32,7 @@ async function loadFinancialContext(
       }
 
       if (tasksTool) {
-            // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
+        // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
         const result = await tasksTool.invoke({ userId: state.userId, status: 'completed' })
         const parsed = JSON.parse(result as string)
         tasksInfo = parsed.tasks
@@ -85,10 +85,7 @@ async function processFinancialQuery(
   const systemPrompt = FINANCIAL_SYSTEM_PROMPT + contextInfo
 
   try {
-    const response = await llmWithTools.invoke([
-      new SystemMessage(systemPrompt),
-      ...state.messages,
-    ])
+    const response = await llmWithTools.invoke([new SystemMessage(systemPrompt), ...state.messages])
 
     const toolCalls = response.tool_calls || []
     const responseMessages: any[] = [response]
@@ -98,7 +95,7 @@ async function processFinancialQuery(
       for (const toolCall of toolCalls) {
         const tool = agentTools.find((t) => t.name === toolCall.name)
         if (tool) {
-            // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
+          // @ts-expect-error - LangChain tool.invoke() complex generic signature mismatch
           try {
             const toolResult = await tool.invoke(toolCall.args)
             responseMessages.push(
