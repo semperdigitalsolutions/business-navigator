@@ -1,5 +1,5 @@
 import { type ElementType, forwardRef, type ReactNode } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 
 export interface EmptyStateProps extends React.HTMLAttributes<HTMLDivElement> {
   icon?: ElementType
@@ -37,7 +37,7 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     return (
       <div
         ref={ref}
-        className={clsx(
+        className={cn(
           'flex flex-col items-center justify-center text-center',
           styles.container,
           className
@@ -47,16 +47,14 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
         {Icon && (
           <div className="mb-4 rounded-full bg-zinc-100 p-3 dark:bg-zinc-800">
             <Icon
-              className={clsx('text-zinc-400 dark:text-zinc-500', styles.icon)}
+              className={cn('text-zinc-400 dark:text-zinc-500', styles.icon)}
               aria-hidden="true"
             />
           </div>
         )}
-        <h3 className={clsx('font-semibold text-zinc-900 dark:text-white', styles.title)}>
-          {title}
-        </h3>
+        <h3 className={cn('font-semibold text-zinc-900 dark:text-white', styles.title)}>{title}</h3>
         {description && (
-          <p className={clsx('mt-1 text-zinc-500 dark:text-zinc-400', styles.description)}>
+          <p className={cn('mt-1 text-zinc-500 dark:text-zinc-400', styles.description)}>
             {description}
           </p>
         )}
@@ -65,3 +63,5 @@ export const EmptyState = forwardRef<HTMLDivElement, EmptyStateProps>(
     )
   }
 )
+
+EmptyState.displayName = 'EmptyState'

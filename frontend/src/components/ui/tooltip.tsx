@@ -1,5 +1,5 @@
 import { forwardRef, type ReactNode } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right'
 export type TooltipSize = 'sm' | 'md' | 'lg'
@@ -38,10 +38,10 @@ const sizeClasses: Record<TooltipSize, string> = {
 export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
   ({ content, children, placement = 'top', size = 'md', className, delay = 200 }, ref) => {
     return (
-      <div ref={ref} className={clsx('group relative inline-flex', className)}>
+      <div ref={ref} className={cn('group relative inline-flex', className)}>
         {children}
         <div
-          className={clsx(
+          className={cn(
             'pointer-events-none absolute z-50 whitespace-nowrap rounded-lg',
             'bg-zinc-900 text-white shadow-lg',
             'opacity-0 transition-opacity duration-200',
@@ -54,7 +54,7 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
         >
           {content}
           <div
-            className={clsx(
+            className={cn(
               'absolute size-0 border-4 border-zinc-900 dark:border-zinc-700',
               arrowClasses[placement]
             )}
@@ -65,3 +65,5 @@ export const Tooltip = forwardRef<HTMLDivElement, TooltipProps>(
     )
   }
 )
+
+Tooltip.displayName = 'Tooltip'
