@@ -14,7 +14,7 @@ export class AppError extends Error {
   }
 }
 
-export function errorResponse(message: string, statusCode: number = 500): ApiResponse {
+export function errorResponse(message: string, _statusCode: number = 500): ApiResponse {
   return {
     success: false,
     error: message,

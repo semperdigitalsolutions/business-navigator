@@ -14,7 +14,7 @@ function encryptApiKey(apiKey: string): string {
   return Buffer.from(apiKey).toString('base64')
 }
 
-function decryptApiKey(encrypted: string): string {
+function _decryptApiKey(encrypted: string): string {
   // TODO: Implement proper decryption
   return Buffer.from(encrypted, 'base64').toString('utf-8')
 }

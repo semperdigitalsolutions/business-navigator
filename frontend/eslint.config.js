@@ -6,7 +6,13 @@ import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
 
 export default defineConfig([
-  globalIgnores(['dist', 'node_modules', '*.config.js', '*.config.ts']),
+  globalIgnores([
+    'dist',
+    'node_modules',
+    '*.config.js',
+    '*.config.ts',
+    'src/components/catalyst-ui-kit',
+  ]),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

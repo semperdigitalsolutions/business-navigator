@@ -1,143 +1,93 @@
 # AGENTS.md - AI Coding Agent Guidelines
 
-## Project Context
+## Project Overview
 
-Business Navigator is a Bun-powered monorepo for an AI-driven business formation platform.
+Bun-powered monorepo for an AI-driven business formation platform.
 
-**CRITICAL:** The codebase architecture DIVERGES significantly from the Notion documentation. Always prioritize codebase patterns over documentation when they conflict.
+| Component    | Technology                                                    |
+| :----------- | :------------------------------------------------------------ |
+| **Runtime**  | Bun (all packages)                                            |
+| **Frontend** | React 19 + Vite + Tailwind v4 + Catalyst UI                   |
+| **Backend**  | ElysiaJS + LangGraph (Router-Delegate architecture)           |
+| **Database** | Supabase (PostgreSQL)                                         |
+| **State**    | TanStack Query + Zustand (UI), LangGraph checkpoints (Server) |
+| **LLM**      | OpenRouter (Claude 3.5 Sonnet preferred)                      |
 
-| Layer    | Technology                                                     |
-| -------- | -------------------------------------------------------------- |
-| Runtime  | Bun (all packages)                                             |
-| Frontend | React 19 + Vite + TypeScript + Tailwind CSS                    |
-| Backend  | ElysiaJS + LangGraph + Supabase (PostgreSQL)                   |
-| AI       | LangGraph multi-agent system (Triage, Legal, Financial, Tasks) |
-| State    | TanStack Query (server) + Zustand (client)                     |
+## Development Commands
 
-## Commands
+| Task               | Command                                                   |
+| :----------------- | :-------------------------------------------------------- |
+| **Install**        | `bun install`                                             |
+| **Dev (All)**      | `bun run dev`                                             |
+| **Dev (Frontend)** | `bun run dev:frontend` (Port 5173)                        |
+| **Dev (Backend)**  | `bun run dev:backend` (Port 3000)                         |
+| **Quality**        | `bun run quality` (Runs format:check + lint + type-check) |
+| **Test (All)**     | `cd backend && bun test`                                  |
+| **Test (File)**    | `cd backend && bun test path/to/file.test.ts`             |
 
-```bash
-# Development
-bun install                                 # Install all dependencies
-bun run dev                                 # Start frontend & backend
-bun run dev:frontend                        # Frontend only (port 5173)
-bun run dev:backend                         # Backend only (port 3000)
+## Code Style & Limits
 
-# Quality (CI enforced)
-bun run quality                             # Run ALL checks
-bun run format && bun run lint              # Format + lint
-bun run type-check                          # TypeScript check
+| Metric          | Limit / Rule                                                  |
+| :-------------- | :------------------------------------------------------------ |
+| **Formatting**  | No semicolons, single quotes, 2-space indent, 100 width       |
+| **File Length** | Max 300 lines (ESLint error)                                  |
+| **Func Length** | Max 50 lines (ESLint error)                                   |
+| **Nesting**     | Max 4 levels (ESLint error)                                   |
+| **Params**      | Max 4 parameters per function                                 |
+| **Naming**      | kebab-case (Files), PascalCase (Components), camelCase (Vars) |
 
-# Testing
-cd backend && bun test                      # All tests
-cd backend && bun test path/to/file.test.ts # Single file
-```
+## TypeScript & API Conventions
 
-## Code Style
+- **Strict TS**: No `any` (use `unknown`), no `@ts-ignore`, no `!` assertions.
+- **Backend Imports**: MUST use `.js` extension for local files (e.g., `import { x } from './file.js'`).
+- **Path Aliases**: `@/*` for local package, `@shared/*` for shared library.
+- **Validation**: Backend uses **TypeBox** (`t.Object`), NOT Zod for route schemas.
+- **Error Handling**: Use `@/middleware/error.js` helpers (`successResponse`, `errors.notFound`).
+- **Unused Vars**: Prefix with `_` to satisfy ESLint.
 
-### Formatting (Prettier)
+## Project Structure
 
-- NO semicolons, single quotes, 2-space indent, 100 char width
-- ES5 trailing commas, arrow parens always
-
-### File Limits (ESLint - errors block CI)
-
-| Rule               | Limit |
-| ------------------ | ----- |
-| Max lines/file     | 300   |
-| Max lines/function | 50    |
-| Max nesting depth  | 4     |
-| Max params         | 4     |
-
-### TypeScript
-
-- Strict mode, no `any` (use `unknown`), no `@ts-ignore`, no `!` assertions
-- Prefix unused vars with `_`
-
-### Imports
-
-```typescript
-// Frontend
-import { Component } from '@/components/Component'
-import { User } from '@shared/types'
-
-// Backend - MUST use .js extension for local files
-import { supabase } from '@/config/database.js'
-import { errorResponse } from '@/middleware/error.js'
-```
-
-Import order: External → `@shared/*` → `@/*` → Relative
-
-### Naming
-
-| Type       | Convention           | Example                      |
-| ---------- | -------------------- | ---------------------------- |
-| vars/funcs | camelCase            | `getUserById`                |
-| Components | PascalCase           | `ChatInterface`              |
-| Files      | kebab-case           | `auth-routes.ts`             |
-| Constants  | SCREAMING_SNAKE      | `MAX_RETRIES`                |
-| Enums      | PascalCase.SCREAMING | `BusinessStatus.IN_PROGRESS` |
-
-### Error Handling (Backend)
-
-```typescript
-import { errorResponse, successResponse, errors } from '@/middleware/error.js'
-return successResponse({ user }, 'Success')
-return errors.unauthorized() | errors.notFound('Resource') | errors.badRequest('msg')
-```
-
-### API Validation (ElysiaJS TypeBox)
-
-```typescript
-.post('/register', handler, {
-  body: t.Object({
-    email: t.String({ format: 'email' }),
-    password: t.String({ minLength: 8 }),
-  }),
-})
-```
-
-### React Patterns
-
-```typescript
-// Feature structure: src/features/{name}/{components,hooks,api,types.ts}
-export function Component({ prop }: Props) {
-  const [state, setState] = useState()       // hooks first
-  const { data } = useQuery()
-  useEffect(() => {}, [deps])                // effects after
-  const handleClick = () => {}               // handlers
-  if (isLoading) return <Spinner />          // early returns
-  return (...)                               // render
-}
-```
-
-## Structure
-
-```
+```text
 business-navigator/
 ├── frontend/src/
-│   ├── features/     # Auth, Chat, Dashboard, Settings, Tasks
-│   ├── components/   # Shared UI
-│   └── layouts/
+│   ├── features/          # auth, chat, dashboard, settings, tasks
+│   │   └── {feature}/     # components/, hooks/, api/, types.ts
+│   ├── components/
+│   │   └── catalyst-ui-kit/typescript/  # Vendored Tailwind v4 UI kit
+│   ├── layouts/           # Page layouts (e.g., SidebarLayout)
+│   └── lib/               # Shared frontend utilities (queryClient, store)
 ├── backend/src/
-│   ├── agents/       # LangGraph (core/, triage/, legal/, financial/, tasks/)
-│   ├── routes/       # API endpoints
-│   ├── middleware/   # Auth, error
-│   └── config/       # Database, env
-└── shared/src/       # Types & constants
+│   ├── agents/            # LangGraph Implementation
+│   │   ├── core/          # checkpoint.ts, llm.ts, state.ts, tools.ts
+│   │   ├── triage/        # router.ts (Triage agent)
+│   │   └── {domain}/      # legal-navigator, financial-planner, etc.
+│   ├── routes/            # Elysia routes mapping to agents
+│   ├── middleware/        # Auth, error, logging
+│   ├── domains/           # (Placeholder for future domain logic)
+│   └── infrastructure/    # (Placeholder for external services)
+└── shared/src/            # types/, constants/
 ```
 
-## Agent Protocols
+## AI Agent Protocols (LangGraph)
 
-1. **Search First**: Find existing patterns before writing new code
-2. **Respect Limits**: Split files > 300 lines
-3. **Verify**: Run `bun run type-check` after changes
-4. **Match Patterns**: Copy style from similar files
-5. **No Console**: Use `console.warn/error` only (frontend)
+- **Architecture**: Router-Delegate pattern. The Triage agent routes to specialized delegates.
+- **Tool Execution**: Manual execution within nodes. **DO NOT** use standard `ToolNode`.
+- **State Management**: Persistent via LangGraph checkpoints; state must be serializable.
+- **Safety**: NEVER provide definitive legal/tax advice. Always include "I am an AI assistant" disclaimers.
+- **Prompting**: System prompts reside in `backend/src/agents/core/prompts.ts` or domain files.
 
-## Gotchas
+## React & UI Patterns
 
-- Backend imports MUST use `.js` extension (Bun ESM)
-- ElysiaJS uses TypeBox (`t.Object`), not Zod
-- LangGraph agents in `backend/src/agents/` - NOT simple OpenAI calls
-- Supabase client: `@/config/database.js`
+- **Tailwind v4**: Use `@tailwind` directives. Avoid legacy Tailwind v3 configurations.
+- **Catalyst UI**: Requires `@headlessui/react`, `clsx`, and `framer-motion`.
+- **Components**: Functional components only. Use `forwardRef` for UI kit components.
+- **State**: Use `Zustand` for global UI state and `TanStack Query` for server state.
+
+## Anti-Patterns & Gotchas
+
+- **Source of Truth**: Codebase patterns DIVERGE from Notion; prioritize existing code.
+- **LLM Provider**: OpenRouter is primary. `OPENROUTER_API_KEY` is required in `.env`.
+- **CI Enforcement**: Test job has `continue-on-error: true`. Quality job is strict.
+- **Placeholder Dirs**: `domains/` and `infrastructure/` are intentional placeholders.
+- **Console Logs**: `console.log` is forbidden. Use `console.warn/error` in frontend only.
+- **Backend ESM**: Bun requires `.js` in imports even though files are `.ts`.

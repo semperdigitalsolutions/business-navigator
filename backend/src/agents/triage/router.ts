@@ -21,18 +21,6 @@ async function classifyIntent(state: TriageStateType): Promise<Partial<TriageSta
   const lastMessage = state.messages[state.messages.length - 1]
   const userQuery = lastMessage.content as string
 
-  const prompt = `${TRIAGE_SYSTEM_PROMPT}
-
-User query: "${userQuery}"
-
-Classify this query as one of: legal, financial, tasks, general
-Respond in the following JSON format:
-{
-  "intent": "legal|financial|tasks|general",
-  "confidence": 0.0-1.0,
-  "reason": "brief explanation"
-}`
-
   try {
     const response = await llm.invoke([
       new SystemMessage(TRIAGE_SYSTEM_PROMPT),
