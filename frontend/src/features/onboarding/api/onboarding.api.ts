@@ -1,6 +1,6 @@
 /**
  * Onboarding API
- * Handles 7-step onboarding wizard API calls
+ * Handles 6-step onboarding wizard API calls
  */
 import { apiClient } from '@/lib/api/client'
 import type { OnboardingData, OnboardingSession, ApiResponse } from '@shared/types'

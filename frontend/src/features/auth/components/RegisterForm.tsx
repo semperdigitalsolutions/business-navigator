@@ -56,8 +56,14 @@ export function RegisterForm() {
       })
 
       if (response.success && response.data) {
-        setAuth(response.data.user, response.data.token)
-        navigate('/dashboard')
+        // Extract token from session object
+        const token = response.data.session?.access_token
+        if (token) {
+          setAuth(response.data.user, token)
+          navigate('/dashboard')
+        } else {
+          setError('Failed to get authentication token')
+        }
       } else {
         setError(response.error || 'Registration failed')
       }

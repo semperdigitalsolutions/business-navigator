@@ -14,7 +14,7 @@ Business Navigator is an AI-powered business formation platform that guides firs
 - AI: LangGraph multi-agent (Triage → Legal/Financial/Tasks specialists)
 - Rate Limiting: Credit-based system (users select model, different costs)
 - Frontend: React 19 PWA (mobile-first, works on desktop)
-- Onboarding: 7-step wizard for maximum AI context
+- Onboarding: 6-step wizard for maximum AI context
 
 ## Commands
 
@@ -148,7 +148,7 @@ Pre-commit hooks run format, lint, and type-check automatically.
 Check `docs/Notion/` for exported Notion specs. Key documents:
 
 - **User Flows** - Task interaction patterns, navigation, user journeys
-- **Auth & Onboarding** - 7-step onboarding quiz, validation rules, data storage
+- **Auth & Onboarding** - 6-step onboarding quiz, validation rules, data storage
 - **8-Week Build Plan** - Sprint timeline and milestones
 - **AI Chat System** - Chat system design
 - **Architecture Implementation Details** - Technical implementation specifics

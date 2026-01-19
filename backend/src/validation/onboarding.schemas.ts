@@ -1,6 +1,6 @@
 /**
  * Onboarding Validation Schemas (TypeBox)
- * Comprehensive validation for 7-step onboarding wizard
+ * Comprehensive validation for 6-step onboarding wizard
  *
  * SECURITY: HIGH - Prevents invalid data injection and ensures data integrity
  */
@@ -206,10 +206,10 @@ export const OnboardingDataSchema = t.Object({
   // Step 5
   timeline: TimelineSchema,
 
-  // Step 6
+  // Step 5 (Timeline already defined above)
   teamSize: TeamSizeSchema,
 
-  // Step 7
+  // Step 6
   fundingApproach: FundingApproachSchema,
   previousExperience: PreviousExperienceSchema,
   primaryConcern: PrimaryConcernSchema,
@@ -218,12 +218,12 @@ export const OnboardingDataSchema = t.Object({
   currentStep: t.Optional(
     t.Integer({
       minimum: 1,
-      maximum: 7,
+      maximum: 6,
     })
   ),
   stepsCompleted: t.Optional(
-    t.Array(t.Integer({ minimum: 1, maximum: 7 }), {
-      maxItems: 7,
+    t.Array(t.Integer({ minimum: 1, maximum: 6 }), {
+      maxItems: 6,
     })
   ),
 })
@@ -240,10 +240,10 @@ export const OnboardingSaveRequestSchema = t.Object({
   data: PartialOnboardingDataSchema,
   currentStep: t.Integer({
     minimum: 1,
-    maximum: 7,
+    maximum: 6,
   }),
-  completedSteps: t.Array(t.Integer({ minimum: 1, maximum: 7 }), {
-    maxItems: 7,
+  completedSteps: t.Array(t.Integer({ minimum: 1, maximum: 6 }), {
+    maxItems: 6,
     uniqueItems: true,
   }),
 })
@@ -296,10 +296,11 @@ export function getStepSchema(step: number) {
     case 4:
       return t.Object({ primaryGoals: PrimaryGoalsSchema })
     case 5:
-      return t.Object({ timeline: TimelineSchema })
+      return t.Object({
+        timeline: TimelineSchema,
+        teamSize: TeamSizeSchema,
+      })
     case 6:
-      return t.Object({ teamSize: TeamSizeSchema })
-    case 7:
       return t.Object({
         fundingApproach: FundingApproachSchema,
         previousExperience: PreviousExperienceSchema,
