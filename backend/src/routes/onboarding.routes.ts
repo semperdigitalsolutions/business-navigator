@@ -110,9 +110,9 @@ export const onboardingRoutes = new Elysia({ prefix: '/api/onboarding' })
             primaryConcern: t.Optional(PrimaryConcernSchema),
           })
         ),
-        currentStep: t.Integer({ minimum: 1, maximum: 7 }),
-        completedSteps: t.Array(t.Integer({ minimum: 1, maximum: 7 }), {
-          maxItems: 7,
+        currentStep: t.Integer({ minimum: 1, maximum: 6 }),
+        completedSteps: t.Array(t.Integer({ minimum: 1, maximum: 6 }), {
+          maxItems: 6,
           uniqueItems: true,
         }),
       }),

@@ -1,6 +1,6 @@
 /**
  * OnboardingProgress Component
- * Progress indicator for 7-step onboarding wizard
+ * Progress indicator for 6-step onboarding wizard
  */
 import { CheckIcon } from '@heroicons/react/24/solid'
 
@@ -13,7 +13,7 @@ interface OnboardingProgressProps {
 export function OnboardingProgress({
   currentStep,
   completedSteps,
-  totalSteps = 7,
+  totalSteps = 6,
 }: OnboardingProgressProps) {
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1)
   const progressPercentage = Math.round((completedSteps.length / totalSteps) * 100)
@@ -103,8 +103,7 @@ export function OnboardingProgress({
                     {step === 3 && 'Location'}
                     {step === 4 && 'Goals'}
                     {step === 5 && 'Timeline'}
-                    {step === 6 && 'Team'}
-                    {step === 7 && 'Details'}
+                    {step === 6 && 'Details'}
                   </span>
                 </div>
               </li>

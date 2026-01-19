@@ -1,6 +1,6 @@
 /**
  * OnboardingWizard Component
- * Main container for 7-step onboarding wizard
+ * Main container for 6-step onboarding wizard
  * Features: Auto-save, progress tracking, dual persistence
  */
 import { useEffect, useState } from 'react'
@@ -61,7 +61,7 @@ export function OnboardingWizard() {
   const handleNext = () => {
     if (isStepValid(currentStep)) {
       markStepCompleted(currentStep)
-      if (currentStep < 7) {
+      if (currentStep < 6) {
         setCurrentStep(currentStep + 1)
       } else {
         // Final step - complete onboarding
@@ -77,7 +77,7 @@ export function OnboardingWizard() {
   }
 
   const handleSkip = () => {
-    if (currentStep < 7) {
+    if (currentStep < 6) {
       setCurrentStep(currentStep + 1)
     }
   }
@@ -95,7 +95,7 @@ export function OnboardingWizard() {
         return !!data.primaryGoals && data.primaryGoals.length > 0
       case 5:
         return !!data.timeline && !!data.teamSize
-      case 7:
+      case 6:
         return !!data.fundingApproach && !!data.previousExperience && !!data.primaryConcern
       default:
         return true
@@ -161,7 +161,7 @@ export function OnboardingWizard() {
         return <PrimaryGoalsStep {...stepProps} />
       case 5:
         return <TimelineStep {...stepProps} />
-      case 7:
+      case 6:
         return <FinalDetailsStep {...stepProps} />
       default:
         return null
@@ -179,7 +179,7 @@ export function OnboardingWizard() {
           <OnboardingProgress
             currentStep={currentStep}
             completedSteps={stepsCompleted}
-            totalSteps={7}
+            totalSteps={6}
           />
         </div>
 
@@ -208,7 +208,7 @@ export function OnboardingWizard() {
               </Button>
             )}
             <Button type="button" onClick={handleNext} color="indigo" disabled={!canGoNext}>
-              {currentStep === 7 ? 'Complete' : 'Continue'}
+              {currentStep === 6 ? 'Complete' : 'Continue'}
             </Button>
           </div>
         </div>

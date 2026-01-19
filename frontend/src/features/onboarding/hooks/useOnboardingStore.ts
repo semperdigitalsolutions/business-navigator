@@ -1,5 +1,5 @@
 /**
- * Onboarding Store - 7-step wizard state management
+ * Onboarding Store - 6-step wizard state management
  * Implements dual persistence: localStorage (instant) + server (cross-device)
  */
 import { create } from 'zustand'
@@ -64,14 +64,17 @@ export const useOnboardingStore = create<OnboardingState>()(
       },
 
       setCurrentStep: (step) => {
-        if (step >= 1 && step <= 7) {
+        if (step >= 1 && step <= 6) {
           set({ currentStep: step })
         }
       },
 
       markStepCompleted: (step) => {
+        // Only mark valid steps (1-6)
+        if (step < 1 || step > 6) return
+
         set((state) => {
-          const completed = new Set(state.stepsCompleted)
+          const completed = new Set(state.stepsCompleted.filter((s) => s <= 6))
           completed.add(step)
           return {
             stepsCompleted: Array.from(completed).sort((a, b) => a - b),
@@ -119,11 +122,12 @@ export const useOnboardingStore = create<OnboardingState>()(
       // Helper: Get completion progress (0-100)
       getProgress: () => {
         const state = get()
-        return Math.round((state.stepsCompleted.length / 7) * 100)
+        return Math.round((state.stepsCompleted.length / 6) * 100)
       },
     }),
     {
       name: 'onboarding-storage',
+      version: 1, // Increment this to trigger migration
       // Only persist essential data, not UI state
       partialize: (state) => ({
         data: state.data,
@@ -132,6 +136,23 @@ export const useOnboardingStore = create<OnboardingState>()(
         isCompleted: state.isCompleted,
         lastSyncedAt: state.lastSyncedAt,
       }),
+      // Migration to handle step 7 -> 6 conversion
+      migrate: (persistedState: any, version: number) => {
+        // If migrating from version 0 (before versioning) or old data
+        if (version === 0 || !version) {
+          // Filter out step 7 from completedSteps
+          if (persistedState.stepsCompleted) {
+            persistedState.stepsCompleted = persistedState.stepsCompleted.filter(
+              (step: number) => step <= 6
+            )
+          }
+          // Cap currentStep at 6
+          if (persistedState.currentStep > 6) {
+            persistedState.currentStep = 6
+          }
+        }
+        return persistedState
+      },
     }
   )
 )
