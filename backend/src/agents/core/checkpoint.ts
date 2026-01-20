@@ -3,13 +3,13 @@
  * Saves conversation state to Supabase PostgreSQL database
  */
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
-import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
-import type {
-  CheckpointTuple,
-  Checkpoint,
-  CheckpointMetadata,
-  PendingWrite,
-  CheckpointListOptions,
+import {
+  BaseCheckpointSaver,
+  type Checkpoint,
+  type CheckpointListOptions,
+  type CheckpointMetadata,
+  type CheckpointTuple,
+  type PendingWrite,
 } from '@langchain/langgraph-checkpoint'
 import type { RunnableConfig } from '@langchain/core/runnables'
 import { env } from '@/config/env.js'
