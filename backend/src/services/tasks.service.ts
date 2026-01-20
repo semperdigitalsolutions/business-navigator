@@ -4,6 +4,7 @@
  */
 import { supabase } from '@/config/database.js'
 import type {
+  ConfidenceScore,
   TaskListItem,
   TaskListResponse,
   TaskListStatus,
@@ -251,6 +252,146 @@ export class TasksService {
       completedAt: userTask?.completedAt,
       icon: template.icon,
     }
+  }
+
+  /**
+   * Complete a task
+   * Issue #59: POST /api/tasks/:id/complete
+   */
+  async completeTask(
+    taskId: string,
+    userId: string,
+    completionData?: Record<string, unknown>,
+    businessId?: string
+  ): Promise<{ task: TaskListItem; confidenceScore: ConfidenceScore }> {
+    // First check if user_task exists, if not create it
+    let userTaskQuery = supabase
+      .from('user_tasks')
+      .select('id')
+      .eq('template_id', taskId)
+      .eq('user_id', userId)
+
+    if (businessId) {
+      userTaskQuery = userTaskQuery.eq('business_id', businessId)
+    }
+
+    const { data: existingTask } = await userTaskQuery.single()
+
+    if (existingTask) {
+      // Update existing task
+      const { error: updateError } = await supabase
+        .from('user_tasks')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          completion_data: completionData || {},
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingTask.id)
+
+      if (updateError) {
+        throw new Error(`Failed to complete task: ${updateError.message}`)
+      }
+    } else {
+      // Create new user_task record marked as completed
+      const { error: insertError } = await supabase.from('user_tasks').insert({
+        template_id: taskId,
+        user_id: userId,
+        business_id: businessId || null,
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        completion_data: completionData || {},
+      })
+
+      if (insertError) {
+        throw new Error(`Failed to create completed task: ${insertError.message}`)
+      }
+    }
+
+    // Get updated task
+    const task = await this.getTaskById(taskId, userId, businessId)
+    if (!task) {
+      throw new Error('Task not found after completion')
+    }
+
+    // Get updated confidence score (triggered by DB)
+    const { data: scoreData, error: scoreError } = await supabase.rpc(
+      'calculate_confidence_score',
+      {
+        p_user_id: userId,
+        p_business_id: businessId || null,
+      }
+    )
+
+    const confidenceScore: ConfidenceScore = scoreError
+      ? { total: 0, ideation: 0, legal: 0, financial: 0, launchPrep: 0, calculatedAt: new Date() }
+      : {
+          total: scoreData.total,
+          ideation: scoreData.ideation,
+          legal: scoreData.legal,
+          financial: scoreData.financial,
+          launchPrep: scoreData.launch_prep,
+          calculatedAt: new Date(scoreData.calculated_at),
+        }
+
+    return { task, confidenceScore }
+  }
+
+  /**
+   * Save task draft data
+   * Issue #60: POST /api/tasks/:id/save
+   */
+  async saveTaskDraft(
+    taskId: string,
+    userId: string,
+    draftData: Record<string, unknown>,
+    businessId?: string
+  ): Promise<{ savedAt: Date }> {
+    // Check if user_task exists
+    let userTaskQuery = supabase
+      .from('user_tasks')
+      .select('id, status')
+      .eq('template_id', taskId)
+      .eq('user_id', userId)
+
+    if (businessId) {
+      userTaskQuery = userTaskQuery.eq('business_id', businessId)
+    }
+
+    const { data: existingTask } = await userTaskQuery.single()
+
+    const savedAt = new Date()
+
+    if (existingTask) {
+      // Update existing task with draft data
+      const { error: updateError } = await supabase
+        .from('user_tasks')
+        .update({
+          draft_data: draftData,
+          status: existingTask.status === 'pending' ? 'in_progress' : existingTask.status,
+          updated_at: savedAt.toISOString(),
+        })
+        .eq('id', existingTask.id)
+
+      if (updateError) {
+        throw new Error(`Failed to save draft: ${updateError.message}`)
+      }
+    } else {
+      // Create new user_task record with draft data
+      const { error: insertError } = await supabase.from('user_tasks').insert({
+        template_id: taskId,
+        user_id: userId,
+        business_id: businessId || null,
+        status: 'in_progress',
+        draft_data: draftData,
+      })
+
+      if (insertError) {
+        throw new Error(`Failed to create task draft: ${insertError.message}`)
+      }
+    }
+
+    return { savedAt }
   }
 }
 

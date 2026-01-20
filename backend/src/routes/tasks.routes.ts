@@ -66,3 +66,71 @@ export const tasksRoutes = new Elysia({ prefix: '/api/tasks' })
       }),
     }
   )
+
+  // POST /api/tasks/:id/complete - Mark task as completed
+  // Issue #59
+  .post(
+    '/:id/complete',
+    async ({ request, params, body }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        const result = await tasksService.completeTask(
+          params.id,
+          auth.user.id,
+          body.completionData,
+          body.businessId
+        )
+        return successResponse(result, 'Task completed successfully')
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        completionData: t.Optional(t.Record(t.String(), t.Unknown())),
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  // POST /api/tasks/:id/save - Auto-save task draft data
+  // Issue #60
+  .post(
+    '/:id/save',
+    async ({ request, params, body }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        const result = await tasksService.saveTaskDraft(
+          params.id,
+          auth.user.id,
+          body.draftData,
+          body.businessId
+        )
+        return successResponse(result, 'Draft saved')
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        draftData: t.Record(t.String(), t.Unknown()),
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
