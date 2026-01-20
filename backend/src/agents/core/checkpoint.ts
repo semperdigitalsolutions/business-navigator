@@ -3,6 +3,15 @@
  * Saves conversation state to Supabase PostgreSQL database
  */
 import { PostgresSaver } from '@langchain/langgraph-checkpoint-postgres'
+import { BaseCheckpointSaver } from '@langchain/langgraph-checkpoint'
+import type {
+  CheckpointTuple,
+  Checkpoint,
+  CheckpointMetadata,
+  PendingWrite,
+  CheckpointListOptions,
+} from '@langchain/langgraph-checkpoint'
+import type { RunnableConfig } from '@langchain/core/runnables'
 import { env } from '@/config/env.js'
 import { Pool } from 'pg'
 
@@ -79,22 +88,238 @@ export async function closeCheckpointer(): Promise<void> {
 
 /**
  * In-memory checkpointer for development/testing when DATABASE_URL not available
+ * Implements BaseCheckpointSaver interface following LangGraph's MemorySaver pattern
  */
-export class MemoryCheckpointer {
-  private checkpoints: Map<string, any> = new Map()
+export class MemoryCheckpointer extends BaseCheckpointSaver {
+  // Nested structure for checkpoint management: thread_id -> checkpoint_ns -> checkpoint_id -> [[type, data], [type, data], parentId]
+  private storage: Record<
+    string,
+    Record<string, Record<string, [[string, Uint8Array], [string, Uint8Array], string | undefined]>>
+  > = {}
 
-  async put(config: any, checkpoint: any, metadata: any): Promise<void> {
-    const key = `${config.configurable?.thread_id}_${config.configurable?.checkpoint_ns}`
-    this.checkpoints.set(key, { checkpoint, metadata })
+  // Track pending writes: combined key -> [taskId, channel, value]
+  private writes: Record<string, [string, string, unknown][]> = {}
+
+  /**
+   * Store a checkpoint
+   */
+  async put(
+    config: RunnableConfig,
+    checkpoint: Checkpoint,
+    metadata: CheckpointMetadata
+  ): Promise<RunnableConfig> {
+    const thread_id = config.configurable?.thread_id
+    const checkpoint_ns = config.configurable?.checkpoint_ns ?? ''
+    const checkpoint_id = checkpoint.id
+
+    if (!thread_id) {
+      throw new Error('thread_id required')
+    }
+
+    // Initialize nested structure if needed
+    if (!this.storage[thread_id]) {
+      this.storage[thread_id] = {}
+    }
+    if (!this.storage[thread_id][checkpoint_ns]) {
+      this.storage[thread_id][checkpoint_ns] = {}
+    }
+
+    // Serialize and store
+    const checkpointData = await this.serde.dumpsTyped(checkpoint)
+    const metadataData = await this.serde.dumpsTyped(metadata)
+
+    this.storage[thread_id][checkpoint_ns][checkpoint_id] = [
+      checkpointData,
+      metadataData,
+      config.configurable?.checkpoint_id, // parent checkpoint ID
+    ]
+
+    return {
+      configurable: {
+        thread_id,
+        checkpoint_ns,
+        checkpoint_id,
+      },
+    }
   }
 
-  async get(config: any): Promise<any> {
-    const key = `${config.configurable?.thread_id}_${config.configurable?.checkpoint_ns}`
-    return this.checkpoints.get(key)?.checkpoint
+  /**
+   * Retrieve a checkpoint tuple by config
+   */
+  async getTuple(config: RunnableConfig): Promise<CheckpointTuple | undefined> {
+    const thread_id = config.configurable?.thread_id
+    const checkpoint_ns = config.configurable?.checkpoint_ns ?? ''
+    let checkpoint_id = config.configurable?.checkpoint_id
+
+    if (!thread_id) {
+      return undefined
+    }
+
+    // Case 1: Get specific checkpoint
+    if (checkpoint_id) {
+      const saved = this.storage[thread_id]?.[checkpoint_ns]?.[checkpoint_id]
+      if (!saved) {
+        return undefined
+      }
+
+      const [checkpointData, metadataData, parentCheckpointId] = saved
+      const [checkpointType, checkpointBytes] = checkpointData
+      const [metadataType, metadataBytes] = metadataData
+
+      return {
+        config,
+        checkpoint: await this.serde.loadsTyped(checkpointType, checkpointBytes),
+        metadata: await this.serde.loadsTyped(metadataType, metadataBytes),
+        parentConfig: parentCheckpointId
+          ? {
+              configurable: {
+                thread_id,
+                checkpoint_ns,
+                checkpoint_id: parentCheckpointId,
+              },
+            }
+          : undefined,
+        pendingWrites: this.getPendingWrites(thread_id, checkpoint_ns, checkpoint_id),
+      }
+    }
+
+    // Case 2: Get latest checkpoint
+    const checkpoints = this.storage[thread_id]?.[checkpoint_ns]
+    if (!checkpoints) {
+      return undefined
+    }
+
+    // Sort checkpoint IDs to get latest (newest first)
+    checkpoint_id = Object.keys(checkpoints).sort((a, b) => b.localeCompare(a))[0]
+    if (!checkpoint_id) {
+      return undefined
+    }
+
+    const saved = checkpoints[checkpoint_id]
+    const [checkpointData, metadataData, parentCheckpointId] = saved
+    const [checkpointType, checkpointBytes] = checkpointData
+    const [metadataType, metadataBytes] = metadataData
+
+    return {
+      config: {
+        configurable: {
+          thread_id,
+          checkpoint_ns,
+          checkpoint_id,
+        },
+      },
+      checkpoint: await this.serde.loadsTyped(checkpointType, checkpointBytes),
+      metadata: await this.serde.loadsTyped(metadataType, metadataBytes),
+      parentConfig: parentCheckpointId
+        ? {
+            configurable: {
+              thread_id,
+              checkpoint_ns,
+              checkpoint_id: parentCheckpointId,
+            },
+          }
+        : undefined,
+      pendingWrites: this.getPendingWrites(thread_id, checkpoint_ns, checkpoint_id),
+    }
   }
 
-  async list(): Promise<any[]> {
-    return Array.from(this.checkpoints.values())
+  /**
+   * Get pending writes for a checkpoint
+   */
+  private getPendingWrites(
+    thread_id: string,
+    checkpoint_ns: string,
+    checkpoint_id: string
+  ): [string, string, unknown][] {
+    const key = `${thread_id}:${checkpoint_ns}:${checkpoint_id}`
+    return this.writes[key] || []
+  }
+
+  /**
+   * Store pending writes for a checkpoint
+   */
+  async putWrites(config: RunnableConfig, writes: PendingWrite[], _taskId: string): Promise<void> {
+    const thread_id = config.configurable?.thread_id
+    const checkpoint_ns = config.configurable?.checkpoint_ns ?? ''
+    const checkpoint_id = config.configurable?.checkpoint_id
+
+    if (!thread_id || !checkpoint_id) {
+      return
+    }
+
+    const key = `${thread_id}:${checkpoint_ns}:${checkpoint_id}`
+    if (!this.writes[key]) {
+      this.writes[key] = []
+    }
+
+    // Store writes as 3-tuples [taskId, channel, value]
+    // Since PendingWrite doesn't include the value, we use undefined as a placeholder
+    for (const [taskId, channel] of writes) {
+      this.writes[key].push([taskId as string, channel as string, undefined])
+    }
+  }
+
+  /**
+   * Delete a thread and all its checkpoints
+   */
+  async deleteThread(threadId: string): Promise<void> {
+    delete this.storage[threadId]
+    // Clean up writes for this thread
+    const keysToDelete = Object.keys(this.writes).filter((key) => key.startsWith(`${threadId}:`))
+    for (const key of keysToDelete) {
+      delete this.writes[key]
+    }
+  }
+
+  /**
+   * List checkpoints as async generator
+   */
+  async *list(
+    config: RunnableConfig,
+    _options?: CheckpointListOptions
+  ): AsyncGenerator<CheckpointTuple> {
+    const thread_id = config.configurable?.thread_id
+    const checkpoint_ns = config.configurable?.checkpoint_ns ?? ''
+
+    if (!thread_id) {
+      return
+    }
+
+    const checkpoints = this.storage[thread_id]?.[checkpoint_ns]
+    if (!checkpoints) {
+      return
+    }
+
+    // Sort checkpoint IDs (newest first)
+    const sortedIds = Object.keys(checkpoints).sort((a, b) => b.localeCompare(a))
+
+    for (const checkpoint_id of sortedIds) {
+      const [checkpointData, metadataData, parentCheckpointId] = checkpoints[checkpoint_id]
+      const [checkpointType, checkpointBytes] = checkpointData
+      const [metadataType, metadataBytes] = metadataData
+
+      yield {
+        config: {
+          configurable: {
+            thread_id,
+            checkpoint_ns,
+            checkpoint_id,
+          },
+        },
+        checkpoint: await this.serde.loadsTyped(checkpointType, checkpointBytes),
+        metadata: await this.serde.loadsTyped(metadataType, metadataBytes),
+        parentConfig: parentCheckpointId
+          ? {
+              configurable: {
+                thread_id,
+                checkpoint_ns,
+                checkpoint_id: parentCheckpointId,
+              },
+            }
+          : undefined,
+        pendingWrites: this.getPendingWrites(thread_id, checkpoint_ns, checkpoint_id),
+      }
+    }
   }
 }
 
