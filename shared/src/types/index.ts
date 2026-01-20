@@ -113,10 +113,14 @@ export interface ConfidenceScore {
   calculatedAt: Date
 }
 
-// Task types (extended for Week 2)
+// Task types (extended for Week 2 & 3)
 export type TaskPhase = 'ideation' | 'legal' | 'financial' | 'launch_prep'
 export type TaskPriority = 'high' | 'medium' | 'low'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
+export type TaskType = 'wizard' | 'checklist' | 'tool' | 'education' | 'external'
+
+// Task list status (includes unlock state)
+export type TaskListStatus = 'locked' | 'available' | 'in_progress' | 'completed' | 'skipped'
 
 export interface TaskTemplate {
   id: string
@@ -129,8 +133,36 @@ export interface TaskTemplate {
   dependencies: string[]
   weight: number
   phase: TaskPhase
+  taskType: TaskType
+  icon?: string
   metadata?: Record<string, any>
   createdAt: Date
+}
+
+// Task list item (for GET /api/tasks response)
+export interface TaskListItem {
+  id: string
+  title: string
+  description: string
+  phase: TaskPhase
+  estimatedTime: string
+  type: TaskType
+  status: TaskListStatus
+  dependencies: string[]
+  completedAt?: Date
+  icon?: string
+}
+
+// Phase with tasks (for grouped response)
+export interface TaskPhaseGroup {
+  id: TaskPhase
+  name: string
+  tasks: TaskListItem[]
+}
+
+// GET /api/tasks response
+export interface TaskListResponse {
+  phases: TaskPhaseGroup[]
 }
 
 export interface UserTask {
