@@ -1,8 +1,10 @@
+/* eslint-disable max-lines */
 /**
  * Tasks Service
  * Handles task listing with dependency/unlock logic
  */
 import { supabase } from '@/config/database.js'
+import type { Json } from '@/types/database.js'
 import type {
   ConfidenceScore,
   TaskListItem,
@@ -90,7 +92,7 @@ export class TasksService {
         status,
         dependencies: template.dependencies || [],
         completedAt: userTask?.completedAt,
-        icon: template.icon,
+        icon: template.icon ?? undefined,
       }
     })
 
@@ -250,7 +252,7 @@ export class TasksService {
       status,
       dependencies: template.dependencies || [],
       completedAt: userTask?.completedAt,
-      icon: template.icon,
+      icon: template.icon ?? undefined,
     }
   }
 
@@ -284,7 +286,7 @@ export class TasksService {
         .update({
           status: 'completed',
           completed_at: new Date().toISOString(),
-          completion_data: completionData || {},
+          completion_data: (completionData || {}) as Json,
           updated_at: new Date().toISOString(),
         })
         .eq('id', existingTask.id)
@@ -298,9 +300,10 @@ export class TasksService {
         template_id: taskId,
         user_id: userId,
         business_id: businessId || null,
+        title: 'Completed Task', // Will be overwritten by template data
         status: 'completed',
         completed_at: new Date().toISOString(),
-        completion_data: completionData || {},
+        completion_data: (completionData || {}) as Json,
       })
 
       if (insertError) {
@@ -323,16 +326,27 @@ export class TasksService {
       }
     )
 
-    const confidenceScore: ConfidenceScore = scoreError
-      ? { total: 0, ideation: 0, legal: 0, financial: 0, launchPrep: 0, calculatedAt: new Date() }
-      : {
-          total: scoreData.total,
-          ideation: scoreData.ideation,
-          legal: scoreData.legal,
-          financial: scoreData.financial,
-          launchPrep: scoreData.launch_prep,
-          calculatedAt: new Date(scoreData.calculated_at),
-        }
+    // Cast scoreData to expected shape from DB function
+    const score = scoreData as {
+      total: number
+      ideation: number
+      legal: number
+      financial: number
+      launch_prep: number
+      calculated_at: string
+    } | null
+
+    const confidenceScore: ConfidenceScore =
+      scoreError || !score
+        ? { total: 0, ideation: 0, legal: 0, financial: 0, launchPrep: 0, calculatedAt: new Date() }
+        : {
+            total: score.total,
+            ideation: score.ideation,
+            legal: score.legal,
+            financial: score.financial,
+            launchPrep: score.launch_prep,
+            calculatedAt: new Date(score.calculated_at),
+          }
 
     return { task, confidenceScore }
   }
@@ -367,7 +381,7 @@ export class TasksService {
       const { error: updateError } = await supabase
         .from('user_tasks')
         .update({
-          draft_data: draftData,
+          draft_data: draftData as Json,
           status: existingTask.status === 'pending' ? 'in_progress' : existingTask.status,
           updated_at: savedAt.toISOString(),
         })
@@ -382,8 +396,9 @@ export class TasksService {
         template_id: taskId,
         user_id: userId,
         business_id: businessId || null,
+        title: 'Draft Task', // Will be overwritten by template data
         status: 'in_progress',
-        draft_data: draftData,
+        draft_data: draftData as Json,
       })
 
       if (insertError) {

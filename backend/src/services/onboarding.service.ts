@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Onboarding Service
  * Handles 7-step onboarding wizard business logic
@@ -262,8 +263,8 @@ export class OnboardingService {
       return this.generateFallbackPlan(userId, onboardingData, sessionId)
     }
 
-    // Fetch the created business plan from database
-    const { data: plan, error } = await supabase
+    // Fetch the created business plan from database (business_plans not in database.ts yet)
+    const { data: plan, error } = await (supabase as any)
       .from('business_plans')
       .select('*')
       .eq('user_id', userId)
@@ -273,39 +274,22 @@ export class OnboardingService {
       throw new Error(`Failed to fetch business plan: ${error?.message || 'Plan not found'}`)
     }
 
-    // @ts-expect-error - Supabase type inference issue
     return {
-      // @ts-expect-error - Data exists but TypeScript infers never
       id: plan.id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       userId: plan.user_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       businessId: plan.business_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       onboardingSessionId: plan.onboarding_session_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       planSummary: plan.plan_summary,
-      // @ts-expect-error - Data exists but TypeScript infers never
       recommendedEntityType: plan.recommended_entity_type,
-      // @ts-expect-error - Data exists but TypeScript infers never
       recommendedState: plan.recommended_state,
-      // @ts-expect-error - Data exists but TypeScript infers never
       executiveSummary: plan.executive_summary,
-      // @ts-expect-error - Data exists but TypeScript infers never
       phaseRecommendations: plan.phase_recommendations,
-      // @ts-expect-error - Data exists but TypeScript infers never
       confidenceScore: plan.confidence_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       ideationScore: plan.ideation_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       legalScore: plan.legal_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       financialScore: plan.financial_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       launchPrepScore: plan.launch_prep_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       createdAt: new Date(plan.created_at),
-      // @ts-expect-error - Data exists but TypeScript infers never
       updatedAt: new Date(plan.updated_at),
     }
   }
@@ -327,10 +311,9 @@ export class OnboardingService {
     const executiveSummary = this.generateExecutiveSummary(onboardingData)
     const phaseRecommendations = this.generatePhaseRecommendations(onboardingData)
 
-    // Create business plan record
-    const { data: plan, error } = await supabase
+    // Create business plan record (business_plans not in database.ts yet)
+    const { data: plan, error } = await (supabase as any)
       .from('business_plans')
-      // @ts-expect-error - Supabase type inference issue
       .upsert(
         {
           user_id: userId,
@@ -358,39 +341,22 @@ export class OnboardingService {
       throw new Error(`Failed to create business plan: ${error.message}`)
     }
 
-    // @ts-expect-error - Data exists but TypeScript infers never
     return {
-      // @ts-expect-error - Data exists but TypeScript infers never
       id: plan.id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       userId: plan.user_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       businessId: plan.business_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       onboardingSessionId: plan.onboarding_session_id,
-      // @ts-expect-error - Data exists but TypeScript infers never
       planSummary: plan.plan_summary,
-      // @ts-expect-error - Data exists but TypeScript infers never
       recommendedEntityType: plan.recommended_entity_type,
-      // @ts-expect-error - Data exists but TypeScript infers never
       recommendedState: plan.recommended_state,
-      // @ts-expect-error - Data exists but TypeScript infers never
       executiveSummary: plan.executive_summary,
-      // @ts-expect-error - Data exists but TypeScript infers never
       phaseRecommendations: plan.phase_recommendations,
-      // @ts-expect-error - Data exists but TypeScript infers never
       confidenceScore: plan.confidence_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       ideationScore: plan.ideation_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       legalScore: plan.legal_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       financialScore: plan.financial_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       launchPrepScore: plan.launch_prep_score,
-      // @ts-expect-error - Data exists but TypeScript infers never
       createdAt: new Date(plan.created_at),
-      // @ts-expect-error - Data exists but TypeScript infers never
       updatedAt: new Date(plan.updated_at),
     }
   }

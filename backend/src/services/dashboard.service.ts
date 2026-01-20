@@ -100,13 +100,34 @@ export class DashboardService {
       }
     }
 
+    // Cast data to expected shape from DB function
+    const score = data as {
+      total: number
+      ideation: number
+      legal: number
+      financial: number
+      launch_prep: number
+      calculated_at: string
+    } | null
+
+    if (!score) {
+      return {
+        total: 0,
+        ideation: 0,
+        legal: 0,
+        financial: 0,
+        launchPrep: 0,
+        calculatedAt: new Date(),
+      }
+    }
+
     return {
-      total: data.total,
-      ideation: data.ideation,
-      legal: data.legal,
-      financial: data.financial,
-      launchPrep: data.launch_prep,
-      calculatedAt: new Date(data.calculated_at),
+      total: score.total,
+      ideation: score.ideation,
+      legal: score.legal,
+      financial: score.financial,
+      launchPrep: score.launch_prep,
+      calculatedAt: new Date(score.calculated_at),
     }
   }
 
@@ -267,7 +288,7 @@ export class DashboardService {
     // Trigger hero task update
     const { error: updateHeroError } = await supabase.rpc('update_hero_task', {
       p_user_id: userId,
-      p_business_id: completedTask.business_id,
+      p_business_id: completedTask.business_id ?? undefined,
     })
 
     if (updateHeroError) {
@@ -275,7 +296,7 @@ export class DashboardService {
     }
 
     // Get next hero task
-    const nextHeroTask = await this.getHeroTask(userId, completedTask.business_id)
+    const nextHeroTask = await this.getHeroTask(userId, completedTask.business_id ?? undefined)
 
     return {
       completedTask: this.mapDbToTask(completedTask),
@@ -312,7 +333,7 @@ export class DashboardService {
     // Trigger hero task update
     const { error: updateHeroError } = await supabase.rpc('update_hero_task', {
       p_user_id: userId,
-      p_business_id: skippedTask.business_id,
+      p_business_id: skippedTask.business_id ?? undefined,
     })
 
     if (updateHeroError) {
@@ -320,7 +341,7 @@ export class DashboardService {
     }
 
     // Get next hero task
-    const nextHeroTask = await this.getHeroTask(userId, skippedTask.business_id)
+    const nextHeroTask = await this.getHeroTask(userId, skippedTask.business_id ?? undefined)
 
     return {
       skippedTask: this.mapDbToTask(skippedTask),

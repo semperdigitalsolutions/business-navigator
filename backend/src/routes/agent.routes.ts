@@ -40,12 +40,9 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
             .single()
 
           if (apiKeyData) {
-            // @ts-expect-error - Supabase returns data but TypeScript infers never
             const encryptedKey = apiKeyData.api_key_encrypted as string
             llmApiKey = decrypt(encryptedKey)
-            // @ts-expect-error - Supabase returns data but TypeScript infers never
             llmModel = apiKeyData.preferred_model
-            // @ts-expect-error - Supabase returns data but TypeScript infers never
             llmProvider = apiKeyData.provider as 'openrouter' | 'openai' | 'anthropic'
           }
         }
@@ -98,12 +95,10 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
 
             const { data: session } = await supabase
               .from('agent_sessions')
-              // @ts-expect-error - Supabase type inference issue with Database generics
               .insert(sessionInsert)
               .select()
               .single()
 
-            // @ts-expect-error - Session data exists but TypeScript infers never
             sessionId = session?.id
           }
 
@@ -127,7 +122,6 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
               },
             ]
 
-            // @ts-expect-error - Supabase type inference issue with Database generics
             await supabase.from('chat_messages').insert(messages)
           }
         }

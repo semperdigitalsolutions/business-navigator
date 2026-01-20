@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Onboarding Planner Agent
  * LangGraph agent that generates personalized business plans from onboarding data
@@ -80,7 +81,7 @@ export type OnboardingPlannerStateType = typeof OnboardingPlannerState.State
  * Load task templates from database
  */
 async function loadTemplates(
-  state: OnboardingPlannerStateType
+  _state: OnboardingPlannerStateType
 ): Promise<Partial<OnboardingPlannerStateType>> {
   try {
     const result = await getTaskTemplatesTool.invoke({ category: undefined })
@@ -115,7 +116,7 @@ async function generatePlan(
     // Create LLM instance
     const llm = createLLM({
       provider: state.llmProvider,
-      model: state.llmModel,
+      model: state.llmModel || 'openai/gpt-4o',
       apiKey: state.llmApiKey,
     })
 

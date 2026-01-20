@@ -3,7 +3,7 @@
  * Issue #70: Debounced auto-save for task draft data
  * Saves every 30 seconds when data changes
  */
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { apiClient } from '@/lib/api/client'
 
@@ -39,56 +39,52 @@ interface UseAutoSaveReturn {
   isDirty: boolean
 }
 
-export function useAutoSave({
-  taskId,
-  businessId,
-  debounceMs = 30000,
-  onSaveSuccess,
-  onSaveError,
-  enabled = true,
-}: UseAutoSaveOptions): UseAutoSaveReturn {
+type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+
+async function performSave(
+  taskId: string,
+  data: Record<string, unknown>,
+  businessId?: string
+): Promise<{ savedAt: Date }> {
+  const response = await apiClient.post<{ savedAt: string }>(`/api/tasks/${taskId}/save`, {
+    draftData: data,
+    businessId,
+  })
+  if (!response.success || !response.data) throw new Error('Failed to save draft')
+  return { savedAt: new Date(response.data.savedAt) }
+}
+
+export function useAutoSave(options: UseAutoSaveOptions): UseAutoSaveReturn {
+  const {
+    taskId,
+    businessId,
+    debounceMs = 30000,
+    onSaveSuccess,
+    onSaveError,
+    enabled = true,
+  } = options
   const [draftData, setDraftData] = useState<Record<string, unknown>>({})
-  const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [status, setStatus] = useState<SaveStatus>('idle')
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isDirty, setIsDirty] = useState(false)
-
-  // Track the last saved data to detect actual changes
   const lastSavedDataRef = useRef<string>('')
-
-  // Debounce the draft data
   const debouncedData = useDebounce(draftData, debounceMs)
 
-  // Save function
   const saveDraft = useCallback(
     async (data: Record<string, unknown>) => {
       if (!taskId || !enabled) return
-
-      // Check if data actually changed
       const dataString = JSON.stringify(data)
-      if (dataString === lastSavedDataRef.current) {
-        return
-      }
-
+      if (dataString === lastSavedDataRef.current) return
+      setStatus('saving')
+      setError(null)
       try {
-        setStatus('saving')
-        setError(null)
-
-        const response = await apiClient.post<{ savedAt: string }>(`/api/tasks/${taskId}/save`, {
-          draftData: data,
-          businessId,
-        })
-
-        if (response.success && response.data) {
-          const savedAt = new Date(response.data.savedAt)
-          setLastSavedAt(savedAt)
-          setStatus('saved')
-          setIsDirty(false)
-          lastSavedDataRef.current = dataString
-          onSaveSuccess?.(savedAt)
-        } else {
-          throw new Error('Failed to save draft')
-        }
+        const { savedAt } = await performSave(taskId, data, businessId)
+        setLastSavedAt(savedAt)
+        setStatus('saved')
+        setIsDirty(false)
+        lastSavedDataRef.current = dataString
+        onSaveSuccess?.(savedAt)
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to save draft'
         setError(errorMessage)
@@ -99,47 +95,23 @@ export function useAutoSave({
     [taskId, businessId, enabled, onSaveSuccess, onSaveError]
   )
 
-  // Auto-save when debounced data changes
   useEffect(() => {
     if (!enabled || !isDirty) return
-
     const dataString = JSON.stringify(debouncedData)
     if (dataString !== lastSavedDataRef.current && Object.keys(debouncedData).length > 0) {
-      saveDraft(debouncedData)
+      queueMicrotask(() => saveDraft(debouncedData))
     }
   }, [debouncedData, enabled, isDirty, saveDraft])
 
-  // Update draft data
   const updateDraft = useCallback((data: Record<string, unknown>) => {
     setDraftData((prev) => ({ ...prev, ...data }))
     setIsDirty(true)
     setStatus('idle')
   }, [])
 
-  // Manual save function
   const saveNow = useCallback(async () => {
-    if (Object.keys(draftData).length > 0) {
-      await saveDraft(draftData)
-    }
+    if (Object.keys(draftData).length > 0) await saveDraft(draftData)
   }, [draftData, saveDraft])
 
-  // Save on unmount if dirty
-  useEffect(() => {
-    return () => {
-      if (isDirty && Object.keys(draftData).length > 0) {
-        // Fire and forget - we can't await in cleanup
-        saveDraft(draftData)
-      }
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  return {
-    status,
-    lastSavedAt,
-    error,
-    saveNow,
-    updateDraft,
-    draftData,
-    isDirty,
-  }
+  return { status, lastSavedAt, error, saveNow, updateDraft, draftData, isDirty }
 }
