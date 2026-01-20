@@ -8,8 +8,6 @@ import { authMiddleware } from '@/middleware/auth.js'
 import { errorResponse, successResponse } from '@/middleware/error.js'
 import { normalRateLimit } from '@/middleware/rate-limit.js'
 import {
-  PartialOnboardingDataSchema,
-  OnboardingDataSchema,
   BusinessCategorySchema,
   CurrentStageSchema,
   StateCodeSchema,

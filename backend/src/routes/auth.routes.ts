@@ -321,8 +321,8 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
         return errorResponse('Failed to find or create user', 500)
       }
 
-      // Create Supabase session
-      const { data: sessionData, error: sessionError } = await supabase.auth.signInWithPassword({
+      // Create Supabase session (not used yet - OAuth session handling TODO)
+      const { data: _sessionData, error: _sessionError } = await supabase.auth.signInWithPassword({
         email: googleUser.email,
         password: crypto.randomUUID(), // This won't work for OAuth users
       })

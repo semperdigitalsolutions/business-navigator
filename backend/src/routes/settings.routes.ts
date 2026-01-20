@@ -51,7 +51,6 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
 
         const { data, error } = await supabase
           .from('user_api_keys')
-          // @ts-expect-error - Supabase type inference issue with Database generics
           .upsert(insertData, {
             onConflict: 'user_id,provider',
           })
@@ -66,13 +65,9 @@ export const settingsRoutes = new Elysia({ prefix: '/api/settings' })
 
         return successResponse({
           apiKey: {
-            // @ts-expect-error - Data exists but TypeScript infers never
             id: data.id,
-            // @ts-expect-error - Data exists but TypeScript infers never
             provider: data.provider,
-            // @ts-expect-error - Data exists but TypeScript infers never
             preferred_model: data.preferred_model,
-            // @ts-expect-error - Data exists but TypeScript infers never
             is_active: data.is_active,
           },
           message: 'API key saved successfully',

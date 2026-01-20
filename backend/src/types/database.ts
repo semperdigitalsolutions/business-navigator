@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Database types for Supabase
  * These types should match your database schema
@@ -14,6 +15,9 @@ export interface Database {
           email: string
           first_name: string
           last_name: string
+          avatar_url: string | null
+          onboarding_completed: boolean
+          onboarding_completed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -22,6 +26,9 @@ export interface Database {
           email: string
           first_name: string
           last_name: string
+          avatar_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -30,9 +37,59 @@ export interface Database {
           email?: string
           first_name?: string
           last_name?: string
+          avatar_url?: string | null
+          onboarding_completed?: boolean
+          onboarding_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
+      }
+      user_oauth_providers: {
+        Row: {
+          id: string
+          user_id: string
+          provider: 'google' | 'github' | 'apple'
+          provider_user_id: string
+          provider_email: string | null
+          provider_avatar_url: string | null
+          access_token_encrypted: string | null
+          refresh_token_encrypted: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          provider: 'google' | 'github' | 'apple'
+          provider_user_id: string
+          provider_email?: string | null
+          provider_avatar_url?: string | null
+          access_token_encrypted?: string | null
+          refresh_token_encrypted?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          provider?: 'google' | 'github' | 'apple'
+          provider_user_id?: string
+          provider_email?: string | null
+          provider_avatar_url?: string | null
+          access_token_encrypted?: string | null
+          refresh_token_encrypted?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'user_oauth_providers_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
       businesses: {
         Row: {
@@ -71,6 +128,14 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'businesses_owner_id_fkey'
+            columns: ['owner_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
       business_formation_sessions: {
         Row: {
@@ -103,6 +168,20 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'business_formation_sessions_business_id_fkey'
+            columns: ['business_id']
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'business_formation_sessions_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
       agent_sessions: {
         Row: {
@@ -135,6 +214,14 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'agent_sessions_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
       chat_messages: {
         Row: {
@@ -164,6 +251,14 @@ export interface Database {
           tokens_used?: number | null
           created_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'chat_messages_session_id_fkey'
+            columns: ['session_id']
+            referencedRelation: 'agent_sessions'
+            referencedColumns: ['id']
+          },
+        ]
       }
       user_api_keys: {
         Row: {
@@ -196,6 +291,14 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'user_api_keys_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
       task_templates: {
         Row: {
@@ -203,7 +306,15 @@ export interface Database {
           title: string
           description: string
           category: string
-          order_index: number
+          priority: 'high' | 'medium' | 'low'
+          week_number: number
+          estimated_hours: number
+          dependencies: string[]
+          metadata: Json
+          weight: number
+          phase: 'ideation' | 'legal' | 'financial' | 'launch_prep'
+          task_type: 'wizard' | 'checklist' | 'tool' | 'education' | 'external'
+          icon: string | null
           created_at: string
         }
         Insert: {
@@ -211,7 +322,15 @@ export interface Database {
           title: string
           description: string
           category: string
-          order_index?: number
+          priority?: 'high' | 'medium' | 'low'
+          week_number: number
+          estimated_hours?: number
+          dependencies?: string[]
+          metadata?: Json
+          weight?: number
+          phase?: 'ideation' | 'legal' | 'financial' | 'launch_prep'
+          task_type?: 'wizard' | 'checklist' | 'tool' | 'education' | 'external'
+          icon?: string | null
           created_at?: string
         }
         Update: {
@@ -219,9 +338,18 @@ export interface Database {
           title?: string
           description?: string
           category?: string
-          order_index?: number
+          priority?: 'high' | 'medium' | 'low'
+          week_number?: number
+          estimated_hours?: number
+          dependencies?: string[]
+          metadata?: Json
+          weight?: number
+          phase?: 'ideation' | 'legal' | 'financial' | 'launch_prep'
+          task_type?: 'wizard' | 'checklist' | 'tool' | 'education' | 'external'
+          icon?: string | null
           created_at?: string
         }
+        Relationships: []
       }
       user_tasks: {
         Row: {
@@ -233,6 +361,11 @@ export interface Database {
           description: string | null
           status: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at: string | null
+          skipped_at: string | null
+          priority_order: number
+          is_hero_task: boolean
+          draft_data: Json
+          completion_data: Json
           created_at: string
           updated_at: string
         }
@@ -245,6 +378,11 @@ export interface Database {
           description?: string | null
           status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at?: string | null
+          skipped_at?: string | null
+          priority_order?: number
+          is_hero_task?: boolean
+          draft_data?: Json
+          completion_data?: Json
           created_at?: string
           updated_at?: string
         }
@@ -257,17 +395,142 @@ export interface Database {
           description?: string | null
           status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at?: string | null
+          skipped_at?: string | null
+          priority_order?: number
+          is_hero_task?: boolean
+          draft_data?: Json
+          completion_data?: Json
           created_at?: string
           updated_at?: string
         }
+        Relationships: [
+          {
+            foreignKeyName: 'user_tasks_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'user_tasks_business_id_fkey'
+            columns: ['business_id']
+            referencedRelation: 'businesses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'user_tasks_template_id_fkey'
+            columns: ['template_id']
+            referencedRelation: 'task_templates'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      onboarding_sessions: {
+        Row: {
+          id: string
+          user_id: string
+          business_name: string | null
+          business_category: 'tech_saas' | 'service' | 'ecommerce' | 'local' | null
+          current_stage: 'idea' | 'planning' | 'started' | null
+          state_code: string | null
+          primary_goals: string[]
+          timeline: 'asap' | 'soon' | 'later' | 'exploring' | null
+          team_size: number | null
+          funding_approach: 'personal_savings' | 'investment' | 'loan' | 'multiple' | 'none' | null
+          previous_experience: 'first_business' | 'experienced' | null
+          primary_concern: 'legal' | 'financial' | 'marketing' | 'product' | 'time' | null
+          current_step: number
+          steps_completed: number[]
+          completed: boolean
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          business_name?: string | null
+          business_category?: 'tech_saas' | 'service' | 'ecommerce' | 'local' | null
+          current_stage?: 'idea' | 'planning' | 'started' | null
+          state_code?: string | null
+          primary_goals?: string[]
+          timeline?: 'asap' | 'soon' | 'later' | 'exploring' | null
+          team_size?: number | null
+          funding_approach?: 'personal_savings' | 'investment' | 'loan' | 'multiple' | 'none' | null
+          previous_experience?: 'first_business' | 'experienced' | null
+          primary_concern?: 'legal' | 'financial' | 'marketing' | 'product' | 'time' | null
+          current_step?: number
+          steps_completed?: number[]
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          business_name?: string | null
+          business_category?: 'tech_saas' | 'service' | 'ecommerce' | 'local' | null
+          current_stage?: 'idea' | 'planning' | 'started' | null
+          state_code?: string | null
+          primary_goals?: string[]
+          timeline?: 'asap' | 'soon' | 'later' | 'exploring' | null
+          team_size?: number | null
+          funding_approach?: 'personal_savings' | 'investment' | 'loan' | 'multiple' | 'none' | null
+          previous_experience?: 'first_business' | 'experienced' | null
+          primary_concern?: 'legal' | 'financial' | 'marketing' | 'product' | 'time' | null
+          current_step?: number
+          steps_completed?: number[]
+          completed?: boolean
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'onboarding_sessions_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
     Views: Record<string, never>
-    Functions: Record<string, never>
+    Functions: {
+      calculate_confidence_score: {
+        Args: {
+          p_user_id: string
+          p_business_id?: string | null
+        }
+        Returns: Json
+      }
+      get_hero_task: {
+        Args: {
+          p_user_id: string
+          p_business_id?: string | null
+        }
+        Returns: string | null
+      }
+      update_hero_task: {
+        Args: {
+          p_user_id: string
+          p_business_id?: string | null
+        }
+        Returns: void
+      }
+    }
     Enums: {
       business_type: 'LLC' | 'CORPORATION' | 'SOLE_PROPRIETORSHIP' | 'PARTNERSHIP'
       business_status: 'DRAFT' | 'IN_PROGRESS' | 'SUBMITTED' | 'APPROVED' | 'REJECTED'
       task_status: 'pending' | 'in_progress' | 'completed' | 'skipped'
+      task_phase: 'ideation' | 'legal' | 'financial' | 'launch_prep'
+      task_type: 'wizard' | 'checklist' | 'tool' | 'education' | 'external'
+      business_category: 'tech_saas' | 'service' | 'ecommerce' | 'local'
+      current_stage: 'idea' | 'planning' | 'started'
+      timeline: 'asap' | 'soon' | 'later' | 'exploring'
+      funding_approach: 'personal_savings' | 'investment' | 'loan' | 'multiple' | 'none'
+      previous_experience: 'first_business' | 'experienced'
+      primary_concern: 'legal' | 'financial' | 'marketing' | 'product' | 'time'
     }
   }
 }

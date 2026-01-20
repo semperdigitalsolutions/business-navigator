@@ -174,7 +174,11 @@ export const Button = forwardRef(function Button(
   let classes = cn(
     className,
     styles.base,
-    outline ? styles.outline : plain ? styles.plain : cn(styles.solid, styles.colors[color ?? 'dark/zinc'])
+    outline
+      ? styles.outline
+      : plain
+        ? styles.plain
+        : cn(styles.solid, styles.colors[color ?? 'dark/zinc'])
   )
 
   return typeof props.href === 'string' ? (

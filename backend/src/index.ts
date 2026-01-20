@@ -117,6 +117,10 @@ Available Routes:
   DELETE /api/settings/api-keys/:id - Delete API key
   GET  /api/settings/models/:provider - Get available models
 
+  Tasks:
+  GET  /api/tasks              - List all tasks grouped by phase
+  GET  /api/tasks/:id          - Get single task by ID
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)
 

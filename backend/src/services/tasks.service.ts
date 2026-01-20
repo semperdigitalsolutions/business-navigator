@@ -1,9 +1,12 @@
+/* eslint-disable max-lines */
 /**
  * Tasks Service
  * Handles task listing with dependency/unlock logic
  */
 import { supabase } from '@/config/database.js'
+import type { Json } from '@/types/database.js'
 import type {
+  ConfidenceScore,
   TaskListItem,
   TaskListResponse,
   TaskListStatus,
@@ -89,7 +92,7 @@ export class TasksService {
         status,
         dependencies: template.dependencies || [],
         completedAt: userTask?.completedAt,
-        icon: template.icon,
+        icon: template.icon ?? undefined,
       }
     })
 
@@ -249,8 +252,161 @@ export class TasksService {
       status,
       dependencies: template.dependencies || [],
       completedAt: userTask?.completedAt,
-      icon: template.icon,
+      icon: template.icon ?? undefined,
     }
+  }
+
+  /**
+   * Complete a task
+   * Issue #59: POST /api/tasks/:id/complete
+   */
+  async completeTask(
+    taskId: string,
+    userId: string,
+    completionData?: Record<string, unknown>,
+    businessId?: string
+  ): Promise<{ task: TaskListItem; confidenceScore: ConfidenceScore }> {
+    // First check if user_task exists, if not create it
+    let userTaskQuery = supabase
+      .from('user_tasks')
+      .select('id')
+      .eq('template_id', taskId)
+      .eq('user_id', userId)
+
+    if (businessId) {
+      userTaskQuery = userTaskQuery.eq('business_id', businessId)
+    }
+
+    const { data: existingTask } = await userTaskQuery.single()
+
+    if (existingTask) {
+      // Update existing task
+      const { error: updateError } = await supabase
+        .from('user_tasks')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+          completion_data: (completionData || {}) as Json,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingTask.id)
+
+      if (updateError) {
+        throw new Error(`Failed to complete task: ${updateError.message}`)
+      }
+    } else {
+      // Create new user_task record marked as completed
+      const { error: insertError } = await supabase.from('user_tasks').insert({
+        template_id: taskId,
+        user_id: userId,
+        business_id: businessId || null,
+        title: 'Completed Task', // Will be overwritten by template data
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+        completion_data: (completionData || {}) as Json,
+      })
+
+      if (insertError) {
+        throw new Error(`Failed to create completed task: ${insertError.message}`)
+      }
+    }
+
+    // Get updated task
+    const task = await this.getTaskById(taskId, userId, businessId)
+    if (!task) {
+      throw new Error('Task not found after completion')
+    }
+
+    // Get updated confidence score (triggered by DB)
+    const { data: scoreData, error: scoreError } = await supabase.rpc(
+      'calculate_confidence_score',
+      {
+        p_user_id: userId,
+        p_business_id: businessId || null,
+      }
+    )
+
+    // Cast scoreData to expected shape from DB function
+    const score = scoreData as {
+      total: number
+      ideation: number
+      legal: number
+      financial: number
+      launch_prep: number
+      calculated_at: string
+    } | null
+
+    const confidenceScore: ConfidenceScore =
+      scoreError || !score
+        ? { total: 0, ideation: 0, legal: 0, financial: 0, launchPrep: 0, calculatedAt: new Date() }
+        : {
+            total: score.total,
+            ideation: score.ideation,
+            legal: score.legal,
+            financial: score.financial,
+            launchPrep: score.launch_prep,
+            calculatedAt: new Date(score.calculated_at),
+          }
+
+    return { task, confidenceScore }
+  }
+
+  /**
+   * Save task draft data
+   * Issue #60: POST /api/tasks/:id/save
+   */
+  async saveTaskDraft(
+    taskId: string,
+    userId: string,
+    draftData: Record<string, unknown>,
+    businessId?: string
+  ): Promise<{ savedAt: Date }> {
+    // Check if user_task exists
+    let userTaskQuery = supabase
+      .from('user_tasks')
+      .select('id, status')
+      .eq('template_id', taskId)
+      .eq('user_id', userId)
+
+    if (businessId) {
+      userTaskQuery = userTaskQuery.eq('business_id', businessId)
+    }
+
+    const { data: existingTask } = await userTaskQuery.single()
+
+    const savedAt = new Date()
+
+    if (existingTask) {
+      // Update existing task with draft data
+      const { error: updateError } = await supabase
+        .from('user_tasks')
+        .update({
+          draft_data: draftData as Json,
+          status: existingTask.status === 'pending' ? 'in_progress' : existingTask.status,
+          updated_at: savedAt.toISOString(),
+        })
+        .eq('id', existingTask.id)
+
+      if (updateError) {
+        throw new Error(`Failed to save draft: ${updateError.message}`)
+      }
+    } else {
+      // Create new user_task record with draft data
+      const { error: insertError } = await supabase.from('user_tasks').insert({
+        template_id: taskId,
+        user_id: userId,
+        business_id: businessId || null,
+        title: 'Draft Task', // Will be overwritten by template data
+        status: 'in_progress',
+        draft_data: draftData as Json,
+      })
+
+      if (insertError) {
+        throw new Error(`Failed to create task draft: ${insertError.message}`)
+      }
+    }
+
+    return { savedAt }
   }
 }
 
