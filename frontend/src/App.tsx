@@ -10,6 +10,7 @@ import { RegisterForm } from '@/features/auth/components/RegisterForm'
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
 import { ChatInterface } from '@/features/chat/components/ChatInterface'
 import { TaskDashboard } from '@/features/tasks/components/TaskDashboard'
+import { TaskDetailPage } from '@/features/tasks/components/TaskDetailPage'
 import { ApiKeySettings } from '@/features/settings/components/ApiKeySettings'
 import { OnboardingWizard } from '@/features/onboarding/components/OnboardingWizard'
 import { onboardingApi } from '@/features/onboarding/api/onboarding.api'
@@ -124,6 +125,7 @@ function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/chat" element={<ChatInterface />} />
             <Route path="/tasks" element={<TaskDashboard />} />
+            <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
             <Route path="/settings" element={<ApiKeySettings />} />
           </Route>
 
