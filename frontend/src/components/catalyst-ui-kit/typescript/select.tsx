@@ -1,15 +1,19 @@
 import * as Headless from '@headlessui/react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 import React, { forwardRef } from 'react'
 
 export const Select = forwardRef(function Select(
-  { className, multiple, ...props }: { className?: string } & Omit<Headless.SelectProps, 'as' | 'className'>,
+  {
+    className,
+    multiple,
+    ...props
+  }: { className?: string } & Omit<Headless.SelectProps, 'as' | 'className'>,
   ref: React.ForwardedRef<HTMLSelectElement>
 ) {
   return (
     <span
       data-slot="control"
-      className={clsx([
+      className={cn([
         className,
         // Basic layout
         'group relative block w-full',
@@ -27,7 +31,7 @@ export const Select = forwardRef(function Select(
         ref={ref}
         multiple={multiple}
         {...props}
-        className={clsx([
+        className={cn([
           // Basic layout
           'relative block w-full appearance-none rounded-lg py-[calc(--spacing(2.5)-1px)] sm:py-[calc(--spacing(1.5)-1px)]',
           // Horizontal padding
@@ -58,8 +62,18 @@ export const Select = forwardRef(function Select(
             aria-hidden="true"
             fill="none"
           >
-            <path d="M5.75 10.75L8 13L10.25 10.75" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M10.25 5.25L8 3L5.75 5.25" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" />
+            <path
+              d="M5.75 10.75L8 13L10.25 10.75"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M10.25 5.25L8 3L5.75 5.25"
+              strokeWidth={1.5}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
           </svg>
         </span>
       )}

@@ -77,8 +77,7 @@ export class BusinessService {
   ) {
     const { data: business, error } = await supabase
       .from('businesses')
-      // @ts-expect-error - Supabase type inference issue with Database generics
-      .update(data as any)
+      .update(data)
       .eq('id', id)
       .eq('owner_id', userId)
       .select()

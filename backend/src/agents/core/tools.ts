@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Shared tools for LangGraph agents
  * Tools allow agents to interact with external systems (database, APIs, etc.)
@@ -60,7 +61,7 @@ export const getUserTasksTool = tool(
       .order('created_at', { ascending: true })
 
     if (status) {
-      query = query.eq('status', status)
+      query = query.eq('status', status as 'pending' | 'in_progress' | 'completed' | 'skipped')
     }
 
     const { data, error } = await query
@@ -138,7 +139,6 @@ export const completeTaskTool = tool(
 
     const { data, error } = await supabase
       .from('user_tasks')
-      // @ts-expect-error - Supabase type inference issue with Database generics
       .update(updateData)
       .eq('id', taskId)
       .eq('user_id', userId)
@@ -156,7 +156,6 @@ export const completeTaskTool = tool(
     return JSON.stringify({
       success: true,
       task: data,
-      // @ts-expect-error - Data exists but TypeScript infers never
       message: `Task "${data.title}" marked as completed!`,
     })
   },
@@ -264,6 +263,287 @@ export const getStateRequirementsTool = tool(
 )
 
 /**
+ * Create or update business from onboarding data
+ */
+export const createBusinessFromOnboardingTool = tool(
+  async ({
+    userId,
+    businessName,
+    _businessCategory,
+    stateCode,
+    currentStage,
+  }: {
+    userId: string
+    businessName: string
+    _businessCategory: string
+    stateCode: string
+    currentStage: string
+  }) => {
+    // Check if user already has a business
+    const { data: existingBusiness } = await supabase
+      .from('businesses')
+      .select('id')
+      .eq('owner_id', userId)
+      .single()
+
+    // Map currentStage to valid business status
+    const statusMap: Record<string, 'DRAFT' | 'IN_PROGRESS'> = {
+      idea: 'DRAFT',
+      planning: 'DRAFT',
+      started: 'IN_PROGRESS',
+    }
+    const mappedStatus = statusMap[currentStage] || 'DRAFT'
+
+    if (existingBusiness) {
+      // Update existing business - businessCategory doesn't map to entity type
+      const { data, error } = await supabase
+        .from('businesses')
+        .update({
+          name: businessName,
+          state: stateCode,
+          status: mappedStatus,
+        })
+        .eq('id', existingBusiness.id)
+        .select()
+        .single()
+
+      if (error) {
+        return JSON.stringify({ success: false, error: error.message })
+      }
+
+      return JSON.stringify({
+        success: true,
+        business: data,
+        message: 'Business updated successfully',
+        isNew: false,
+      })
+    } else {
+      // Create new business - default to LLC since businessCategory is not entity type
+      const { data, error } = await supabase
+        .from('businesses')
+        .insert({
+          owner_id: userId,
+          name: businessName,
+          type: 'LLC' as const,
+          state: stateCode,
+          status: mappedStatus,
+        })
+        .select()
+        .single()
+
+      if (error) {
+        return JSON.stringify({ success: false, error: error.message })
+      }
+
+      return JSON.stringify({
+        success: true,
+        business: data,
+        message: 'Business created successfully',
+        isNew: true,
+      })
+    }
+  },
+  {
+    name: 'create_business_from_onboarding',
+    description:
+      'Create or update a business based on onboarding data. Updates existing business if found, creates new one otherwise.',
+    schema: z.object({
+      userId: z.string().describe('The user ID'),
+      businessName: z.string().describe('Business name'),
+      businessCategory: z.string().describe('Business category/type'),
+      stateCode: z.string().length(2).describe('Two-letter US state code'),
+      currentStage: z.string().describe('Current business stage (idea, planning, started)'),
+    }),
+  }
+)
+
+/**
+ * Bulk create tasks from templates
+ */
+export const bulkCreateTasksTool = tool(
+  async ({
+    userId,
+    businessId,
+    templateIds,
+  }: {
+    userId: string
+    businessId: string
+    templateIds: string[]
+  }) => {
+    // Fetch templates
+    const { data: templates, error: fetchError } = await supabase
+      .from('task_templates')
+      .select('*')
+      .in('id', templateIds)
+
+    if (fetchError || !templates) {
+      return JSON.stringify({ success: false, error: fetchError?.message || 'Templates not found' })
+    }
+
+    // Create tasks from templates
+    const tasksToInsert = templates.map((template: any) => ({
+      user_id: userId,
+      business_id: businessId,
+      template_id: template.id,
+      title: template.title,
+      description: template.description,
+      category: template.category,
+      priority: template.priority || 'medium',
+      status: 'pending',
+      week_number: template.week_number,
+      estimated_hours: template.estimated_hours,
+      priority_order: template.weight || 1,
+    }))
+
+    const { data, error } = await supabase
+      .from('user_tasks')
+      .insert(tasksToInsert as any)
+      .select()
+
+    if (error) {
+      return JSON.stringify({ success: false, error: error.message })
+    }
+
+    return JSON.stringify({
+      success: true,
+      tasks: data || [],
+      count: data?.length || 0,
+      message: `Successfully created ${data?.length || 0} tasks`,
+    })
+  },
+  {
+    name: 'bulk_create_tasks',
+    description: 'Create multiple user tasks from template IDs in a single operation',
+    schema: z.object({
+      userId: z.string().describe('The user ID'),
+      businessId: z.string().describe('The business ID'),
+      templateIds: z.array(z.string()).describe('Array of task template IDs to instantiate'),
+    }),
+  }
+)
+
+/**
+ * Store AI-generated business plan
+ */
+export const storeBusinessPlanTool = tool(
+  async ({
+    userId,
+    businessId,
+    onboardingSessionId,
+    planSummary,
+    recommendedEntityType,
+    recommendedState,
+    executiveSummary,
+    phaseRecommendations,
+    confidenceScore,
+    ideationScore,
+    legalScore,
+    financialScore,
+    launchPrepScore,
+  }: {
+    userId: string
+    businessId?: string
+    onboardingSessionId?: string
+    planSummary: string
+    recommendedEntityType: string
+    recommendedState: string
+    executiveSummary: Record<string, any>
+    phaseRecommendations: Record<string, any>
+    confidenceScore: number
+    ideationScore: number
+    legalScore: number
+    financialScore: number
+    launchPrepScore: number
+  }) => {
+    // Check if plan already exists
+    const { data: existingPlan } = await supabase
+      .from('business_plans')
+      .select('id')
+      .eq('user_id', userId)
+      .single()
+
+    const planData = {
+      user_id: userId,
+      business_id: businessId,
+      onboarding_session_id: onboardingSessionId,
+      plan_summary: planSummary,
+      recommended_entity_type: recommendedEntityType,
+      recommended_state: recommendedState,
+      executive_summary: executiveSummary,
+      phase_recommendations: phaseRecommendations,
+      confidence_score: confidenceScore,
+      ideation_score: ideationScore,
+      legal_score: legalScore,
+      financial_score: financialScore,
+      launch_prep_score: launchPrepScore,
+    } as any
+
+    if (existingPlan) {
+      // Update existing plan (business_plans table not yet in database.ts)
+      const { data, error } = await (supabase as any)
+        .from('business_plans')
+        .update(planData)
+        .eq('id', (existingPlan as { id: string }).id)
+        .select()
+        .single()
+
+      if (error) {
+        return JSON.stringify({ success: false, error: error.message })
+      }
+
+      return JSON.stringify({
+        success: true,
+        businessPlan: data,
+        message: 'Business plan updated successfully',
+        isNew: false,
+      })
+    } else {
+      // Create new plan (business_plans table not yet in database.ts)
+      const { data, error } = await (supabase as any)
+        .from('business_plans')
+        .insert(planData)
+        .select()
+        .single()
+
+      if (error) {
+        return JSON.stringify({ success: false, error: error.message })
+      }
+
+      return JSON.stringify({
+        success: true,
+        businessPlan: data,
+        message: 'Business plan created successfully',
+        isNew: true,
+      })
+    }
+  },
+  {
+    name: 'store_business_plan',
+    description:
+      'Store AI-generated business plan with recommendations and confidence scores. Updates existing plan if found.',
+    schema: z.object({
+      userId: z.string().describe('The user ID'),
+      businessId: z.string().optional().describe('Optional business ID'),
+      onboardingSessionId: z.string().optional().describe('Optional onboarding session ID'),
+      planSummary: z.string().describe('High-level summary of the business plan'),
+      recommendedEntityType: z
+        .string()
+        .describe('Recommended business entity type (LLC, Corp, etc)'),
+      recommendedState: z.string().describe('Recommended state for formation'),
+      executiveSummary: z.record(z.any()).describe('Executive summary as JSON object'),
+      phaseRecommendations: z
+        .record(z.any())
+        .describe('Phase-specific recommendations as JSON object'),
+      confidenceScore: z.number().min(0).max(100).describe('Overall confidence score (0-100)'),
+      ideationScore: z.number().min(0).max(100).describe('Ideation phase score (0-100)'),
+      legalScore: z.number().min(0).max(100).describe('Legal phase score (0-100)'),
+      financialScore: z.number().min(0).max(100).describe('Financial phase score (0-100)'),
+      launchPrepScore: z.number().min(0).max(100).describe('Launch prep phase score (0-100)'),
+    }),
+  }
+)
+
+/**
  * All tools available to agents
  */
 export const agentTools = [
@@ -273,4 +553,7 @@ export const agentTools = [
   completeTaskTool,
   createUserTaskTool,
   getStateRequirementsTool,
+  createBusinessFromOnboardingTool,
+  bulkCreateTasksTool,
+  storeBusinessPlanTool,
 ]

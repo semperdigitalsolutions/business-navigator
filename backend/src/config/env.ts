@@ -35,6 +35,11 @@ const envSchema = z.object({
   // Rate Limiting
   RATE_LIMIT_MAX: z.string().default('100'),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000'),
+
+  // OAuth (Week 2)
+  GOOGLE_CLIENT_ID: z.string().optional(),
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  OAUTH_REDIRECT_URI: z.string().url().optional(),
 })
 
 // Validate environment variables

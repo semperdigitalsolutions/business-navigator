@@ -10,6 +10,9 @@ import { authRoutes } from './routes/auth.routes.js'
 import { businessRoutes } from './routes/business.routes.js'
 import { agentRoutes } from './routes/agent.routes.js'
 import { settingsRoutes } from './routes/settings.routes.js'
+import { onboardingRoutes } from './routes/onboarding.routes.js'
+import { dashboardRoutes } from './routes/dashboard.routes.js'
+import { tasksRoutes } from './routes/tasks.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
@@ -43,6 +46,9 @@ const _app = new Elysia()
   .use(businessRoutes)
   .use(agentRoutes)
   .use(settingsRoutes)
+  .use(onboardingRoutes)
+  .use(dashboardRoutes)
+  .use(tasksRoutes)
 
   // Global error handler
   .onError(({ code, error, set }) => {
@@ -110,6 +116,10 @@ Available Routes:
   POST /api/settings/api-keys    - Add/update API key
   DELETE /api/settings/api-keys/:id - Delete API key
   GET  /api/settings/models/:provider - Get available models
+
+  Tasks:
+  GET  /api/tasks              - List all tasks grouped by phase
+  GET  /api/tasks/:id          - Get single task by ID
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)

@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 
 export type CircularProgressSize = 'sm' | 'md' | 'lg' | 'xl'
 export type CircularProgressColor = 'primary' | 'success' | 'warning' | 'error' | 'accent'
@@ -43,7 +43,7 @@ export const CircularProgress = forwardRef<SVGSVGElement, CircularProgressProps>
     c = dim / 2
 
   return (
-    <div className={clsx('relative inline-flex items-center justify-center', className)}>
+    <div className={cn('relative inline-flex items-center justify-center', className)}>
       <svg
         ref={ref}
         width={dim}
@@ -72,13 +72,13 @@ export const CircularProgress = forwardRef<SVGSVGElement, CircularProgressProps>
           strokeLinecap="round"
           strokeDasharray={circ}
           strokeDashoffset={circ - (pct / 100) * circ}
-          className={clsx('origin-center -rotate-90 transition-all duration-300', colors[color])}
+          className={cn('origin-center -rotate-90 transition-all duration-300', colors[color])}
           style={{ transformOrigin: '50% 50%' }}
         />
       </svg>
       {showValue && (
         <span
-          className={clsx('absolute font-medium text-zinc-700 dark:text-zinc-300', textSizes[size])}
+          className={cn('absolute font-medium text-zinc-700 dark:text-zinc-300', textSizes[size])}
         >
           {Math.round(pct)}%
         </span>
@@ -86,3 +86,5 @@ export const CircularProgress = forwardRef<SVGSVGElement, CircularProgressProps>
     </div>
   )
 })
+
+CircularProgress.displayName = 'CircularProgress'

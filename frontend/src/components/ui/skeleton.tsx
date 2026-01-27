@@ -1,5 +1,5 @@
 import { forwardRef } from 'react'
-import clsx from 'clsx'
+import { cn } from '@/utils/classnames'
 
 export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
   variant?: 'text' | 'circular' | 'rectangular'
@@ -18,7 +18,7 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
     return (
       <div
         ref={ref}
-        className={clsx(
+        className={cn(
           'animate-pulse bg-zinc-200 dark:bg-zinc-700',
           variantClasses[variant],
           className
@@ -34,6 +34,8 @@ export const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
   }
 )
 
+Skeleton.displayName = 'Skeleton'
+
 export interface SkeletonTextProps extends Omit<SkeletonProps, 'variant'> {
   lines?: number
   lastLineWidth?: string
@@ -46,7 +48,7 @@ export function SkeletonText({
   ...props
 }: SkeletonTextProps) {
   return (
-    <div className={clsx('space-y-2', className)}>
+    <div className={cn('space-y-2', className)}>
       {Array.from({ length: lines }).map((_, index) => (
         <Skeleton
           key={index}
@@ -103,7 +105,7 @@ export function SkeletonCard({
 }: SkeletonCardProps) {
   return (
     <div
-      className={clsx(
+      className={cn(
         'rounded-lg bg-white p-6 shadow-sm ring-1 ring-zinc-950/5',
         'dark:bg-zinc-900 dark:ring-white/10',
         className

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /**
  * Main LangGraph Orchestration
  * Routes user queries through triage to appropriate specialist agents
@@ -196,7 +197,6 @@ export async function createMainGraph() {
     .addEdge('tasks', END)
     .addEdge('general', END)
 
-  // @ts-expect-error - LangGraph MemoryCheckpointer type mismatch with BaseCheckpointSaver interface
   return graph.compile({ checkpointer })
 }
 
