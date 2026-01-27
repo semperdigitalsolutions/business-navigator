@@ -8,3 +8,4 @@ export type {
   UseNavigationGuardReturn,
   NavigationGuardDialogProps,
 } from './use-navigation-guard'
+export { useSwipeGesture } from './use-swipe-gesture'

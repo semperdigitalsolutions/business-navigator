@@ -1,6 +1,7 @@
 /**
  * TaskDetailPage Component
  * Issue #86: Task detail view with unsaved changes warning
+ * Issue #88: Business Name wizard integration
  * Integrates useTaskNavigationGuard for navigation blocking
  */
 import { useCallback, useEffect, useState } from 'react'
@@ -9,8 +10,14 @@ import { TaskDetailLayout } from './TaskDetailLayout'
 import { TaskNavigation } from './TaskNavigation'
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog'
 import { useTaskNavigationGuard } from '../hooks/use-task-navigation-guard'
+import { BusinessNameWizard } from './wizards/business-name'
 import { apiClient } from '@/lib/api/client'
 import type { TaskPhase } from '@shared/types'
+
+// Task IDs that have dedicated wizard components
+const WIZARD_TASK_IDS = {
+  BUSINESS_NAME: '11111111-1111-1111-1111-111111111108',
+} as const
 
 interface TaskDetail {
   id: string
@@ -106,6 +113,19 @@ export function TaskDetailPage() {
           Back to Tasks
         </button>
       </div>
+    )
+  }
+
+  // Render dedicated wizard for specific tasks
+  if (taskId === WIZARD_TASK_IDS.BUSINESS_NAME) {
+    return (
+      <BusinessNameWizard
+        taskId={taskId}
+        initialData={task.completionData as Record<string, unknown> | undefined}
+        onComplete={async (data) => {
+          await apiClient.post(`/api/tasks/${taskId}/complete`, { data })
+        }}
+      />
     )
   }
 

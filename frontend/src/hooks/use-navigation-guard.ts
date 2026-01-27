@@ -98,6 +98,7 @@ export function useNavigationGuard({
         blocker.proceed()
       } catch {
         // Save failed - stay on page, user will see error from save handler
+      } finally {
         setIsSaving(false)
       }
     } else {
