@@ -2,18 +2,30 @@
  * DashboardPage Component
  * Main dashboard view with hero task, confidence score, and greeting
  * Week 2: Complete redesign with hero task card, confidence score, and progress tracking
+ * Issue #53: Pull-to-refresh for mobile dashboard
  */
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { Text } from '@/components/catalyst-ui-kit/typescript/text'
 import { useDashboardStore } from '../hooks/useDashboardStore'
 import { dashboardApi } from '../api/dashboard.api'
 import { DashboardLayout } from './DashboardLayout'
 import { HeroTaskCard } from './HeroTaskCard'
 import { ConfidenceScore } from './ConfidenceScore'
-import { HeroTaskSkeleton } from '@/components/skeletons/HeroTaskSkeleton'
-import { ConfidenceScoreSkeleton } from '@/components/skeletons/ConfidenceScoreSkeleton'
-import { Skeleton } from '@/components/skeletons/Skeleton'
+import { KeyDecisionsCard } from './KeyDecisionsCard'
+import {
+  ConfidenceScoreSkeleton,
+  GreetingHeaderSkeleton,
+  HeroTaskSkeleton,
+  KeyDecisionsSkeleton,
+  QuickStatsSkeleton,
+  RecentActivitySkeleton,
+  UpcomingDeadlinesSkeleton,
+} from '@/components/skeletons'
 import { WidgetErrorBoundary } from '@/components/error-boundaries/WidgetErrorBoundary'
+import { UpcomingDeadlines } from './UpcomingDeadlines'
+import { MilestoneCelebration } from './MilestoneCelebration'
+import { PullToRefresh } from '@/components/ui/pull-to-refresh'
+import { useIsTouchDevice } from '../hooks/useIsTouchDevice'
 import type { UserTask } from '@shared/types'
 
 export function DashboardPage() {
@@ -27,32 +39,49 @@ export function DashboardPage() {
     setHeroTask,
     setLoading,
     setError,
+    setRefreshing,
   } = useDashboardStore()
+
+  const isTouchDevice = useIsTouchDevice()
+
+  // Fetch dashboard data
+  const fetchDashboardData = useCallback(async () => {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const response = await dashboardApi.getDashboard()
+      if (response.success && response.data) {
+        setDashboardData(response.data)
+      } else {
+        setError(response.error || 'Failed to load dashboard')
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load dashboard')
+    } finally {
+      setLoading(false)
+    }
+  }, [setDashboardData, setError, setLoading])
 
   // Fetch dashboard data on mount
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      setLoading(true)
-      setError(null)
-
-      try {
-        const response = await dashboardApi.getDashboard()
-        if (response.success && response.data) {
-          setDashboardData(response.data)
-        } else {
-          setError(response.error || 'Failed to load dashboard')
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load dashboard')
-      } finally {
-        setLoading(false)
-      }
-    }
-
     fetchDashboardData()
-  }, [setDashboardData, setLoading, setError])
+  }, [fetchDashboardData])
 
-  const handleTaskComplete = (completedTask: UserTask, nextTask?: UserTask) => {
+  // Pull-to-refresh handler for touch devices
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true)
+    try {
+      const response = await dashboardApi.getDashboard()
+      if (response.success && response.data) {
+        setDashboardData(response.data)
+      }
+    } finally {
+      setRefreshing(false)
+    }
+  }, [setDashboardData, setRefreshing])
+
+  const handleTaskComplete = (_completedTask: UserTask, nextTask?: UserTask) => {
     // Update hero task with the next one
     setHeroTask(nextTask || null)
 
@@ -74,50 +103,22 @@ export function DashboardPage() {
       <DashboardLayout>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Greeting Header Skeleton */}
-          <div className="mb-8">
-            <Skeleton width="40%" height={36} className="mb-2" />
-            <Skeleton width="30%" height={20} />
-          </div>
+          <GreetingHeaderSkeleton />
 
           {/* Main Dashboard Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Left Column - Hero Task */}
+            {/* Left Column - Hero Task & Key Decisions */}
             <div className="lg:col-span-2 space-y-6">
               <HeroTaskSkeleton />
-
-              {/* Recent Activity Skeleton */}
-              <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm p-6">
-                <Skeleton width={150} height={24} className="mb-4" />
-                <div className="space-y-3">
-                  <Skeleton width="100%" height={60} />
-                  <Skeleton width="100%" height={60} />
-                  <Skeleton width="100%" height={60} />
-                </div>
-              </div>
+              <KeyDecisionsSkeleton />
+              <RecentActivitySkeleton />
             </div>
 
             {/* Right Column - Confidence Score & Stats */}
             <div className="space-y-6">
               <ConfidenceScoreSkeleton />
-
-              {/* Quick Stats Skeleton */}
-              <div className="bg-white dark:bg-zinc-800 rounded-lg shadow-sm p-6">
-                <Skeleton width={120} height={24} className="mb-4" />
-                <div className="space-y-4">
-                  <div>
-                    <Skeleton width={80} height={16} className="mb-2" />
-                    <Skeleton width={60} height={32} />
-                  </div>
-                  <div>
-                    <Skeleton width={80} height={16} className="mb-2" />
-                    <Skeleton width={60} height={32} />
-                  </div>
-                  <div>
-                    <Skeleton width={80} height={16} className="mb-2" />
-                    <Skeleton width={60} height={32} />
-                  </div>
-                </div>
-              </div>
+              <QuickStatsSkeleton />
+              <UpcomingDeadlinesSkeleton />
             </div>
           </div>
         </div>
@@ -145,8 +146,13 @@ export function DashboardPage() {
     )
   }
 
-  return (
-    <DashboardLayout>
+  const completionPercentage = dashboardData?.businessProgress?.completionPercentage ?? 0
+
+  const dashboardContent = (
+    <>
+      {/* Milestone Celebration Modal */}
+      <MilestoneCelebration completionPercentage={completionPercentage} />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Greeting Header */}
         <div className="mb-8">
@@ -160,7 +166,7 @@ export function DashboardPage() {
 
         {/* Main Dashboard Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Hero Task (takes 2 columns on large screens) */}
+          {/* Left Column - Hero Task & Key Decisions (takes 2 columns on large screens) */}
           <div className="lg:col-span-2 space-y-6">
             <WidgetErrorBoundary widgetName="Hero Task">
               <HeroTaskCard
@@ -168,6 +174,11 @@ export function DashboardPage() {
                 onTaskComplete={handleTaskComplete}
                 onTaskSkip={handleTaskSkip}
               />
+            </WidgetErrorBoundary>
+
+            {/* Key Decisions */}
+            <WidgetErrorBoundary widgetName="Key Decisions">
+              <KeyDecisionsCard keyDecisions={dashboardData?.keyDecisions} />
             </WidgetErrorBoundary>
 
             {/* Recent Activity Placeholder */}
@@ -217,9 +228,25 @@ export function DashboardPage() {
                 </div>
               )}
             </div>
+
+            {/* Upcoming Deadlines */}
+            <WidgetErrorBoundary widgetName="Upcoming Deadlines">
+              <UpcomingDeadlines tasks={dashboardData?.upcomingTasks || []} />
+            </WidgetErrorBoundary>
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   )
+
+  // Wrap with PullToRefresh on touch devices only
+  if (isTouchDevice) {
+    return (
+      <DashboardLayout>
+        <PullToRefresh onRefresh={handleRefresh}>{dashboardContent}</PullToRefresh>
+      </DashboardLayout>
+    )
+  }
+
+  return <DashboardLayout>{dashboardContent}</DashboardLayout>
 }

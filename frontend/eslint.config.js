@@ -99,4 +99,13 @@ export default defineConfig([
       'no-nested-ternary': 'warn',
     },
   },
+  // Test file overrides - allow nested describe/it blocks and longer files
+  {
+    files: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+    rules: {
+      'max-nested-callbacks': 'off',
+      'max-lines-per-function': 'off',
+      'max-lines': 'off',
+    },
+  },
 ])
