@@ -2,7 +2,7 @@
  * Authentication routes using Supabase
  */
 import { Elysia, t } from 'elysia'
-import { supabase } from '@/config/database.js'
+import { supabase, supabaseAdmin } from '@/config/database.js'
 import { env } from '@/config/env.js'
 import { errorResponse, successResponse } from '@/middleware/error.js'
 import { strictRateLimit } from '@/middleware/rate-limit.js'
@@ -251,12 +251,17 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
           return errorResponse(`Weak password: ${passwordValidation.errors.join('. ')}`, 400)
         }
 
-        // Use the access token to update the user's password
-        const { error } = await supabase.auth.admin.updateUserById(
-          // First get the user from the token
-          (await supabase.auth.getUser(accessToken)).data.user?.id || '',
-          { password: body.password }
-        )
+        // First validate the recovery token and get the user
+        const { data: userData, error: userError } = await supabase.auth.getUser(accessToken)
+
+        if (userError || !userData.user) {
+          return errorResponse('Invalid or expired recovery token', 401)
+        }
+
+        // Use admin client to update the user's password
+        const { error } = await supabaseAdmin.auth.admin.updateUserById(userData.user.id, {
+          password: body.password,
+        })
 
         if (error) {
           return errorResponse(error.message, 400)
