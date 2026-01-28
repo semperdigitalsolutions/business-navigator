@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom'
 import { PasswordInput } from './PasswordInput'
 import { PasswordStrengthMeter } from './PasswordStrengthMeter'
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000'
+
 interface ResetPasswordFormProps {
   accessToken: string
 }
@@ -36,7 +38,7 @@ export function ResetPasswordForm({ accessToken }: ResetPasswordFormProps) {
     setIsLoading(true)
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/password/reset`, {
+      const response = await fetch(`${API_URL}/api/auth/password/reset`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
