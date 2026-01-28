@@ -196,6 +196,85 @@ export const authRoutes = new Elysia({ prefix: '/api/auth' })
   })
 
   /**
+   * Password Reset Routes
+   */
+
+  // Request password reset email
+  .post(
+    '/password/forgot',
+    async ({ body }) => {
+      try {
+        const { error } = await supabase.auth.resetPasswordForEmail(body.email, {
+          redirectTo: `${env.FRONTEND_URL || 'http://localhost:3000'}`,
+        })
+
+        if (error) {
+          // Don't reveal if email exists or not for security
+          console.error('Password reset error:', error.message)
+        }
+
+        // Always return success to prevent email enumeration
+        return successResponse(
+          { sent: true },
+          'If an account exists, a password reset link has been sent.'
+        )
+      } catch (error: any) {
+        console.error('Password reset error:', error.message)
+        return successResponse(
+          { sent: true },
+          'If an account exists, a password reset link has been sent.'
+        )
+      }
+    },
+    {
+      body: t.Object({
+        email: t.String({ format: 'email' }),
+      }),
+    }
+  )
+
+  // Reset password with recovery token
+  .post(
+    '/password/reset',
+    async ({ body, request }) => {
+      try {
+        const authorization = request.headers.get('Authorization')
+        if (!authorization || !authorization.startsWith('Bearer ')) {
+          return errorResponse('Recovery token required', 401)
+        }
+
+        const accessToken = authorization.replace('Bearer ', '')
+
+        // Validate password strength
+        const passwordValidation = validatePassword(body.password)
+        if (!passwordValidation.isValid) {
+          return errorResponse(`Weak password: ${passwordValidation.errors.join('. ')}`, 400)
+        }
+
+        // Use the access token to update the user's password
+        const { error } = await supabase.auth.admin.updateUserById(
+          // First get the user from the token
+          (await supabase.auth.getUser(accessToken)).data.user?.id || '',
+          { password: body.password }
+        )
+
+        if (error) {
+          return errorResponse(error.message, 400)
+        }
+
+        return successResponse({ updated: true }, 'Password has been reset successfully.')
+      } catch (error: any) {
+        return errorResponse(error.message)
+      }
+    },
+    {
+      body: t.Object({
+        password: t.String({ minLength: 8 }),
+      }),
+    }
+  )
+
+  /**
    * OAuth Routes (Week 2)
    */
 

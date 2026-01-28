@@ -7,6 +7,8 @@ import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { RegisterForm } from '@/features/auth/components/RegisterForm'
+import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm'
+import { AuthCallback } from '@/features/auth/components/AuthCallback'
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
 import { ChatInterface } from '@/features/chat/components/ChatInterface'
 import { TaskDashboard } from '@/features/tasks/components/TaskDashboard'
@@ -103,6 +105,17 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPasswordForm />
+              </PublicRoute>
+            }
+          />
+
+          {/* Auth Callback Route - handles Supabase redirects */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Onboarding Route */}
           <Route
@@ -129,8 +142,17 @@ function App() {
             <Route path="/settings" element={<ApiKeySettings />} />
           </Route>
 
-          {/* Redirect root to dashboard or login */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Root route - check for auth callback hash params */}
+          <Route
+            path="/"
+            element={
+              window.location.hash.includes('type=') ? (
+                <AuthCallback />
+              ) : (
+                <Navigate to="/dashboard" replace />
+              )
+            }
+          />
 
           {/* 404 */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
