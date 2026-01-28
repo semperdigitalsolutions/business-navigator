@@ -7,12 +7,14 @@ import { cors } from '@elysiajs/cors'
 import { env } from './config/env.js'
 import { checkDatabaseConnection } from './config/database.js'
 import { authRoutes } from './routes/auth.routes.js'
+import { oauthRoutes } from './routes/oauth.routes.js'
 import { businessRoutes } from './routes/business.routes.js'
 import { agentRoutes } from './routes/agent.routes.js'
 import { settingsRoutes } from './routes/settings.routes.js'
 import { onboardingRoutes } from './routes/onboarding.routes.js'
 import { dashboardRoutes } from './routes/dashboard.routes.js'
 import { tasksRoutes } from './routes/tasks.routes.js'
+import { waitlistRoutes } from './routes/waitlist.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
@@ -43,12 +45,14 @@ const _app = new Elysia()
 
   // Register routes
   .use(authRoutes)
+  .use(oauthRoutes)
   .use(businessRoutes)
   .use(agentRoutes)
   .use(settingsRoutes)
   .use(onboardingRoutes)
   .use(dashboardRoutes)
   .use(tasksRoutes)
+  .use(waitlistRoutes)
 
   // Global error handler
   .onError(({ code, error, set }) => {
@@ -120,6 +124,10 @@ Available Routes:
   Tasks:
   GET  /api/tasks              - List all tasks grouped by phase
   GET  /api/tasks/:id          - Get single task by ID
+
+  Waitlist:
+  POST /api/waitlist            - Join beta waitlist
+  GET  /api/waitlist/count      - Get waitlist count
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 `)

@@ -494,6 +494,36 @@ export interface Database {
           },
         ]
       }
+      waitlist_signups: {
+        Row: {
+          id: string
+          email: string
+          first_name: string
+          stage: string | null
+          email_opt_in: boolean
+          signed_up_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          email: string
+          first_name: string
+          stage?: string | null
+          email_opt_in: boolean
+          signed_up_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          email?: string
+          first_name?: string
+          stage?: string | null
+          email_opt_in?: boolean
+          signed_up_at?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: Record<string, never>
     Functions: {

@@ -7,6 +7,8 @@ import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { AppLayout } from '@/layouts/AppLayout'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { RegisterForm } from '@/features/auth/components/RegisterForm'
+import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm'
+import { AuthCallback } from '@/features/auth/components/AuthCallback'
 import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
 import { ChatInterface } from '@/features/chat/components/ChatInterface'
 import { TaskDashboard } from '@/features/tasks/components/TaskDashboard'
@@ -15,6 +17,8 @@ import { ApiKeySettings } from '@/features/settings/components/ApiKeySettings'
 import { OnboardingWizard } from '@/features/onboarding/components/OnboardingWizard'
 import { onboardingApi } from '@/features/onboarding/api/onboarding.api'
 import { ErrorBoundary } from '@/components/error-boundaries/ErrorBoundary'
+import { LandingPage } from '@/features/landing/components/LandingPage'
+import { LandingLayout } from '@/layouts/LandingLayout'
 
 // Protected Route wrapper with onboarding check
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -103,6 +107,17 @@ function App() {
               </PublicRoute>
             }
           />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPasswordForm />
+              </PublicRoute>
+            }
+          />
+
+          {/* Auth Callback Route - handles Supabase redirects */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Onboarding Route */}
           <Route
@@ -129,8 +144,19 @@ function App() {
             <Route path="/settings" element={<ApiKeySettings />} />
           </Route>
 
-          {/* Redirect root to dashboard or login */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Landing Page - public */}
+          <Route
+            path="/"
+            element={
+              window.location.hash.includes('type=') ? (
+                <AuthCallback />
+              ) : (
+                <LandingLayout>
+                  <LandingPage />
+                </LandingLayout>
+              )
+            }
+          />
 
           {/* 404 */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />

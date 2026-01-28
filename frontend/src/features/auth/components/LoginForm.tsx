@@ -94,6 +94,14 @@ export function LoginForm() {
                   required
                   autoComplete="current-password"
                 />
+                <div className="mt-1 text-right">
+                  <Link
+                    to="/forgot-password"
+                    className="text-sm text-indigo-600 hover:text-indigo-500"
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
               </Field>
             </FieldGroup>
 
