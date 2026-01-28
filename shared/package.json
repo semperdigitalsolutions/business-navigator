@@ -6,6 +6,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
+    "build": "echo 'Shared package uses TypeScript sources directly - no build needed'",
     "type-check": "bun tsc --noEmit"
   },
   "devDependencies": {

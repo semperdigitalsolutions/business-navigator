@@ -32,6 +32,8 @@ interface TaskDetailLayoutProps {
   navigation?: React.ReactNode
   /** Additional class names */
   className?: string
+  /** Optional dialog to render (e.g., UnsavedChangesDialog) */
+  dialog?: React.ReactNode
 }
 
 const PHASE_COLORS: Record<TaskPhase, string> = {
@@ -138,6 +140,7 @@ export function TaskDetailLayout(props: TaskDetailLayoutProps) {
     children,
     navigation,
     className,
+    dialog,
   } = props
   const breadcrumbs: BreadcrumbItem[] = [
     { label: 'Tasks', href: '/tasks' },
@@ -161,6 +164,7 @@ export function TaskDetailLayout(props: TaskDetailLayoutProps) {
           <div className="mx-auto max-w-3xl px-4 py-4">{navigation}</div>
         </div>
       )}
+      {dialog}
     </div>
   )
 }

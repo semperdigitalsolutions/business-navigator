@@ -185,11 +185,29 @@ export interface UserTask {
   updatedAt: Date
 }
 
+// Key Decisions types (for dashboard summary)
+export interface KeyDecision {
+  id: string
+  label: string
+  value: string
+  icon?: string
+  status: 'decided' | 'pending' | 'needs_attention'
+  category: 'business' | 'legal' | 'financial' | 'location'
+  updatedAt?: Date
+}
+
+export interface KeyDecisions {
+  decisions: KeyDecision[]
+  completedCount: number
+  totalCount: number
+}
+
 // Dashboard types (Week 2)
 export interface DashboardData {
   greeting: string
   heroTask?: UserTask
   confidenceScore: ConfidenceScore
+  keyDecisions?: KeyDecisions
   recentTasks: UserTask[]
   upcomingTasks: UserTask[]
   businessProgress: BusinessProgress

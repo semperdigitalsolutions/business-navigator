@@ -14,6 +14,8 @@ interface WizardTaskLayoutProps {
   onBack?: () => void
   isLoading?: boolean
   className?: string
+  /** Optional dialog to render (e.g., UnsavedChangesDialog) */
+  dialog?: React.ReactNode
 }
 
 interface WizardHeaderProps {
@@ -92,6 +94,7 @@ export function WizardTaskLayout(props: WizardTaskLayoutProps) {
     onBack,
     isLoading = false,
     className,
+    dialog,
   } = props
   const progress = (currentStep / totalSteps) * 100
 
@@ -117,6 +120,7 @@ export function WizardTaskLayout(props: WizardTaskLayoutProps) {
           </div>
         </div>
       </main>
+      {dialog}
     </div>
   )
 }

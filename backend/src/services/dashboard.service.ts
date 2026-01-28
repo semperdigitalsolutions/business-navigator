@@ -3,6 +3,7 @@
  * Aggregates data for dashboard display
  */
 import { supabase } from '@/config/database.js'
+import { keyDecisionsService } from '@/services/key-decisions.service.js'
 import type {
   DashboardData,
   UserTask,
@@ -21,12 +22,14 @@ export class DashboardService {
    */
   async getDashboardData(userId: string, businessId?: string): Promise<DashboardData> {
     // Fetch data in parallel
-    const [heroTaskResult, confidenceResult, tasksResult, userResult] = await Promise.all([
-      this.getHeroTask(userId, businessId),
-      this.getConfidenceScore(userId, businessId),
-      this.getTasks(userId, businessId),
-      this.getUserInfo(userId),
-    ])
+    const [heroTaskResult, confidenceResult, tasksResult, userResult, keyDecisionsResult] =
+      await Promise.all([
+        this.getHeroTask(userId, businessId),
+        this.getConfidenceScore(userId, businessId),
+        this.getTasks(userId, businessId),
+        this.getUserInfo(userId),
+        keyDecisionsService.getKeyDecisions(userId),
+      ])
 
     // Calculate business progress from tasks
     const businessProgress = this.calculateBusinessProgress(tasksResult)
@@ -38,6 +41,7 @@ export class DashboardService {
       greeting,
       heroTask: heroTaskResult,
       confidenceScore: confidenceResult,
+      keyDecisions: keyDecisionsResult,
       recentTasks: tasksResult.filter((t) => t.status === 'completed').slice(0, 5),
       upcomingTasks: tasksResult.filter((t) => t.status === 'pending').slice(0, 5),
       businessProgress,
