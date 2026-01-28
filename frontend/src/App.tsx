@@ -17,6 +17,8 @@ import { ApiKeySettings } from '@/features/settings/components/ApiKeySettings'
 import { OnboardingWizard } from '@/features/onboarding/components/OnboardingWizard'
 import { onboardingApi } from '@/features/onboarding/api/onboarding.api'
 import { ErrorBoundary } from '@/components/error-boundaries/ErrorBoundary'
+import { LandingPage } from '@/features/landing/components/LandingPage'
+import { LandingLayout } from '@/layouts/LandingLayout'
 
 // Protected Route wrapper with onboarding check
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -142,14 +144,16 @@ function App() {
             <Route path="/settings" element={<ApiKeySettings />} />
           </Route>
 
-          {/* Root route - check for auth callback hash params */}
+          {/* Landing Page - public */}
           <Route
             path="/"
             element={
               window.location.hash.includes('type=') ? (
                 <AuthCallback />
               ) : (
-                <Navigate to="/dashboard" replace />
+                <LandingLayout>
+                  <LandingPage />
+                </LandingLayout>
               )
             }
           />
