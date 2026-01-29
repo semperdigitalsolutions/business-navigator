@@ -165,6 +165,19 @@ export interface TaskListResponse {
   phases: TaskPhaseGroup[]
 }
 
+// Task dependency check result (Issue #64)
+export interface TaskDependencyCheckResult {
+  canStart: boolean
+  blockedBy: BlockingTask[]
+  reason?: string
+}
+
+export interface BlockingTask {
+  id: string
+  title: string
+  status: TaskListStatus
+}
+
 export interface UserTask {
   id: string
   userId: string
