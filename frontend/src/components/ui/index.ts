@@ -84,3 +84,7 @@ export type { DecisionType, DecisionChangeModalProps } from './decision-change-m
 // Pull to Refresh
 export { PullToRefresh } from './pull-to-refresh'
 export type { PullToRefreshProps } from './pull-to-refresh'
+
+// Icon
+export { Icon } from './Icon'
+export type { IconProps } from './Icon'

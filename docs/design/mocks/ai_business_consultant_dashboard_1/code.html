@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Business Navigator Home Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#3B82F6", secondary: "#6366f1", background: "#fafafa", surface: "#ffffff", border: "#e2e8f0", "accent-pink": "#f472b6", "background-light": "#f5f7f8", "background-dark": "#101722"}, fontFamily: {sans: ["Inter", "sans-serif"], mono: ["JetBrains Mono", "monospace"], display: "Inter"}, boxShadow: {soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)", glow: "0 0 20px -5px rgba(14, 165, 233, 0.2)", catalyst: "0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-background text-slate-900 antialiased font-sans; }
+        }
+        .bubble-less-msg {
+            @apply py-8 px-4 border-b border-slate-100 last:border-0;
+        }
+        .visualizer-node {
+            @apply w-1 bg-primary rounded-full;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { height: 8px; opacity: 0.4; }
+            50% { height: 24px; opacity: 1; }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+<aside class="w-[72px] lg:w-64 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col z-30">
+<div class="h-16 flex items-center px-6">
+<div class="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center text-white flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<span class="ml-3 font-bold text-slate-900 tracking-tight hidden lg:block text-sm">Business Navigator</span>
+</div>
+<nav class="flex-1 px-3 py-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-sky-50 text-primary group" href="#">
+<span class="material-symbols-outlined text-[22px]">home</span>
+<span class="hidden lg:block">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">task</span>
+<span class="hidden lg:block">Task Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">chat_bubble</span>
+<span class="hidden lg:block">Chat History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+<span class="hidden lg:block">Progress</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">folder</span>
+<span class="hidden lg:block">Documents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="hidden lg:block">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-100">
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-all">
+<img alt="User Profile" class="w-8 h-8 rounded-full ring-2 ring-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7YPbZRegdLf-FzoRYTc5beXD3S8QteZzebvgrTqKdUL00UvZVlSubtwcWc4H6cvGUCuEqTd1_j-wxLrWyy_Pr3jVIedwdl3HUv8p9OLUx9MB09uLs0lo3uVCanIQR5ZeOa4afWCAt-N5_B2lsPHjyMaye01_1eA7mHZVmSzfzuCh-0VUhN4ZqtkokXIl7sdZgmc11RVPuAiSpQ58tM7qCCfcag7Hd10-Tzc1furPBBKjm1pDyE8xdtNACNQ2b8N3vvkE5JGuTxAbD"/>
+<div class="flex-1 min-w-0 hidden lg:block">
+<p class="text-xs font-semibold text-slate-900 truncate">Erica</p>
+<p class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Pro Plan</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col relative min-w-0 bg-white">
+<header class="h-16 flex items-center justify-between px-8 border-b border-slate-100">
+<div class="flex items-center gap-4">
+<div class="flex items-end gap-[2px] h-6 w-12 justify-center">
+<div class="visualizer-node" style="animation-delay: 0s"></div>
+<div class="visualizer-node" style="animation-delay: 0.2s"></div>
+<div class="visualizer-node" style="animation-delay: 0.1s"></div>
+<div class="visualizer-node" style="animation-delay: 0.3s"></div>
+<div class="visualizer-node" style="animation-delay: 0s"></div>
+</div>
+<div>
+<h2 class="text-base font-bold text-slate-900 leading-none">Home</h2>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-slate-600 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all">
+<span class="material-symbols-outlined text-[16px]">share</span>
+                    Share
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto hide-scrollbar scroll-smooth">
+<div class="max-w-3xl mx-auto px-6 py-12">
+<div class="mb-16 text-center">
+<div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-slate-50 text-slate-900 mb-6">
+<span class="material-symbols-outlined text-3xl">lightbulb</span>
+</div>
+<h1 class="text-3xl font-extrabold text-slate-900 tracking-tight mb-3">Launch your vision.</h1>
+<p class="text-slate-500 max-w-md mx-auto leading-relaxed">I'm your strategic partner from ideation to launch. What are we building today?</p>
+</div>
+<div class="space-y-4">
+<div class="bubble-less-msg group">
+<div class="flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-slate-100 flex-shrink-0 flex items-center justify-center text-slate-400 text-xs font-bold border border-slate-200">
+                                E
+                            </div>
+<div class="flex-1 space-y-2">
+<div class="text-xs font-bold text-slate-400 uppercase tracking-widest">You</div>
+<p class="text-[15px] text-slate-800 leading-relaxed font-medium">I need help deciding between an LLC and a C-Corp for my tech startup. We plan to raise venture capital later this year.</p>
+</div>
+</div>
+</div>
+<div class="bubble-less-msg">
+<div class="flex items-start gap-6">
+<div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-white shadow-glow">
+<span class="material-symbols-outlined text-[18px]">smart_toy</span>
+</div>
+<div class="flex-1 space-y-4">
+<div class="text-xs font-bold text-primary uppercase tracking-widest">Business Navigator</div>
+<div class="space-y-4 text-[15px] text-slate-700 leading-relaxed">
+<p>If you plan to raise venture capital, a <strong class="text-slate-900">Delaware C-Corporation</strong> is almost universally required by institutional investors. While an LLC offers tax flexibility, C-Corps are built for scale and equity distribution.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
+<button class="text-left p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-catalyst group hover:bg-white hover:border-primary hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 active:scale-95">
+<div class="flex items-center justify-between mb-3">
+<span class="material-symbols-outlined text-primary">account_balance</span>
+<span class="text-[10px] font-bold text-primary opacity-0 group-hover:opacity-100 transition-opacity bg-sky-50 px-2 py-0.5 rounded-full">SELECT OPTION</span>
+</div>
+<h4 class="font-bold text-slate-900 text-sm mb-1">Delaware C-Corp</h4>
+<p class="text-xs text-slate-500 leading-relaxed group-hover:text-slate-600">The standard for startups seeking VC. Optimized for complex equity and preferred stock.</p>
+</button>
+<button class="text-left p-5 rounded-2xl bg-slate-50 border border-slate-200 shadow-catalyst group hover:bg-white hover:border-secondary hover:shadow-lg hover:shadow-secondary/5 hover:-translate-y-1 transition-all duration-300 active:scale-95">
+<div class="flex items-center justify-between mb-3">
+<span class="material-symbols-outlined text-secondary">payments</span>
+<span class="text-[10px] font-bold text-secondary opacity-0 group-hover:opacity-100 transition-opacity bg-indigo-50 px-2 py-0.5 rounded-full">SELECT OPTION</span>
+</div>
+<h4 class="font-bold text-slate-900 text-sm mb-1">LLC (Pass-through)</h4>
+<p class="text-xs text-slate-500 leading-relaxed group-hover:text-slate-600">Best for bootstrapped businesses. Avoids double taxation but complicates equity for VCs.</p>
+</button>
+</div>
+<p>Would you like me to prepare a customized <span class="text-primary font-semibold underline decoration-primary/30 decoration-2 underline-offset-4 cursor-pointer hover:decoration-primary hover:text-sky-600 transition-all">formation checklist</span> or a <span class="text-primary font-semibold underline decoration-primary/30 decoration-2 underline-offset-4 cursor-pointer hover:decoration-primary hover:text-sky-600 transition-all">tax comparison table</span>?</p>
+</div>
+<div class="flex gap-2 pt-2">
+<button class="px-4 py-2 text-xs font-bold text-slate-900 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">Compare Structures</button>
+<button class="px-4 py-2 text-xs font-bold text-slate-900 bg-white border border-slate-200 rounded-full hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm">Download Guide</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6">
+<div class="max-w-3xl mx-auto">
+<div class="flex flex-wrap gap-2 mb-3">
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sky-50 text-sky-700 text-[11px] font-semibold rounded-full border border-sky-100 hover:bg-sky-100 hover:border-sky-200 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[14px]">add</span>
+                        Draft Operating Agreement
+                    </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 text-[11px] font-semibold rounded-full border border-slate-100 hover:bg-slate-100 hover:border-slate-200 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[14px]">search</span>
+                        Research Competitors
+                    </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 text-slate-600 text-[11px] font-semibold rounded-full border border-slate-100 hover:bg-slate-100 hover:border-slate-200 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[14px]">lightbulb</span>
+                        Brainstorm Names
+                    </button>
+</div>
+<div class="relative group">
+<div class="absolute inset-0 bg-primary/10 blur-xl opacity-0 group-focus-within:opacity-40 transition-opacity"></div>
+<div class="relative bg-white border border-slate-200 shadow-catalyst rounded-2xl overflow-hidden focus-within:border-primary/40 focus-within:ring-4 focus-within:ring-primary/5 transition-all">
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-[15px] p-5 pb-16 resize-none min-h-[100px] text-slate-800 placeholder-slate-400" placeholder="Type your next request..."></textarea>
+<div class="absolute bottom-3 left-4 right-4 flex items-center justify-between border-t border-slate-50 pt-3">
+<div class="flex items-center gap-1">
+<button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]">attach_file</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-lg transition-all">
+<span class="material-symbols-outlined text-[20px]">mic</span>
+</button>
+<div class="h-4 w-px bg-slate-200 mx-2"></div>
+<button class="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-700 transition-all">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                                    Web Search
+                                </button>
+</div>
+<button class="w-10 h-10 bg-slate-950 text-white rounded-xl flex items-center justify-center hover:bg-slate-800 transition-all shadow-lg active:scale-95">
+<span class="material-symbols-outlined text-[20px]">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+<p class="text-center text-[10px] text-slate-400 mt-3 font-medium tracking-wide">BUSINESS NAVIGATOR AI v2.4 • ACCURACY SUBJECT TO VERIFICATION</p>
+</div>
+</div>
+</main>
+<aside class="w-80 border-l border-slate-200 flex flex-col hidden xl:flex bg-slate-50 h-screen overflow-hidden">
+<div class="p-6 border-b border-slate-200/60 bg-white z-10 flex-shrink-0">
+<div class="flex items-center justify-between mb-4">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Business Velocity</h3>
+<span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-emerald-50 text-emerald-600 border border-emerald-100">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+                    On Track
+                </span>
+</div>
+<div class="space-y-2">
+<div class="flex justify-between items-baseline">
+<div>
+<span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">Overall Progress</span>
+<div class="text-sm font-bold text-slate-900 mt-0.5">Stage 2: Foundation</div>
+</div>
+<span class="text-sm font-bold text-primary">65%</span>
+</div>
+<div class="relative h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-gradient-to-r from-blue-400 to-primary rounded-full transition-all duration-1000" style="width: 65%"></div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-6 py-6 space-y-8 scroll-smooth">
+<div class="relative bg-white rounded-xl border border-sky-100 shadow-soft p-1 group hover:border-sky-300 transition-all duration-300">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-xl"></div>
+<div class="p-4 pl-5">
+<div class="flex items-center justify-between mb-3">
+<span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-extrabold bg-sky-50 text-primary border border-sky-100 uppercase tracking-wider">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+                            AI Recommended
+                        </span>
+<div class="relative group/tooltip">
+<span class="material-symbols-outlined text-slate-300 text-[18px] hover:text-primary cursor-help transition-colors">info</span>
+<div class="absolute right-0 top-6 w-48 p-3 bg-slate-800 text-white text-[11px] font-medium leading-relaxed rounded-lg shadow-xl opacity-0 group-hover/tooltip:opacity-100 transition-opacity z-50 pointer-events-none transform translate-y-1 group-hover/tooltip:translate-y-0">
+<span class="font-bold text-sky-200 block mb-1">Why this task?</span>
+                                Crucial step to protect IP and enable venture fundraising.
+                            </div>
+</div>
+</div>
+<div class="flex gap-3 mb-4">
+<div class="w-10 h-10 rounded-lg bg-sky-50 border border-sky-100 flex items-center justify-center shrink-0 text-primary">
+<span class="material-symbols-outlined text-[22px]">gavel</span>
+</div>
+<div>
+<h4 class="text-sm font-bold text-slate-900 leading-tight">Entity Formation</h4>
+<p class="text-[11px] text-slate-500 mt-1 leading-snug">File Delaware C-Corp articles of incorporation.</p>
+</div>
+</div>
+<button class="w-full py-2 bg-slate-900 text-white text-xs font-bold rounded-lg shadow-md hover:bg-slate-800 hover:shadow-lg transition-all flex items-center justify-center gap-2 group/btn">
+                        Start Task
+                        <span class="material-symbols-outlined text-[14px] group-hover/btn:translate-x-0.5 transition-transform">arrow_forward</span>
+</button>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<button class="w-full flex items-center justify-between group mb-3">
+<h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 group-hover:text-primary transition-colors">
+<span class="material-symbols-outlined text-[14px]">foundation</span>
+                            Phase 1: Foundation
+                        </h4>
+<span class="material-symbols-outlined text-[16px] text-slate-300 group-hover:text-slate-500">expand_less</span>
+</button>
+<div class="space-y-1 pl-1">
+<div class="flex items-center gap-3 p-2.5 rounded-lg bg-emerald-50/50 border border-transparent hover:border-emerald-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-emerald-500 filled">check_circle</span>
+<div class="flex-1">
+<p class="text-xs font-semibold text-slate-700">Business Concept</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2.5 rounded-lg bg-emerald-50/50 border border-transparent hover:border-emerald-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-emerald-500 filled">check_circle</span>
+<div class="flex-1">
+<p class="text-xs font-semibold text-slate-700">Market Research</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<button class="w-full flex items-center justify-between group mb-3">
+<h4 class="text-[10px] font-bold text-primary uppercase tracking-widest flex items-center gap-2">
+<span class="material-symbols-outlined text-[14px]">policy</span>
+                            Phase 2: Legal &amp; Compliance
+                        </h4>
+<span class="material-symbols-outlined text-[16px] text-slate-300 group-hover:text-slate-500">expand_less</span>
+</button>
+<div class="space-y-1 pl-1">
+<div class="flex items-center gap-3 p-2.5 rounded-lg bg-emerald-50/50 border border-transparent hover:border-emerald-100 transition-all cursor-pointer">
+<span class="material-symbols-outlined text-[20px] text-emerald-500 filled">check_circle</span>
+<div class="flex-1">
+<p class="text-xs font-semibold text-slate-700">Name Availability</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-blue-100 shadow-sm hover:border-blue-300 transition-all cursor-pointer">
+<div class="relative flex items-center justify-center w-5 h-5">
+<span class="absolute inline-flex h-full w-full rounded-full bg-blue-100 opacity-75 animate-ping"></span>
+<span class="material-symbols-outlined text-[20px] text-primary relative">radio_button_checked</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-900">Operating Agreement</p>
+</div>
+<span class="text-[10px] font-bold text-primary bg-blue-50 px-1.5 py-0.5 rounded">IN PROGRESS</span>
+</div>
+<div class="flex items-center gap-3 p-2.5 rounded-lg group hover:bg-white hover:shadow-sm transition-all cursor-pointer border border-transparent hover:border-slate-100">
+<span class="material-symbols-outlined text-[20px] text-slate-300 group-hover:text-primary transition-colors">radio_button_unchecked</span>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Tax ID (EIN)</p>
+</div>
+</div>
+</div>
+</div>
+<div>
+<button class="w-full flex items-center justify-between group mb-3">
+<h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-2 group-hover:text-slate-600 transition-colors">
+<span class="material-symbols-outlined text-[14px]">attach_money</span>
+                            Phase 3: Financials
+                        </h4>
+<span class="material-symbols-outlined text-[16px] text-slate-300 group-hover:text-slate-500">expand_more</span>
+</button>
+<div class="space-y-1 pl-1">
+<div class="flex items-center justify-between p-2.5 rounded-lg hover:bg-white hover:shadow-sm transition-all cursor-pointer group border border-transparent hover:border-slate-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-slate-300 group-hover:text-primary transition-colors">radio_button_unchecked</span>
+<p class="text-xs font-medium text-slate-500 group-hover:text-slate-800 transition-colors">Business Banking</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded-lg hover:bg-white hover:shadow-sm transition-all cursor-pointer group border border-transparent hover:border-slate-100">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-[20px] text-slate-300 group-hover:text-primary transition-colors">radio_button_unchecked</span>
+<p class="text-xs font-medium text-slate-500 group-hover:text-slate-800 transition-colors">Credit Card Setup</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="p-6 border-t border-slate-200 bg-white flex-shrink-0">
+<button class="w-full py-3 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-lg hover:bg-slate-800 hover:shadow-xl transition-all flex items-center justify-center gap-2 group">
+<span class="material-symbols-outlined text-[18px] group-hover:-translate-y-0.5 transition-transform">map</span>
+                View Full Roadmap
+            </button>
+</div>
+</aside>
+</body></html>
