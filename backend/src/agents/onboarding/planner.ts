@@ -12,7 +12,8 @@ import {
   bulkCreateTasksTool,
   storeBusinessPlanTool,
 } from '@/agents/core/tools.js'
-import { ONBOARDING_PLANNER_PROMPT } from '@/agents/core/prompts.js'
+// Prompt simplified inline for better free tier model compatibility
+// import { ONBOARDING_PLANNER_PROMPT } from '@/agents/core/prompts.js'
 import type { OnboardingData } from '@shared/types'
 
 /**
@@ -113,20 +114,18 @@ async function generatePlan(
   state: OnboardingPlannerStateType
 ): Promise<Partial<OnboardingPlannerStateType>> {
   try {
-    // Create LLM instance
+    // Create LLM instance - use env default model if not specified
+    const model = state.llmModel || process.env.DEFAULT_LLM_MODEL || 'openai/gpt-4o'
+    console.log('🤖 Using model:', model)
+
     const llm = createLLM({
       provider: state.llmProvider,
-      model: state.llmModel || 'openai/gpt-4o',
+      model,
       apiKey: state.llmApiKey,
     })
 
-    // Bind tools to LLM
-    const llmWithTools = llm.bindTools([
-      getTaskTemplatesTool,
-      createBusinessFromOnboardingTool,
-      bulkCreateTasksTool,
-      storeBusinessPlanTool,
-    ])
+    // Don't bind tools for plan generation - we want JSON response, not tool calls
+    // Tools are executed in subsequent graph nodes (createBusiness, initializeTasks, etc.)
 
     // Format onboarding data for AI
     const onboardingDataText = `
@@ -152,58 +151,54 @@ async function generatePlan(
 ${JSON.stringify(state.taskTemplates.slice(0, 50), null, 2)}
 `
 
-    // Create prompt with system instructions
+    // Create simplified prompt for better compatibility with free/small models
+    // Limit task templates to reduce input size
+    const limitedTemplates = state.taskTemplates.slice(0, 10).map((t: any) => ({
+      id: t.id,
+      title: t.title,
+      phase: t.phase,
+    }))
+
     const messages = [
       new HumanMessage({
-        content: `${ONBOARDING_PLANNER_PROMPT}
+        content: `You are a business formation advisor. Based on this user's profile, recommend the best business structure.
 
----
+USER PROFILE:
+- Business: ${state.onboardingData.businessName || 'New Business'} (${state.onboardingData.businessCategory || 'general'})
+- State: ${state.onboardingData.stateCode || 'CA'}
+- Stage: ${state.onboardingData.currentStage || 'idea'}
+- Funding: ${state.onboardingData.fundingApproach || 'bootstrapped'}
+- Team Size: ${state.onboardingData.teamSize || 1}
+- Experience: ${state.onboardingData.previousExperience || 'none'}
 
-**Onboarding Data for New User:**
+AVAILABLE TASKS:
+${JSON.stringify(limitedTemplates, null, 1)}
 
-${onboardingDataText}
-
-**Instructions:**
-
-1. Analyze this entrepreneur's situation comprehensively
-2. Generate a personalized business plan with:
-   - Executive summary (JSON object with businessOverview, currentPosition, keyStrengths, primaryChallenges, criticalNextSteps)
-   - Recommended entity type with justification
-   - Phase recommendations (ideation, legal, financial, launchPrep) as JSON
-   - Confidence scores (total, ideation, legal, financial, launchPrep)
-3. Select 15-20 most relevant task template IDs from the available templates
-4. Identify the single most important hero task (task template ID)
-
-**Please respond in JSON format:**
+Respond ONLY with valid JSON (no markdown, no explanation):
 {
-  "analysis": "Your comprehensive analysis of their situation",
-  "executiveSummary": { ... },
-  "recommendedEntityType": "LLC|S-Corp|C-Corp|Sole-Prop",
-  "entityJustification": "Why this entity type is best for them",
-  "recommendedState": "XX",
-  "phaseRecommendations": {
-    "ideation": { "priorityActions": [...], "keyConsiderations": [...], "estimatedTimeline": "...", "resourcesNeeded": [...] },
-    "legal": { ... },
-    "financial": { ... },
-    "launchPrep": { ... }
-  },
-  "confidenceScores": {
-    "total": 0-100,
-    "ideation": 0-100,
-    "legal": 0-100,
-    "financial": 0-100,
-    "launchPrep": 0-100,
-    "justification": "Brief explanation of scores"
-  },
-  "selectedTaskTemplateIds": ["id1", "id2", ...],
-  "heroTaskTemplateId": "id",
-  "planSummary": "2-3 paragraph summary of the complete plan"
+  "recommendedEntityType": "LLC",
+  "recommendedState": "CA",
+  "planSummary": "Brief 1-2 sentence recommendation",
+  "executiveSummary": {"overview": "Brief overview"},
+  "confidenceScores": {"total": 80, "ideation": 75, "legal": 80, "financial": 75, "launchPrep": 70},
+  "selectedTaskTemplateIds": ["id1", "id2"],
+  "heroTaskTemplateId": "id1"
 }`,
       }),
     ]
 
-    // Get AI response
-    const response = await llmWithTools.invoke(messages)
+    // Get AI response (no tools bound - we expect JSON response)
+    console.log('🤖 Calling LLM with provider:', state.llmProvider, 'model:', model)
+    const response = await llm.invoke(messages)
+
+    // Debug: log full response structure
+    console.log('🤖 Response type:', typeof response)
+    console.log('🤖 Response keys:', Object.keys(response))
+    console.log('🤖 Response content type:', typeof response.content)
+    console.log('🤖 Response tool_calls:', response.tool_calls?.length || 0, 'calls')
+    if (response.tool_calls?.length) {
+      console.log('🤖 Tool calls:', JSON.stringify(response.tool_calls, null, 2))
+    }
 
     // Parse AI response
     let aiContent = ''
@@ -215,13 +210,41 @@ ${onboardingDataText}
         .join('\n')
     }
 
+    // Log response for debugging
+    console.log('🤖 AI Response length:', aiContent.length)
+    if (aiContent.length < 100) {
+      console.log('🤖 AI Response (short):', aiContent)
+    }
+
     // Extract JSON from response (may be wrapped in markdown code blocks)
-    const jsonMatch = aiContent.match(/```json\n?([\s\S]*?)\n?```/) || aiContent.match(/{[\s\S]*}/)
+    // Try multiple patterns for flexibility
+    const jsonPatterns = [
+      /```json\n?([\s\S]*?)\n?```/, // ```json ... ```
+      /```\n?([\s\S]*?)\n?```/, // ``` ... ``` (no language tag)
+      /\{[\s\S]*"executiveSummary"[\s\S]*\}/, // Raw JSON with expected field
+      /\{[\s\S]*\}/, // Any JSON object
+    ]
+
+    let jsonMatch: RegExpMatchArray | null = null
+    for (const pattern of jsonPatterns) {
+      jsonMatch = aiContent.match(pattern)
+      if (jsonMatch) break
+    }
+
     if (!jsonMatch) {
+      console.error('🔴 Failed to extract JSON. Response preview:', aiContent.substring(0, 500))
       throw new Error('Failed to extract JSON from AI response')
     }
 
-    const planData = JSON.parse(jsonMatch[1] || jsonMatch[0])
+    const jsonString = jsonMatch[1] || jsonMatch[0]
+    let planData: any
+    try {
+      planData = JSON.parse(jsonString)
+    } catch (parseError) {
+      console.error('🔴 JSON parse error:', parseError)
+      console.error('🔴 JSON string preview:', jsonString.substring(0, 500))
+      throw new Error('Failed to parse AI response as JSON')
+    }
 
     // Validate required fields
     if (

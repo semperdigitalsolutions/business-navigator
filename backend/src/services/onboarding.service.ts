@@ -251,10 +251,8 @@ export class OnboardingService {
       userId,
       onboardingData,
       onboardingSessionId: sessionId,
-      // Use quality models as per user's choice (GPT-4 or Opus)
       llmProvider: 'openrouter',
-      llmModel: 'openai/gpt-4o', // Quality model for best plan generation
-      // User's API key will be fetched from settings if available
+      // Let planner use DEFAULT_LLM_MODEL from env (or fallback to gpt-4o)
     })
 
     if (!result.success) {

@@ -50,9 +50,10 @@ export function createLLM(config: LLMConfig) {
   }
 
   // All providers use ChatOpenAI with different base URLs
+  // Note: @langchain/openai v1.x uses 'apiKey' not 'openAIApiKey'
   return new ChatOpenAI({
     modelName: model,
-    openAIApiKey: resolvedApiKey,
+    apiKey: resolvedApiKey,
     temperature,
     maxTokens,
     streaming,
