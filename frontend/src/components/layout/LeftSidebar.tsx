@@ -9,12 +9,12 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'Home', icon: 'home', href: '/app' },
-  { label: 'Task Library', icon: 'task', href: '/app/tasks' },
-  { label: 'Chat History', icon: 'chat_bubble', href: '/app/chat-history' },
-  { label: 'Progress', icon: 'trending_up', href: '/app/progress' },
-  { label: 'Documents', icon: 'folder', href: '/app/documents' },
-  { label: 'Settings', icon: 'settings', href: '/app/settings' },
+  { label: 'Home', icon: 'home', href: '/dashboard' },
+  { label: 'Task Library', icon: 'task', href: '/tasks' },
+  { label: 'Chat History', icon: 'chat_bubble', href: '/chat-history' },
+  { label: 'Progress', icon: 'trending_up', href: '/progress' },
+  { label: 'Documents', icon: 'folder', href: '/documents' },
+  { label: 'Settings', icon: 'settings', href: '/settings' },
 ]
 
 interface NavLinkProps {
@@ -90,7 +90,9 @@ export function LeftSidebar({
   const location = useLocation()
 
   const isActive = (href: string) => {
-    if (href === '/app') return location.pathname === '/app' || location.pathname === '/app/'
+    if (href === '/dashboard') {
+      return location.pathname === '/dashboard' || location.pathname === '/dashboard/'
+    }
     return location.pathname.startsWith(href)
   }
 
