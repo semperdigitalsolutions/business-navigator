@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Business Navigator | Documents</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=Inter:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#3B82F6", secondary: "#6366f1", background: "#fafafa", surface: "#ffffff", border: "#e2e8f0", "accent-pink": "#f472b6", "background-light": "#f5f7f8", "background-dark": "#101722"}, fontFamily: {sans: ["Plus Jakarta Sans", "sans-serif"], mono: ["JetBrains Mono", "monospace"], display: "Inter"}, boxShadow: {soft: "0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.05)", glow: "0 0 20px -5px rgba(14, 165, 233, 0.2)", catalyst: "0 0 0 1px rgba(0, 0, 0, 0.05), 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1)"}, borderRadius: {DEFAULT: "0.25rem", lg: "0.5rem", xl: "0.75rem", full: "9999px"}}}};</script>
+<style type="text/tailwindcss">
+        @layer base {
+            body { @apply bg-background text-slate-900 antialiased font-sans; }
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .visualizer-node {
+            @apply w-1 bg-primary rounded-full;
+            animation: bounce 1.2s infinite ease-in-out;
+        }
+        @keyframes bounce {
+            0%, 100% { height: 8px; opacity: 0.4; }
+            50% { height: 24px; opacity: 1; }
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+<aside class="w-[72px] lg:w-64 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col z-30">
+<div class="h-16 flex items-center px-6">
+<div class="w-8 h-8 rounded-lg bg-slate-950 flex items-center justify-center text-white flex-shrink-0">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<span class="ml-3 font-bold text-slate-900 tracking-tight hidden lg:block">Business Navigator</span>
+</div>
+<nav class="flex-1 px-3 py-4 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">home</span>
+<span class="hidden lg:block">Home</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">task</span>
+<span class="hidden lg:block">Task Library</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">chat_bubble</span>
+<span class="hidden lg:block">Chat History</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">trending_up</span>
+<span class="hidden lg:block">Progress</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg bg-primary/10 text-primary group" href="#">
+<span class="material-symbols-outlined text-[22px]">folder</span>
+<span class="hidden lg:block">Documents</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-all group" href="#">
+<span class="material-symbols-outlined text-[22px]">settings</span>
+<span class="hidden lg:block">Settings</span>
+</a>
+</nav>
+<div class="p-4 border-t border-slate-100">
+<div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 cursor-pointer transition-all">
+<img alt="User Profile" class="w-8 h-8 rounded-full ring-2 ring-slate-100" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7YPbZRegdLf-FzoRYTc5beXD3S8QteZzebvgrTqKdUL00UvZVlSubtwcWc4H6cvGUCuEqTd1_j-wxLrWyy_Pr3jVIedwdl3HUv8p9OLUx9MB09uLs0lo3uVCanIQR5ZeOa4afWCAt-N5_B2lsPHjyMaye01_1eA7mHZVmSzfzuCh-0VUhN4ZqtkokXIl7sdZgmc11RVPuAiSpQ58tM7qCCfcag7Hd10-Tzc1furPBBKjm1pDyE8xdtNACNQ2b8N3vvkE5JGuTxAbD"/>
+<div class="flex-1 min-w-0 hidden lg:block">
+<p class="text-xs font-semibold text-slate-900 truncate">Erica</p>
+<p class="text-[10px] text-slate-400 font-medium tracking-wide uppercase">Pro Plan</p>
+</div>
+</div>
+</div>
+</aside>
+<main class="flex-1 flex flex-col relative min-w-0 bg-white">
+<header class="h-16 flex items-center justify-between px-8 border-b border-slate-100 flex-shrink-0">
+<div class="flex items-center gap-4">
+<div class="flex items-end gap-[2px] h-6 w-12 justify-center">
+<div class="visualizer-node" style="animation-delay: 0s"></div>
+<div class="visualizer-node" style="animation-delay: 0.2s"></div>
+<div class="visualizer-node" style="animation-delay: 0.1s"></div>
+<div class="visualizer-node" style="animation-delay: 0.3s"></div>
+<div class="visualizer-node" style="animation-delay: 0s"></div>
+</div>
+<div>
+<h2 class="text-sm font-bold text-slate-900 leading-none">Documents</h2>
+<p class="text-[11px] text-primary font-medium tracking-wider uppercase mt-1">Thoughtful Mode</p>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="absolute left-2.5 top-1.5 material-symbols-outlined text-slate-400 text-[18px]">search</span>
+<input class="pl-9 pr-4 py-1.5 text-xs font-medium bg-slate-50 border-none rounded-lg focus:ring-1 focus:ring-primary w-64 placeholder-slate-400 text-slate-700" placeholder="Search files..." type="text"/>
+</div>
+<button class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 border border-slate-900 rounded-lg hover:bg-slate-800 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">add</span>
+                    Upload
+                </button>
+</div>
+</header>
+<div class="flex-1 overflow-y-auto hide-scrollbar scroll-smooth bg-slate-50/30">
+<div class="max-w-5xl mx-auto px-6 py-8">
+<div class="flex items-end justify-between mb-8">
+<div>
+<h1 class="text-2xl font-bold text-slate-900 tracking-tight">Document Vault</h1>
+<p class="text-slate-500 text-sm mt-1">Securely manage and generate your business documentation.</p>
+</div>
+<div class="flex gap-1 p-1 bg-slate-100 rounded-lg">
+<button class="px-3 py-1.5 text-xs font-bold text-slate-900 bg-white rounded-md shadow-sm">All</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 rounded-md transition-colors">Legal</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 rounded-md transition-colors">Finance</button>
+<button class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-900 rounded-md transition-colors">Assets</button>
+</div>
+</div>
+<div class="mb-8">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">auto_awesome</span>
+                        AI Generated
+                    </h3>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+<div class="group relative bg-white p-5 rounded-2xl border border-slate-200 shadow-catalyst hover:border-primary/30 hover:shadow-soft transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+<span class="material-symbols-outlined text-[20px]">gavel</span>
+</div>
+<div class="px-2 py-1 bg-green-50 text-green-700 text-[10px] font-bold uppercase rounded-full">Finalized</div>
+</div>
+<h4 class="text-sm font-bold text-slate-900 mb-1">Articles of Incorporation</h4>
+<p class="text-[11px] text-slate-500 mb-6">Delaware C-Corp Structure • v2.0</p>
+<div class="flex gap-2">
+<button class="flex-1 py-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg hover:bg-slate-100 transition-colors">Open</button>
+<button class="flex items-center justify-center w-8 h-8 rounded-lg text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit_note</span>
+</button>
+</div>
+</div>
+<div class="group relative bg-white p-5 rounded-2xl border border-slate-200 shadow-catalyst hover:border-primary/30 hover:shadow-soft transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600">
+<span class="material-symbols-outlined text-[20px]">slideshow</span>
+</div>
+<div class="px-2 py-1 bg-amber-50 text-amber-700 text-[10px] font-bold uppercase rounded-full">Draft</div>
+</div>
+<h4 class="text-sm font-bold text-slate-900 mb-1">Seed Pitch Deck</h4>
+<p class="text-[11px] text-slate-500 mb-6">12 Slides • Last edited 2h ago</p>
+<div class="flex gap-2">
+<button class="flex-1 py-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg hover:bg-slate-100 transition-colors">Open</button>
+<button class="flex items-center justify-center w-8 h-8 rounded-lg text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">auto_fix_high</span>
+</button>
+</div>
+</div>
+<div class="group relative bg-white p-5 rounded-2xl border border-slate-200 shadow-catalyst hover:border-primary/30 hover:shadow-soft transition-all">
+<div class="flex justify-between items-start mb-4">
+<div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600">
+<span class="material-symbols-outlined text-[20px]">table_chart</span>
+</div>
+<div class="px-2 py-1 bg-slate-100 text-slate-500 text-[10px] font-bold uppercase rounded-full">Template</div>
+</div>
+<h4 class="text-sm font-bold text-slate-900 mb-1">Financial Projections</h4>
+<p class="text-[11px] text-slate-500 mb-6">3-Year Operating Model • Excel</p>
+<div class="flex gap-2">
+<button class="flex-1 py-1.5 text-xs font-bold text-slate-700 bg-slate-50 border border-slate-100 rounded-lg hover:bg-slate-100 transition-colors">Preview</button>
+<button class="flex items-center justify-center w-8 h-8 rounded-lg text-primary hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div>
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Recent Uploads</h3>
+<div class="space-y-3">
+<div class="flex items-center p-3 bg-white rounded-xl border border-slate-200 hover:border-primary/20 transition-all cursor-pointer group">
+<div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 mr-4 group-hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-slate-900 truncate">Competitor Analysis Report.pdf</h4>
+<p class="text-[10px] text-slate-400">2.4 MB • Uploaded yesterday</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-slate-600 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+<div class="flex items-center p-3 bg-white rounded-xl border border-slate-200 hover:border-primary/20 transition-all cursor-pointer group">
+<div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-500 mr-4 group-hover:bg-slate-200 transition-colors">
+<span class="material-symbols-outlined text-[18px]">image</span>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-sm font-bold text-slate-900 truncate">Brand_Logo_Assets_v4.zip</h4>
+<p class="text-[10px] text-slate-400">14.8 MB • Uploaded 3 days ago</p>
+</div>
+<button class="opacity-0 group-hover:opacity-100 p-2 text-slate-400 hover:text-slate-600 transition-all">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<aside class="w-80 border-l border-slate-100 flex flex-col hidden xl:flex bg-slate-50/30">
+<div class="p-8 pb-4">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Business Velocity</h3>
+<div class="relative h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+<div class="absolute left-0 top-0 h-full bg-secondary rounded-full" style="width: 45%"></div>
+</div>
+<div class="flex justify-between mt-3">
+<span class="text-[11px] font-bold text-slate-900">Milestone: Seed Round</span>
+<span class="text-[11px] font-bold text-secondary">45%</span>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto px-6 py-4 space-y-2">
+<div class="p-5 bg-white border-2 border-secondary/10 rounded-2xl shadow-catalyst mb-6">
+<div class="flex items-center gap-3 mb-4">
+<div class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-[18px] filled">folder_open</span>
+</div>
+<span class="text-sm font-bold text-slate-900">Data Room Prep</span>
+</div>
+<p class="text-[13px] text-slate-600 leading-relaxed mb-4">Organize key documents for due diligence review.</p>
+<div class="space-y-2 mb-4">
+<div class="flex items-center gap-2 text-xs text-slate-600">
+<span class="material-symbols-outlined text-green-500 text-[16px]">check_circle</span>
+<span>Inc. Documents</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-600">
+<span class="material-symbols-outlined text-slate-300 text-[16px]">radio_button_unchecked</span>
+<span>IP Assignments</span>
+</div>
+<div class="flex items-center gap-2 text-xs text-slate-600">
+<span class="material-symbols-outlined text-slate-300 text-[16px]">radio_button_unchecked</span>
+<span>Cap Table</span>
+</div>
+</div>
+<button class="w-full text-[11px] font-bold text-white bg-slate-900 px-3 py-2 rounded-lg hover:bg-slate-800 transition-all">Open Data Room</button>
+</div>
+<h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2 mb-2">Upcoming Requirements</h4>
+<div class="space-y-1">
+<div class="flex items-center gap-4 p-4 rounded-xl hover:bg-white hover:shadow-catalyst transition-all cursor-pointer opacity-80 hover:opacity-100 group">
+<div class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:border-primary/30 group-hover:text-primary bg-white">
+<span class="material-symbols-outlined text-[20px]">handshake</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-900">Term Sheet</p>
+<p class="text-[10px] text-slate-400">Review Template</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-[18px]">lock</span>
+</div>
+<div class="flex items-center gap-4 p-4 rounded-xl hover:bg-white hover:shadow-catalyst transition-all cursor-pointer opacity-80 hover:opacity-100 group">
+<div class="w-10 h-10 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:border-primary/30 group-hover:text-primary bg-white">
+<span class="material-symbols-outlined text-[20px]">badge</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-bold text-slate-900">Advisor Agreement</p>
+<p class="text-[10px] text-slate-400">Generate Draft</p>
+</div>
+<span class="material-symbols-outlined text-slate-300 text-[18px]">lock</span>
+</div>
+</div>
+</div>
+<div class="p-6">
+<button class="w-full py-3 bg-white border border-slate-200 text-slate-900 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+                Schedule Review
+            </button>
+</div>
+</aside>
+</body></html>
