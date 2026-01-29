@@ -362,6 +362,7 @@ export interface Database {
           status: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at: string | null
           skipped_at: string | null
+          skip_reason: string | null
           priority_order: number
           is_hero_task: boolean
           draft_data: Json
@@ -379,6 +380,7 @@ export interface Database {
           status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at?: string | null
           skipped_at?: string | null
+          skip_reason?: string | null
           priority_order?: number
           is_hero_task?: boolean
           draft_data?: Json
@@ -396,6 +398,7 @@ export interface Database {
           status?: 'pending' | 'in_progress' | 'completed' | 'skipped'
           completed_at?: string | null
           skipped_at?: string | null
+          skip_reason?: string | null
           priority_order?: number
           is_hero_task?: boolean
           draft_data?: Json
