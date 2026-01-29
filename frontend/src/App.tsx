@@ -4,21 +4,24 @@
 import { useEffect } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
-import { AppLayout } from '@/layouts/AppLayout'
+import { AppShellLayout } from '@/layouts/AppShellLayout'
 import { LoginForm } from '@/features/auth/components/LoginForm'
 import { RegisterForm } from '@/features/auth/components/RegisterForm'
 import { ForgotPasswordForm } from '@/features/auth/components/ForgotPasswordForm'
 import { AuthCallback } from '@/features/auth/components/AuthCallback'
-import { DashboardPage } from '@/features/dashboard/components/DashboardPage'
-import { ChatInterface } from '@/features/chat/components/ChatInterface'
-import { TaskDashboard } from '@/features/tasks/components/TaskDashboard'
 import { TaskDetailPage } from '@/features/tasks/components/TaskDetailPage'
-import { ApiKeySettings } from '@/features/settings/components/ApiKeySettings'
 import { OnboardingWizard } from '@/features/onboarding/components/OnboardingWizard'
 import { onboardingApi } from '@/features/onboarding/api/onboarding.api'
 import { ErrorBoundary } from '@/components/error-boundaries/ErrorBoundary'
 import { LandingPage } from '@/features/landing/components/LandingPage'
 import { LandingLayout } from '@/layouts/LandingLayout'
+// Design V2 Pages
+import { HomePage } from '@/pages/HomePage'
+import { TaskLibraryPage } from '@/pages/TaskLibraryPage'
+import { SettingsPage } from '@/pages/SettingsPage'
+import { ChatHistoryPage } from '@/pages/ChatHistoryPage'
+import { ProgressPage } from '@/pages/ProgressPage'
+import { DocumentsPage } from '@/pages/DocumentsPage'
 
 // Protected Route wrapper with onboarding check
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -133,15 +136,19 @@ function App() {
           <Route
             element={
               <ProtectedRoute>
-                <AppLayout />
+                <AppShellLayout />
               </ProtectedRoute>
             }
           >
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/chat" element={<ChatInterface />} />
-            <Route path="/tasks" element={<TaskDashboard />} />
+            <Route path="/dashboard" element={<HomePage />} />
+            <Route path="/tasks" element={<TaskLibraryPage />} />
             <Route path="/tasks/:taskId" element={<TaskDetailPage />} />
-            <Route path="/settings" element={<ApiKeySettings />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/chat-history" element={<ChatHistoryPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
+            <Route path="/documents" element={<DocumentsPage />} />
+            {/* Redirect old /chat route to dashboard (chat is now in HomePage) */}
+            <Route path="/chat" element={<Navigate to="/dashboard" replace />} />
           </Route>
 
           {/* Landing Page - public */}
