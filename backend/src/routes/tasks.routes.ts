@@ -134,3 +134,167 @@ export const tasksRoutes = new Elysia({ prefix: '/api/tasks' })
       }),
     }
   )
+
+  // POST /api/tasks/:id/skip - Mark task as skipped
+  // Issue #61
+  .post(
+    '/:id/skip',
+    async ({ request, params, body }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        // Verify task exists
+        const task = await tasksService.getTaskById(params.id, auth.user.id, body.businessId)
+        if (!task) {
+          return errorResponse('Task not found', 404)
+        }
+
+        const result = await tasksService.skipTask(
+          params.id,
+          auth.user.id,
+          body.reason,
+          body.businessId
+        )
+
+        if (!result.success) {
+          return errorResponse(result.error || 'Failed to skip task', 400)
+        }
+
+        return successResponse({ skipped: true }, 'Task skipped successfully')
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        reason: t.Optional(t.String({ maxLength: 500 })),
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  // POST /api/tasks/:id/unskip - Restore skipped task
+  // Issue #61
+  .post(
+    '/:id/unskip',
+    async ({ request, params, body }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        // Verify task exists
+        const task = await tasksService.getTaskById(params.id, auth.user.id, body.businessId)
+        if (!task) {
+          return errorResponse('Task not found', 404)
+        }
+
+        const result = await tasksService.unskipTask(params.id, auth.user.id, body.businessId)
+
+        if (!result.success) {
+          return errorResponse(result.error || 'Failed to unskip task', 400)
+        }
+
+        return successResponse({ unskipped: true }, 'Task restored successfully')
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  // POST /api/tasks/:id/start - Start a task with dependency checking
+  // Issue #64
+  .post(
+    '/:id/start',
+    async ({ request, params, body }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        const result = await tasksService.startTask(params.id, auth.user.id, body.businessId)
+
+        if (!result.started) {
+          // Task could not be started due to dependencies or already completed
+          return successResponse(
+            {
+              task: result.task,
+              started: false,
+              dependencyCheck: result.dependencyCheck,
+            },
+            result.dependencyCheck.reason || 'Task cannot be started'
+          )
+        }
+
+        return successResponse(
+          {
+            task: result.task,
+            started: true,
+            dependencyCheck: result.dependencyCheck,
+          },
+          'Task started successfully'
+        )
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      body: t.Object({
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
+
+  // GET /api/tasks/:id/dependencies - Get dependency info for a task
+  // Issue #64
+  .get(
+    '/:id/dependencies',
+    async ({ request, params, query }) => {
+      const auth = await authMiddleware({ request } as any)
+      if (!auth.success || !auth.user) {
+        return errorResponse('Unauthorized', 401)
+      }
+
+      try {
+        const result = await tasksService.getTaskDependencies(
+          params.id,
+          auth.user.id,
+          query.businessId
+        )
+        return successResponse(result)
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+        return errorResponse(message)
+      }
+    },
+    {
+      params: t.Object({
+        id: t.String(),
+      }),
+      query: t.Object({
+        businessId: t.Optional(t.String()),
+      }),
+    }
+  )
