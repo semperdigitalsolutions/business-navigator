@@ -1,5 +1,4 @@
 import { useCallback, useEffect } from 'react'
-import { AppShell, LeftSidebar, RightSidebar } from '@/components/layout'
 import { Icon } from '@/components/ui/Icon'
 import { StageCard } from '@/features/progress/components/StageCard'
 import {
@@ -7,18 +6,11 @@ import {
   GenericStageContent,
   IdeationContent,
 } from '@/features/progress/components/StageContent'
-import {
-  buildSidebarPhases,
-  getCurrentStageInfo,
-  getRecommendedTask,
-  getStageStatus,
-} from '@/features/progress/utils/progress-helpers'
-import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
+import { getStageStatus } from '@/features/progress/utils/progress-helpers'
 import { useDashboardStore } from '@/features/dashboard/hooks/useDashboardStore'
 import { dashboardApi } from '@/features/dashboard/api/dashboard.api'
 
 export function ProgressPage() {
-  const { user } = useAuthStore()
   const {
     dashboardData,
     heroTask,
@@ -51,34 +43,14 @@ export function ProgressPage() {
     fetchDashboardData()
   }, [fetchDashboardData])
 
-  const userName = user?.firstName || 'User'
-  const currentStage = getCurrentStageInfo(dashboardData)
-  const sidebarPhases = buildSidebarPhases(dashboardData)
   const phases = dashboardData?.businessProgress?.phases
 
   if (isLoading && !dashboardData) {
-    return (
-      <AppShell
-        leftSidebar={<LeftSidebar userName={userName} userPlan="Pro Plan" />}
-        rightSidebar={<RightSidebar stageLabel="Loading..." progressPercent={0} phases={[]} />}
-      >
-        <LoadingState />
-      </AppShell>
-    )
+    return <LoadingState />
   }
 
   return (
-    <AppShell
-      leftSidebar={<LeftSidebar userName={userName} userPlan="Pro Plan" />}
-      rightSidebar={
-        <RightSidebar
-          stageLabel={currentStage.label}
-          progressPercent={currentStage.percent}
-          recommendedTask={getRecommendedTask(heroTask)}
-          phases={sidebarPhases}
-        />
-      }
-    >
+    <>
       <ProgressHeader />
       <div className="hide-scrollbar flex-1 overflow-y-auto p-8">
         <div className="mx-auto max-w-4xl space-y-6">
@@ -129,7 +101,7 @@ export function ProgressPage() {
           )}
         </div>
       </div>
-    </AppShell>
+    </>
   )
 }
 

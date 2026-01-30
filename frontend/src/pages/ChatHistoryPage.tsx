@@ -1,33 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AppShell, LeftSidebar, RightSidebar } from '@/components/layout'
 import { Icon } from '@/components/ui/Icon'
 import { ConversationCard } from '@/features/chat/components/ConversationCard'
-import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
-import { useDashboardStore } from '@/features/dashboard/hooks/useDashboardStore'
 import { chatApi, type ChatSession } from '@/features/chat/api/chat.api'
 import { Skeleton } from '@/components/skeletons'
-
-const DEMO_PHASES = [
-  {
-    id: 'foundation',
-    title: 'Phase 1: Foundation',
-    icon: 'foundation',
-    tasks: [
-      { id: '1', title: 'Business Concept', status: 'completed' as const },
-      { id: '2', title: 'Market Research', status: 'completed' as const },
-    ],
-  },
-  {
-    id: 'legal',
-    title: 'Phase 2: Legal & Compliance',
-    icon: 'policy',
-    tasks: [
-      { id: '3', title: 'Operating Agreement', status: 'in_progress' as const },
-      { id: '4', title: 'Tax ID (EIN)', status: 'pending' as const },
-    ],
-  },
-]
 
 /** Maps agent_type to display icon and colors */
 function getAgentDisplayInfo(agentType: string): {
@@ -98,15 +74,11 @@ function ChatHistorySkeleton() {
 
 export function ChatHistoryPage() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
-  const { dashboardData } = useDashboardStore()
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sessions, setSessions] = useState<ChatSession[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-
-  const userName = user?.firstName || 'there'
 
   // Fetch chat sessions on mount
   const fetchSessions = useCallback(async () => {
@@ -159,20 +131,8 @@ export function ChatHistoryPage() {
       conv.summary.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  // Get progress data from dashboard store if available
-  const progressPercent = dashboardData?.businessProgress?.completionPercentage ?? 65
-
   return (
-    <AppShell
-      leftSidebar={<LeftSidebar userName={userName} userPlan="Pro Plan" />}
-      rightSidebar={
-        <RightSidebar
-          stageLabel="Stage 2: Foundation"
-          progressPercent={progressPercent}
-          phases={DEMO_PHASES}
-        />
-      }
-    >
+    <>
       {/* Header */}
       <header className="flex-shrink-0 border-b border-slate-100 px-8 py-6 dark:border-zinc-800">
         <div className="flex items-center justify-between">
@@ -267,6 +227,6 @@ export function ChatHistoryPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   )
 }

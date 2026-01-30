@@ -1,6 +1,4 @@
 import { useCallback, useEffect } from 'react'
-import { AppShell, LeftSidebar, RightSidebar } from '@/components/layout'
-import type { Phase, Task } from '@/components/layout/RightSidebar'
 import {
   ChatHeader,
   ChatInput,
@@ -9,11 +7,9 @@ import {
   ChatWelcome,
   type SuggestedAction,
 } from '@/features/chat/components'
-import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { useDashboardStore } from '@/features/dashboard/hooks/useDashboardStore'
 import { dashboardApi } from '@/features/dashboard/api/dashboard.api'
 import { Skeleton } from '@/components/skeletons'
-import type { BusinessProgress, PhaseProgress, TaskPhase } from '@shared/types'
 
 const SUGGESTED_ACTIONS: SuggestedAction[] = [
   { label: 'Draft Operating Agreement', icon: 'add', variant: 'primary' },
@@ -21,123 +17,27 @@ const SUGGESTED_ACTIONS: SuggestedAction[] = [
   { label: 'Brainstorm Names', icon: 'lightbulb' },
 ]
 
-/** Maps business progress phases to the Phase[] format expected by RightSidebar */
-function mapPhasesToSidebarFormat(businessProgress: BusinessProgress | undefined): Phase[] {
-  if (!businessProgress?.phases) return []
-
-  const phaseConfig: Record<TaskPhase, { title: string; icon: string }> = {
-    ideation: { title: 'Phase 1: Foundation', icon: 'foundation' },
-    legal: { title: 'Phase 2: Legal & Compliance', icon: 'policy' },
-    financial: { title: 'Phase 3: Financials', icon: 'attach_money' },
-    launch_prep: { title: 'Phase 4: Launch Prep', icon: 'rocket_launch' },
-  }
-
-  const phaseOrder: TaskPhase[] = ['ideation', 'legal', 'financial', 'launch_prep']
-
-  return phaseOrder.map((phaseKey) => {
-    const phase = businessProgress.phases[phaseKey] as PhaseProgress
-    const config = phaseConfig[phaseKey]
-
-    // Generate task items based on phase progress
-    const tasks: Task[] = []
-    const completedCount = phase.tasksCompleted
-    const totalCount = phase.tasksTotal
-
-    for (let i = 0; i < totalCount; i++) {
-      let status: Task['status'] = 'pending'
-      if (i < completedCount) {
-        status = 'completed'
-      } else if (i === completedCount && phase.status === 'in_progress') {
-        status = 'in_progress'
-      }
-
-      tasks.push({
-        id: `${phaseKey}-task-${i + 1}`,
-        title: `Task ${i + 1}`,
-        status,
-      })
-    }
-
-    return {
-      id: phaseKey,
-      title: config.title,
-      icon: config.icon,
-      tasks,
-      isExpanded: phase.status === 'in_progress',
-    }
-  })
-}
-
-/** Calculate current stage label from business progress */
-function getStageLabel(businessProgress: BusinessProgress | undefined): string {
-  if (!businessProgress?.phases) return 'Getting Started'
-
-  const phaseOrder: TaskPhase[] = ['ideation', 'legal', 'financial', 'launch_prep']
-  const phaseNames: Record<TaskPhase, string> = {
-    ideation: 'Foundation',
-    legal: 'Legal & Compliance',
-    financial: 'Financials',
-    launch_prep: 'Launch Prep',
-  }
-
-  for (let i = 0; i < phaseOrder.length; i++) {
-    const phaseKey = phaseOrder[i]
-    const phase = businessProgress.phases[phaseKey]
-    if (phase.status === 'in_progress' || phase.status === 'not_started') {
-      return `Stage ${i + 1}: ${phaseNames[phaseKey]}`
-    }
-  }
-
-  return 'Complete'
-}
-
 function HomePageSkeleton() {
   return (
-    <AppShell
-      leftSidebar={
-        <div className="flex h-full flex-col p-6">
-          <Skeleton className="mb-4 h-8 w-32" />
-          <Skeleton className="mb-2 h-4 w-24" />
-          <div className="mt-auto">
-            <Skeleton className="h-10 w-full rounded-lg" />
-          </div>
-        </div>
-      }
-      rightSidebar={
-        <div className="flex h-full flex-col p-6">
-          <Skeleton className="mb-4 h-6 w-40" />
-          <Skeleton className="mb-6 h-2 w-full rounded-full" />
-          <Skeleton className="mb-6 h-32 w-full rounded-xl" />
+    <div className="flex h-full flex-col">
+      <div className="border-b border-slate-200 p-4 dark:border-zinc-700">
+        <Skeleton className="h-6 w-24" />
+      </div>
+      <div className="flex-1 p-6">
+        <div className="mx-auto max-w-3xl">
+          <Skeleton className="mb-6 h-24 w-full rounded-xl" />
           <div className="space-y-4">
-            <Skeleton className="h-4 w-32" />
-            <Skeleton className="h-8 w-full" />
-            <Skeleton className="h-8 w-full" />
-          </div>
-        </div>
-      }
-    >
-      <div className="flex h-full flex-col">
-        <div className="border-b border-slate-200 p-4 dark:border-zinc-700">
-          <Skeleton className="h-6 w-24" />
-        </div>
-        <div className="flex-1 p-6">
-          <div className="mx-auto max-w-3xl">
-            <Skeleton className="mb-6 h-24 w-full rounded-xl" />
-            <div className="space-y-4">
-              <Skeleton className="h-16 w-3/4" />
-              <Skeleton className="h-32 w-full" />
-            </div>
+            <Skeleton className="h-16 w-3/4" />
+            <Skeleton className="h-32 w-full" />
           </div>
         </div>
       </div>
-    </AppShell>
+    </div>
   )
 }
 
 export function HomePage() {
-  const { user } = useAuthStore()
-  const { dashboardData, heroTask, isLoading, setDashboardData, setLoading, setError } =
-    useDashboardStore()
+  const { dashboardData, isLoading, setDashboardData, setLoading, setError } = useDashboardStore()
 
   // Fetch dashboard data on mount
   const fetchDashboardData = useCallback(async () => {
@@ -170,35 +70,8 @@ export function HomePage() {
     return <HomePageSkeleton />
   }
 
-  const userName = user?.firstName || 'there'
-  const phases = mapPhasesToSidebarFormat(dashboardData?.businessProgress)
-  const progressPercent = dashboardData?.businessProgress?.completionPercentage ?? 0
-  const stageLabel = getStageLabel(dashboardData?.businessProgress)
-
-  // Map hero task to recommended task format for sidebar
-  const recommendedTask = heroTask
-    ? {
-        id: heroTask.id,
-        title: heroTask.title,
-        description: heroTask.description,
-        icon: heroTask.metadata?.icon || 'task_alt',
-      }
-    : undefined
-
   return (
-    <AppShell
-      leftSidebar={<LeftSidebar userName={userName} userPlan="Pro Plan" />}
-      rightSidebar={
-        <RightSidebar
-          stageLabel={stageLabel}
-          progressPercent={progressPercent}
-          recommendedTask={recommendedTask}
-          phases={phases}
-          onStartTask={(id) => console.warn('Start task:', id)}
-          onViewRoadmap={() => console.warn('View roadmap')}
-        />
-      }
-    >
+    <>
       <ChatHeader title="Home" onShare={() => console.warn('Share clicked')} />
 
       <div className="hide-scrollbar flex-1 overflow-y-auto scroll-smooth">
@@ -249,6 +122,6 @@ export function HomePage() {
         onSend={(msg) => console.warn('Send:', msg)}
         onActionClick={(action) => console.warn('Action:', action)}
       />
-    </AppShell>
+    </>
   )
 }
