@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { AppShell, LeftSidebar } from '@/components/layout'
 import { Icon } from '@/components/ui/Icon'
 import { DocumentCard } from '@/features/documents/components/DocumentCard'
 import { UploadedFileRow } from '@/features/documents/components/UploadedFileRow'
-import { DataRoomPanel } from '@/features/documents/components/DataRoomPanel'
 
 const FILTER_TABS = ['All', 'Legal', 'Finance', 'Assets'] as const
 type FilterTab = (typeof FILTER_TABS)[number]
@@ -37,34 +35,11 @@ const UPLOADED_FILES = [
   { filename: 'Brand_Logo_Assets_v4.zip', fileSize: '14.8 MB', uploadDate: '3 days ago' },
 ]
 
-const DATA_ROOM_ITEMS = [
-  { label: 'Inc. Documents', completed: true },
-  { label: 'IP Assignments', completed: false },
-  { label: 'Cap Table', completed: false },
-]
-
-const UPCOMING_REQUIREMENTS = [
-  { title: 'Term Sheet', subtitle: 'Review Template' },
-  { title: 'Advisor Agreement', subtitle: 'Generate Draft' },
-]
-
 export function DocumentsPage() {
   const [activeTab, setActiveTab] = useState<FilterTab>('All')
 
   return (
-    <AppShell
-      leftSidebar={<LeftSidebar userName="Erica" userPlan="Pro Plan" />}
-      rightSidebar={
-        <DataRoomPanel
-          milestone="Milestone: Seed Round"
-          progress={45}
-          items={DATA_ROOM_ITEMS}
-          upcomingRequirements={UPCOMING_REQUIREMENTS}
-          onOpenDataRoom={() => console.warn('Open data room')}
-          onScheduleReview={() => console.warn('Schedule review')}
-        />
-      }
-    >
+    <>
       {/* Header */}
       <header className="flex-shrink-0 border-b border-slate-100 px-8 py-6 dark:border-zinc-800">
         <div className="flex items-center justify-between">
@@ -158,6 +133,6 @@ export function DocumentsPage() {
           </div>
         </section>
       </div>
-    </AppShell>
+    </>
   )
 }

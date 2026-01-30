@@ -2,15 +2,16 @@
  * TaskLibraryPage Component
  * Displays all tasks organized by phase with filtering capabilities
  * Uses real data from dashboard API
+ *
+ * Note: This page is wrapped by AppShellLayout which provides the three-column
+ * layout with LeftSidebar and RightSidebar. This component only renders the
+ * main content area.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AppShell, LeftSidebar } from '@/components/layout'
 import { Icon } from '@/components/ui/Icon'
 import { TaskCard, type TaskStatus } from '@/features/tasks/components/TaskCard'
 import { PhaseSection } from '@/features/tasks/components/PhaseSection'
-import { ActiveCategoryPanel } from '@/features/tasks/components/ActiveCategoryPanel'
-import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { useDashboardStore } from '@/features/dashboard/hooks/useDashboardStore'
 import { dashboardApi } from '@/features/dashboard/api/dashboard.api'
 import type { PhaseProgress, TaskPhase, UserTask } from '@shared/types'
@@ -56,15 +57,15 @@ function groupTasksByPhase(tasks: UserTask[]): Record<TaskPhase, UserTask[]> {
   return grouped
 }
 
-// Get active phase from progress data
+// Get active phase from progress data with null safety
 function getActivePhase(
-  phases?: Record<string, PhaseProgress>
+  phases?: Record<string, PhaseProgress> | null
 ): { phase: TaskPhase; progress: PhaseProgress } | null {
   if (!phases) return null
   const phaseOrder: TaskPhase[] = ['ideation', 'legal', 'financial', 'launch_prep']
   for (const phase of phaseOrder) {
     const progress = phases[phase]
-    if (progress?.status !== 'completed') return { phase, progress }
+    if (progress && progress.status !== 'completed') return { phase, progress }
   }
   return null
 }
@@ -82,7 +83,6 @@ function deduplicateTasks(tasks: UserTask[]): UserTask[] {
 // Custom hook for task library data and actions
 function useTaskLibraryData() {
   const navigate = useNavigate()
-  const { user } = useAuthStore()
   const {
     dashboardData,
     heroTask,
@@ -131,15 +131,9 @@ function useTaskLibraryData() {
   )
 
   const handleTaskAction = useCallback((taskId: string) => navigate(`/tasks/${taskId}`), [navigate])
-  const handleViewDetails = useCallback(() => {
-    if (heroTask) navigate(`/tasks/${heroTask.id}`)
-  }, [heroTask, navigate])
-  const handleViewRoadmap = useCallback(() => navigate('/roadmap'), [navigate])
 
   return {
-    user,
     dashboardData,
-    heroTask,
     isLoading,
     error,
     allTasks,
@@ -147,16 +141,12 @@ function useTaskLibraryData() {
     activePhaseInfo,
     fetchData,
     handleTaskAction,
-    handleViewDetails,
-    handleViewRoadmap,
   }
 }
 
 export function TaskLibraryPage() {
   const {
-    user,
     dashboardData,
-    heroTask,
     isLoading,
     error,
     allTasks,
@@ -164,53 +154,28 @@ export function TaskLibraryPage() {
     activePhaseInfo,
     fetchData,
     handleTaskAction,
-    handleViewDetails,
-    handleViewRoadmap,
   } = useTaskLibraryData()
 
   const [_filterOpen, setFilterOpen] = useState(false)
-  const userName = user?.firstName || 'User'
 
-  const activePhaseProgress = useMemo(() => {
-    if (!activePhaseInfo) return { progress: 0, completed: 0, total: 0 }
-    const { progress } = activePhaseInfo
-    const pct =
-      progress.tasksTotal > 0
-        ? Math.round((progress.tasksCompleted / progress.tasksTotal) * 100)
-        : 0
-    return { progress: pct, completed: progress.tasksCompleted, total: progress.tasksTotal }
-  }, [activePhaseInfo])
-
-  const activePhaseMilestones = useMemo(() => {
-    if (!activePhaseInfo) return []
-    const phaseTasks = tasksByPhase[activePhaseInfo.phase] || []
-    return phaseTasks
-      .slice(0, 4)
-      .map((task) => ({ label: task.title, completed: task.status === 'completed' }))
-  }, [activePhaseInfo, tasksByPhase])
-
-  const activePhaseName = activePhaseInfo
-    ? `Phase ${PHASE_CONFIG[activePhaseInfo.phase].number}: ${PHASE_CONFIG[activePhaseInfo.phase].title}`
-    : 'Phase 1: Foundation'
-
-  const sidebar = <LeftSidebar userName={userName} userPlan="Pro Plan" />
-
+  // Loading state
   if (isLoading && !dashboardData) {
     return (
-      <AppShell leftSidebar={sidebar}>
+      <div className="flex h-full flex-col">
         <div className="flex h-full items-center justify-center">
           <div className="text-center">
-            <div className="mb-4 h-8 w-8 mx-auto animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
+            <div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-primary-600 border-t-transparent" />
             <p className="text-slate-500 dark:text-slate-400">Loading tasks...</p>
           </div>
         </div>
-      </AppShell>
+      </div>
     )
   }
 
+  // Error state
   if (error && !dashboardData) {
     return (
-      <AppShell leftSidebar={sidebar}>
+      <div className="flex h-full flex-col">
         <div className="flex h-full items-center justify-center">
           <div className="max-w-md text-center">
             <div className="mb-4 rounded-lg bg-red-50 p-6 dark:bg-red-900/20">
@@ -224,28 +189,12 @@ export function TaskLibraryPage() {
             </button>
           </div>
         </div>
-      </AppShell>
+      </div>
     )
   }
 
   return (
-    <AppShell
-      leftSidebar={sidebar}
-      rightSidebar={
-        <ActiveCategoryPanel
-          phaseName={activePhaseName}
-          progress={activePhaseProgress.progress}
-          completedCount={activePhaseProgress.completed}
-          totalCount={activePhaseProgress.total}
-          currentTask={
-            heroTask ? { title: heroTask.title, description: heroTask.description } : undefined
-          }
-          milestones={activePhaseMilestones}
-          onViewDetails={handleViewDetails}
-          onViewRoadmap={handleViewRoadmap}
-        />
-      }
-    >
+    <>
       <header className="flex-shrink-0 border-b border-slate-100 px-8 py-6 dark:border-zinc-800">
         <div className="flex items-center justify-between">
           <div>
@@ -267,7 +216,7 @@ export function TaskLibraryPage() {
       <div className="hide-scrollbar flex-1 overflow-y-auto p-8">
         {(Object.keys(PHASE_CONFIG) as TaskPhase[]).map((phase) => {
           const config = PHASE_CONFIG[phase]
-          const phaseTasks = tasksByPhase[phase]
+          const phaseTasks = tasksByPhase[phase] || []
           if (phaseTasks.length === 0) return null
           return (
             <PhaseSection
@@ -304,6 +253,6 @@ export function TaskLibraryPage() {
           </div>
         )}
       </div>
-    </AppShell>
+    </>
   )
 }
