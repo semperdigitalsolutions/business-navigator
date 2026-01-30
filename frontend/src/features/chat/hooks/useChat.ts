@@ -2,7 +2,8 @@
  * useChat Hook - Manage chat state and interactions
  */
 import { useCallback, useState } from 'react'
-import { chatApi, type ChatMessage, type ChatRequest } from '../api/chat.api'
+import { chatApi, isRateLimitResponse, type ChatMessage, type ChatRequest } from '../api/chat.api'
+import { useChatUsageStore } from './useChatUsageStore'
 
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -12,8 +13,17 @@ export function useChat() {
   const [error, setError] = useState<string | null>(null)
   const [currentAgent, setCurrentAgent] = useState<string>('triage')
 
+  // Get usage state from store
+  const { limitReached, incrementUsage } = useChatUsageStore()
+
   const sendMessage = useCallback(
     async (content: string, options?: Partial<ChatRequest>) => {
+      // Check if limit reached before sending
+      if (limitReached) {
+        setError('Daily message limit reached. Please try again later.')
+        return
+      }
+
       setLoading(true)
       setError(null)
 
@@ -26,6 +36,9 @@ export function useChat() {
       }
       setMessages((prev) => [...prev, userMessage])
 
+      // Optimistically increment usage
+      incrementUsage()
+
       try {
         const response = await chatApi.sendMessage({
           message: content,
@@ -33,6 +46,14 @@ export function useChat() {
           sessionId,
           ...options,
         })
+
+        // Handle rate limit response
+        if (isRateLimitResponse(response)) {
+          setError(`Daily message limit reached. Resets in ${response.retryAfter} seconds.`)
+          // Remove the optimistic user message
+          setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id))
+          return
+        }
 
         if (response.success && response.data) {
           // Update thread and session IDs
@@ -56,15 +77,21 @@ export function useChat() {
         } else {
           setError(response.error || 'Failed to send message')
         }
-      } catch (err: any) {
-        setError(err.error || 'An error occurred')
+      } catch (err: unknown) {
+        const errorObj = err as { error?: string; retryAfter?: number; status?: number }
+        // Check if this is a rate limit error (429)
+        if (errorObj.error === 'Too many requests' || errorObj.retryAfter) {
+          setError(`Rate limit exceeded. Please try again in ${errorObj.retryAfter || 60} seconds.`)
+        } else {
+          setError(errorObj.error || 'An error occurred')
+        }
         // Remove the optimistic user message on error
         setMessages((prev) => prev.filter((msg) => msg.id !== userMessage.id))
       } finally {
         setLoading(false)
       }
     },
-    [threadId, sessionId]
+    [threadId, sessionId, limitReached, incrementUsage]
   )
 
   const clearChat = useCallback(() => {
@@ -94,6 +121,7 @@ export function useChat() {
     currentAgent,
     loading,
     error,
+    limitReached,
     sendMessage,
     clearChat,
     loadSession,

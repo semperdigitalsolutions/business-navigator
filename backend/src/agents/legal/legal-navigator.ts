@@ -55,16 +55,23 @@ async function processLegalQuery(state: LegalStateType): Promise<Partial<LegalSt
   const lastMessage = state.messages[state.messages.length - 1]
   const userQuery = lastMessage.content as string
 
-  // Build context-aware system prompt
+  // Build context-aware system prompt (Issue #95)
   let contextInfo = ''
-  if (state.businessType) {
-    contextInfo += `\nUser's business type: ${state.businessType}`
-  }
-  if (state.state) {
-    contextInfo += `\nUser's state: ${state.state}`
-  }
-  if (state.metadata?.businessContext) {
-    contextInfo += `\nBusiness status: ${state.metadata.businessContext.status}`
+
+  // Use rich context if available
+  if (state.userContextSummary) {
+    contextInfo = `\n\n${state.userContextSummary}`
+  } else {
+    // Fallback to basic context
+    if (state.businessType) {
+      contextInfo += `\nUser's business type: ${state.businessType}`
+    }
+    if (state.state) {
+      contextInfo += `\nUser's state: ${state.state}`
+    }
+    if (state.metadata?.businessContext) {
+      contextInfo += `\nBusiness status: ${state.metadata.businessContext.status}`
+    }
   }
 
   const systemPrompt = LEGAL_SYSTEM_PROMPT + contextInfo

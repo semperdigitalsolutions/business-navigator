@@ -1,5 +1,7 @@
 import { KeyboardEvent, useRef, useState } from 'react'
 import { Icon } from '@/components/ui/Icon'
+import { ChatUsageMinimal } from './ChatUsageIndicator'
+import { ChatDisclaimer } from './ChatDisclaimer'
 
 export interface SuggestedAction {
   label: string
@@ -13,6 +15,10 @@ export interface ChatInputProps {
   onActionClick?: (action: SuggestedAction) => void
   placeholder?: string
   disabled?: boolean
+  /** Whether to show the usage indicator in the footer */
+  showUsage?: boolean
+  /** Whether to show the AI disclaimer below the input */
+  showDisclaimer?: boolean
 }
 
 export function ChatInput({
@@ -21,6 +27,8 @@ export function ChatInput({
   onActionClick,
   placeholder = 'Type your next request...',
   disabled = false,
+  showUsage = true,
+  showDisclaimer = true,
 }: ChatInputProps) {
   const [value, setValue] = useState('')
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -98,9 +106,20 @@ export function ChatInput({
           </div>
         </div>
 
-        <p className="mt-3 text-center text-[10px] font-medium tracking-wide text-slate-400">
-          BUSINESS NAVIGATOR AI - ACCURACY SUBJECT TO VERIFICATION
-        </p>
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {showUsage && (
+            <>
+              <ChatUsageMinimal />
+              <span className="text-slate-300 dark:text-slate-600">|</span>
+            </>
+          )}
+          <p className="text-[10px] font-medium tracking-wide text-slate-400">
+            ACCURACY SUBJECT TO VERIFICATION
+          </p>
+        </div>
+
+        {/* AI Disclaimer - shown below input with dismiss functionality */}
+        {showDisclaimer && <ChatDisclaimer className="mt-4" />}
       </div>
     </div>
   )

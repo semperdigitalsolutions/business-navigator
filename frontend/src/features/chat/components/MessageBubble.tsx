@@ -1,7 +1,9 @@
 /**
  * Message Bubble Component
+ * Issue #103: Updated to support inline task link chips in AI responses
  */
 import type { ChatMessage } from '../api/chat.api'
+import { MessageContent } from './MessageContent'
 
 interface MessageBubbleProps {
   message: ChatMessage
@@ -50,7 +52,12 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
           }`}
         >
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          {/* User messages render as plain text, AI responses parse task links */}
+          {isUser ? (
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          ) : (
+            <MessageContent content={message.content} />
+          )}
           {message.tokens_used && (
             <p className="text-xs mt-2 opacity-70">{message.tokens_used} tokens used</p>
           )}
