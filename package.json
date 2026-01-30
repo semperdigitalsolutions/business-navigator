@@ -29,7 +29,10 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
     "quality": "bun run format:check && bun run lint && bun run type-check",
     "prepare": "husky",
-    "install:all": "bun install"
+    "install:all": "bun install",
+    "migrate:credits": "bun scripts/migrations/migrate_to_credits.ts",
+    "migrate:credits:dry-run": "bun scripts/migrations/migrate_to_credits.ts --dry-run",
+    "migrate:credits:rollback": "bun scripts/migrations/rollback_credits_migration.ts"
   },
   "devDependencies": {
     "@rollup/rollup-darwin-arm64": "^4.55.1",
