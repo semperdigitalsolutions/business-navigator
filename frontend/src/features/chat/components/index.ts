@@ -33,3 +33,9 @@ export type { TaskLinkChipProps } from './TaskLinkChip'
 
 export { MessageContent } from './MessageContent'
 export type { MessageContentProps } from './MessageContent'
+
+export { ModelSelector } from './ModelSelector'
+export type { ModelSelectorProps } from './ModelSelector'
+
+export { CostPreview } from './CostPreview'
+export type { CostPreviewProps } from './CostPreview'

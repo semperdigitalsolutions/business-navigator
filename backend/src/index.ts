@@ -15,6 +15,8 @@ import { onboardingRoutes } from './routes/onboarding.routes.js'
 import { dashboardRoutes } from './routes/dashboard.routes.js'
 import { tasksRoutes } from './routes/tasks.routes.js'
 import { waitlistRoutes } from './routes/waitlist.routes.js'
+import { creditsRoutes } from './routes/credits.routes.js'
+import { adminRoutes } from './routes/admin.routes.js'
 import { successResponse } from './middleware/error.js'
 
 // Create Elysia app
@@ -53,6 +55,8 @@ const _app = new Elysia()
   .use(dashboardRoutes)
   .use(tasksRoutes)
   .use(waitlistRoutes)
+  .use(creditsRoutes)
+  .use(adminRoutes)
 
   // Global error handler
   .onError(({ code, error, set }) => {
