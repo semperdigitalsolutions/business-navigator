@@ -21,9 +21,15 @@ async function classifyIntent(state: TriageStateType): Promise<Partial<TriageSta
   const lastMessage = state.messages[state.messages.length - 1]
   const userQuery = lastMessage.content as string
 
+  // Build system prompt with context if available (Issue #95)
+  let systemPrompt = TRIAGE_SYSTEM_PROMPT
+  if (state.userContextSummary) {
+    systemPrompt = `${TRIAGE_SYSTEM_PROMPT}\n\n${state.userContextSummary}`
+  }
+
   try {
     const response = await llm.invoke([
-      new SystemMessage(TRIAGE_SYSTEM_PROMPT),
+      new SystemMessage(systemPrompt),
       new HumanMessage(userQuery),
     ])
 

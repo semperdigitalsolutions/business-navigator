@@ -18,6 +18,7 @@ export interface Database {
           avatar_url: string | null
           onboarding_completed: boolean
           onboarding_completed_at: string | null
+          subscription_tier: 'free' | 'basic' | 'pro' | 'enterprise'
           created_at: string
           updated_at: string
         }
@@ -29,6 +30,7 @@ export interface Database {
           avatar_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
+          subscription_tier?: 'free' | 'basic' | 'pro' | 'enterprise'
           created_at?: string
           updated_at?: string
         }
@@ -40,6 +42,7 @@ export interface Database {
           avatar_url?: string | null
           onboarding_completed?: boolean
           onboarding_completed_at?: string | null
+          subscription_tier?: 'free' | 'basic' | 'pro' | 'enterprise'
           created_at?: string
           updated_at?: string
         }
@@ -527,6 +530,40 @@ export interface Database {
         }
         Relationships: []
       }
+      user_message_counts: {
+        Row: {
+          id: string
+          user_id: string
+          date: string
+          message_count: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          date?: string
+          message_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          date?: string
+          message_count?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'user_message_counts_user_id_fkey'
+            columns: ['user_id']
+            referencedRelation: 'users'
+            referencedColumns: ['id']
+          },
+        ]
+      }
     }
     Views: Record<string, never>
     Functions: {
@@ -551,6 +588,18 @@ export interface Database {
         }
         Returns: void
       }
+      increment_user_message_count: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
+      get_user_message_count: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       business_type: 'LLC' | 'CORPORATION' | 'SOLE_PROPRIETORSHIP' | 'PARTNERSHIP'
@@ -564,6 +613,7 @@ export interface Database {
       funding_approach: 'personal_savings' | 'investment' | 'loan' | 'multiple' | 'none'
       previous_experience: 'first_business' | 'experienced'
       primary_concern: 'legal' | 'financial' | 'marketing' | 'product' | 'time'
+      subscription_tier: 'free' | 'basic' | 'pro' | 'enterprise'
     }
   }
 }

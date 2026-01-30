@@ -23,3 +23,13 @@ export type UserTaskUpdate = Database['public']['Tables']['user_tasks']['Update'
 export type Business = Database['public']['Tables']['businesses']['Row']
 export type BusinessInsert = Database['public']['Tables']['businesses']['Insert']
 export type BusinessUpdate = Database['public']['Tables']['businesses']['Update']
+
+export type UserMessageCount = Database['public']['Tables']['user_message_counts']['Row']
+export type UserMessageCountInsert = Database['public']['Tables']['user_message_counts']['Insert']
+export type UserMessageCountUpdate = Database['public']['Tables']['user_message_counts']['Update']
+
+export type User = Database['public']['Tables']['users']['Row']
+export type UserInsert = Database['public']['Tables']['users']['Insert']
+export type UserUpdate = Database['public']['Tables']['users']['Update']
+
+export type SubscriptionTier = Database['public']['Enums']['subscription_tier']

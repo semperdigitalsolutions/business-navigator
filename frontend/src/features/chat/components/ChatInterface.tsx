@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useChat } from '../hooks/useChat'
 import { MessageBubble } from './MessageBubble'
 import { AgentIndicator } from './AgentIndicator'
+import { TypingIndicator } from './TypingIndicator'
+import { ChatDisclaimer } from './ChatDisclaimer'
 
 export function ChatInterface() {
   const { messages, currentAgent, loading, error, sendMessage, clearChat } = useChat()
@@ -74,14 +76,7 @@ export function ChatInterface() {
             {messages.map((message) => (
               <MessageBubble key={message.id} message={message} />
             ))}
-            {loading && (
-              <div className="flex items-center gap-2 text-gray-500">
-                <div className="animate-pulse">●</div>
-                <div className="animate-pulse delay-100">●</div>
-                <div className="animate-pulse delay-200">●</div>
-                <span className="ml-2">AI is thinking...</span>
-              </div>
-            )}
+            {loading && <TypingIndicator />}
           </>
         )}
         <div ref={messagesEndRef} />
@@ -113,6 +108,8 @@ export function ChatInterface() {
             Send
           </button>
         </div>
+        {/* AI Disclaimer */}
+        <ChatDisclaimer className="mt-4" />
       </form>
     </div>
   )

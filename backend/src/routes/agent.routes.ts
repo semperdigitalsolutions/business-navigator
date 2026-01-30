@@ -10,6 +10,9 @@ import { supabase } from '@/config/database.js'
 import { decrypt } from '@/utils/crypto.js'
 import { v4 as uuidv4 } from 'uuid'
 import type { AgentSessionInsert, ChatMessageInsert } from '@/types/supabase-helpers.js'
+import { usageLimitsService } from '@/services/usage-limits.service.js'
+import { suggestionsService } from '@/services/suggestions.service.js'
+import { contextService } from '@/services/context.service.js'
 
 export const agentRoutes = new Elysia({ prefix: '/api/agent' })
   // Chat with AI agents (with LangGraph orchestration)
@@ -17,6 +20,25 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
     '/chat',
     async ({ body, request }) => {
       const auth = await optionalAuthMiddleware({ request } as any)
+
+      // Check usage limits for authenticated users (Issue #97, #98)
+      if (auth?.userId) {
+        const usageCheck = await usageLimitsService.checkUsageLimit(auth.userId)
+        if (!usageCheck.allowed) {
+          const limitError = usageLimitsService.createLimitExceededError(usageCheck)
+          return {
+            success: false,
+            error: limitError.message,
+            code: limitError.code,
+            data: {
+              currentCount: limitError.currentCount,
+              limit: limitError.limit,
+              tier: limitError.tier,
+              resetTime: limitError.resetTime,
+            },
+          }
+        }
+      }
 
       try {
         const graph = await getMainGraph()
@@ -55,6 +77,23 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
           llmProvider = body.provider
         }
 
+        // Generate context for authenticated users (Issue #95)
+        let userContext = undefined
+        let userContextSummary = undefined
+        if (auth?.userId) {
+          try {
+            const contextResult = await contextService.generateChatContext(
+              auth.userId,
+              body.businessId
+            )
+            userContext = contextResult.context
+            userContextSummary = contextResult.formattedSummary
+          } catch (contextError) {
+            console.error('Error generating context:', contextError)
+            // Continue without context if generation fails
+          }
+        }
+
         // Build initial state
         const initialState = {
           messages: [new HumanMessage(body.message)],
@@ -65,6 +104,8 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
           llmProvider,
           llmModel,
           llmApiKey,
+          userContext,
+          userContextSummary,
         }
 
         // Invoke the graph with checkpointing
@@ -124,6 +165,9 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
 
             await supabase.from('chat_messages').insert(messages)
           }
+
+          // Increment message count after successful processing (Issue #97)
+          await usageLimitsService.incrementMessageCount(auth.userId)
         }
 
         return successResponse({
@@ -264,4 +308,44 @@ export const agentRoutes = new Elysia({ prefix: '/api/agent' })
         'Context awareness',
       ],
     })
+  )
+
+  // Get usage statistics for the authenticated user (Issue #97, #98)
+  .get('/usage', async ({ request }) => {
+    const auth = await optionalAuthMiddleware({ request } as any)
+    if (!auth?.userId) {
+      return errorResponse('Authentication required', 401)
+    }
+
+    try {
+      const stats = await usageLimitsService.getUsageStats(auth.userId)
+      return successResponse(stats)
+    } catch (error: any) {
+      console.error('Error fetching usage stats:', error)
+      return errorResponse(error.message || 'Failed to fetch usage statistics')
+    }
+  })
+
+  // Get context-aware suggested questions (Issue #96)
+  .get(
+    '/suggestions',
+    async ({ request, query }) => {
+      const auth = await optionalAuthMiddleware({ request } as any)
+      if (!auth?.userId) {
+        return errorResponse('Authentication required', 401)
+      }
+
+      try {
+        const result = await suggestionsService.getSuggestions(auth.userId, query.businessId)
+        return successResponse(result)
+      } catch (error: any) {
+        console.error('Error fetching suggestions:', error)
+        return errorResponse(error.message || 'Failed to fetch suggestions')
+      }
+    },
+    {
+      query: t.Object({
+        businessId: t.Optional(t.String()),
+      }),
+    }
   )

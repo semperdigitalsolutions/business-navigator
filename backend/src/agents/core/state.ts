@@ -4,6 +4,7 @@
  */
 import { BaseMessage } from '@langchain/core/messages'
 import { Annotation } from '@langchain/langgraph'
+import type { ChatContext } from '@shared/types'
 
 /**
  * Main agent state that persists across conversation turns
@@ -40,6 +41,10 @@ export const AgentState = Annotation.Root({
       }
     | undefined
   >(),
+
+  // Rich user context (Issue #95)
+  userContext: Annotation<ChatContext | undefined>(),
+  userContextSummary: Annotation<string | undefined>(),
 
   // Progress tracking
   completedSteps: Annotation<string[]>({

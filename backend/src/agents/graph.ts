@@ -13,6 +13,7 @@ import { createFinancialPlannerAgent } from './financial/financial-planner.js'
 import { createTaskAssistantAgent } from './tasks/task-assistant.js'
 import { GENERAL_SYSTEM_PROMPT } from './core/prompts.js'
 import { createLLM, getLLMConfigFromState } from './core/llm.js'
+import { appendDisclaimer, shouldAddDisclaimer } from './core/disclaimers.js'
 
 /**
  * Initialize all specialist agents
@@ -49,11 +50,23 @@ async function routeToTriage(state: AgentStateType): Promise<Partial<AgentStateT
 async function routeToLegal(state: AgentStateType): Promise<Partial<AgentStateType>> {
   try {
     const result = await legalAgent.invoke(state)
+
+    // Get user query for topic-specific disclaimer
+    const lastUserMessage = state.messages[state.messages.length - 1]
+    const userQuery = lastUserMessage ? (lastUserMessage.content as string) : ''
+
+    // Add disclaimers to response messages
+    const messagesWithDisclaimers = addDisclaimersToMessages(
+      result.messages as AIMessage[],
+      'legal',
+      userQuery
+    )
+
     return {
-      messages: result.messages,
+      messages: messagesWithDisclaimers,
       tokensUsed: result.tokensUsed || 0,
       confidence: result.confidence,
-      metadata: result.metadata,
+      metadata: { ...result.metadata, disclaimerAdded: true },
     }
   } catch (error) {
     console.error('Error in legal agent:', error)
@@ -74,11 +87,23 @@ async function routeToLegal(state: AgentStateType): Promise<Partial<AgentStateTy
 async function routeToFinancial(state: AgentStateType): Promise<Partial<AgentStateType>> {
   try {
     const result = await financialAgent.invoke(state)
+
+    // Get user query for topic-specific disclaimer
+    const lastUserMessage = state.messages[state.messages.length - 1]
+    const userQuery = lastUserMessage ? (lastUserMessage.content as string) : ''
+
+    // Add disclaimers to response messages
+    const messagesWithDisclaimers = addDisclaimersToMessages(
+      result.messages as AIMessage[],
+      'financial',
+      userQuery
+    )
+
     return {
-      messages: result.messages,
+      messages: messagesWithDisclaimers,
       tokensUsed: result.tokensUsed || 0,
       confidence: result.confidence,
-      metadata: result.metadata,
+      metadata: { ...result.metadata, disclaimerAdded: true },
     }
   } catch (error) {
     console.error('Error in financial agent:', error)
@@ -99,8 +124,20 @@ async function routeToFinancial(state: AgentStateType): Promise<Partial<AgentSta
 async function routeToTask(state: AgentStateType): Promise<Partial<AgentStateType>> {
   try {
     const result = await taskAgent.invoke(state)
+
+    // Get user query for topic-specific disclaimer (tasks may discuss legal/financial topics)
+    const lastUserMessage = state.messages[state.messages.length - 1]
+    const userQuery = lastUserMessage ? (lastUserMessage.content as string) : ''
+
+    // Add disclaimers if task response discusses legal/financial topics
+    const messagesWithDisclaimers = addDisclaimersToMessages(
+      result.messages as AIMessage[],
+      'tasks',
+      userQuery
+    )
+
     return {
-      messages: result.messages,
+      messages: messagesWithDisclaimers,
       tokensUsed: result.tokensUsed || 0,
       confidence: result.confidence,
       completedSteps: result.completedSteps || [],
@@ -127,21 +164,33 @@ async function handleGeneral(state: AgentStateType): Promise<Partial<AgentStateT
     const llmConfig = getLLMConfigFromState(state)
     const llm = createLLM(llmConfig)
 
+    // Build system prompt with context if available (Issue #95)
+    let systemPrompt = GENERAL_SYSTEM_PROMPT
+    if (state.userContextSummary) {
+      systemPrompt = `${GENERAL_SYSTEM_PROMPT}\n\n${state.userContextSummary}`
+    }
+
     const lastMessage = state.messages[state.messages.length - 1]
+    const userQuery = lastMessage.content as string
+
     const response = await llm.invoke([
-      { role: 'system', content: GENERAL_SYSTEM_PROMPT },
+      { role: 'system', content: systemPrompt },
       ...state.messages,
     ])
 
+    // Add disclaimers if general response discusses legal/financial topics
+    const messagesWithDisclaimers = addDisclaimersToMessages(
+      [response as AIMessage],
+      'general',
+      userQuery
+    )
+
     const tokensUsed = Math.ceil(
-      (GENERAL_SYSTEM_PROMPT.length +
-        (lastMessage.content as string).length +
-        (response.content as string).length) /
-        4
+      (systemPrompt.length + userQuery.length + (response.content as string).length) / 4
     )
 
     return {
-      messages: [response],
+      messages: messagesWithDisclaimers,
       tokensUsed,
       confidence: 0.8,
     }
@@ -171,6 +220,30 @@ function routeByAgent(state: AgentStateType): string {
     default:
       return 'general'
   }
+}
+
+/**
+ * Helper function to add disclaimers to agent response messages
+ */
+function addDisclaimersToMessages(
+  messages: AIMessage[],
+  agentType: string,
+  userQuery: string
+): AIMessage[] {
+  return messages.map((msg) => {
+    const content = msg.content as string
+    if (!shouldAddDisclaimer(content, agentType)) {
+      return msg
+    }
+    const contentWithDisclaimer = appendDisclaimer(content, agentType, userQuery)
+    if (contentWithDisclaimer === content) {
+      return msg
+    }
+    return new AIMessage({
+      content: contentWithDisclaimer,
+      tool_calls: msg.tool_calls || [],
+    })
+  })
 }
 
 /**
