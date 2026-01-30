@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react'
-import { AppShell, LeftSidebar } from '@/components/layout'
 import { useAuthStore } from '@/features/auth/hooks/useAuthStore'
 import { useDashboardStore } from '@/features/dashboard/hooks/useDashboardStore'
 import { AIPreferences } from '@/features/settings/components/AIPreferences'
@@ -32,12 +31,18 @@ function mapPhaseStatus(status: string): RoadmapStage['status'] {
 }
 
 function buildRoadmapData(businessProgress: BusinessProgress) {
-  const { phases, completionPercentage } = businessProgress
+  const phases = businessProgress?.phases
+  const completionPercentage = businessProgress?.completionPercentage ?? 0
+
+  if (!phases) {
+    return DEFAULT_ROADMAP
+  }
+
   const stages: RoadmapStage[] = [
-    { label: 'Ideation', status: mapPhaseStatus(phases.ideation.status) },
-    { label: 'Legal Setup', status: mapPhaseStatus(phases.legal.status) },
-    { label: 'Financial', status: mapPhaseStatus(phases.financial.status) },
-    { label: 'Launch Prep', status: mapPhaseStatus(phases.launchPrep.status) },
+    { label: 'Ideation', status: mapPhaseStatus(phases.ideation?.status ?? 'locked') },
+    { label: 'Legal Setup', status: mapPhaseStatus(phases.legal?.status ?? 'locked') },
+    { label: 'Financial', status: mapPhaseStatus(phases.financial?.status ?? 'locked') },
+    { label: 'Launch Prep', status: mapPhaseStatus(phases.launchPrep?.status ?? 'locked') },
   ]
 
   const inProgressStage = stages.find((s) => s.status === 'in_progress')
@@ -88,7 +93,6 @@ export function SettingsPage() {
     missionStatement: '',
   }))
 
-  const userName = user?.firstName || 'User'
   const { currentStage, progress, roadmapStages } = useMemo(
     () =>
       dashboardData?.businessProgress
@@ -98,7 +102,7 @@ export function SettingsPage() {
   )
 
   return (
-    <AppShell leftSidebar={<LeftSidebar userName={userName} userPlan="Pro Plan" />}>
+    <>
       <SettingsHeader />
       <div className="hide-scrollbar flex-1 overflow-y-auto p-8">
         <div className="mx-auto max-w-4xl space-y-6">
@@ -122,6 +126,6 @@ export function SettingsPage() {
           />
         </div>
       </div>
-    </AppShell>
+    </>
   )
 }
