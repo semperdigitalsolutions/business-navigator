@@ -263,3 +263,88 @@ export interface PaginatedResponse<T> {
   pageSize: number
   hasMore: boolean
 }
+
+// Chat Context types (Issue #95 - Context payload for AI)
+export type SubscriptionTier = 'free' | 'basic' | 'pro' | 'enterprise'
+
+export interface ChatContextUser {
+  name: string
+  subscriptionTier: SubscriptionTier
+  accountAgeDays: number
+  isFirstTimeBusiness: boolean
+}
+
+export interface ChatContextBusiness {
+  name: string
+  category: BusinessCategory | null
+  state: string | null
+  currentStage: CurrentStage | null
+  entityType: string | null
+  timeline: Timeline | null
+  fundingApproach: FundingApproach | null
+}
+
+export interface ChatContextProgress {
+  currentPhase: TaskPhase
+  completionPercentage: number
+  tasksCompleted: number
+  totalTasks: number
+  phaseProgress: {
+    ideation: number
+    legal: number
+    financial: number
+    launchPrep: number
+  }
+}
+
+export interface ChatContextRecentTask {
+  id: string
+  title: string
+  completedAt: Date
+}
+
+export interface ChatContextHeroTask {
+  id: string
+  title: string
+  description: string
+  phase: TaskPhase
+}
+
+export interface ChatContextPendingDecision {
+  id: string
+  label: string
+  category: 'business' | 'legal' | 'financial' | 'location'
+}
+
+export interface ChatContextRecentActivity {
+  lastCompletedTasks: ChatContextRecentTask[]
+  heroTask: ChatContextHeroTask | null
+}
+
+export interface ChatContext {
+  user: ChatContextUser
+  business: ChatContextBusiness | null
+  progress: ChatContextProgress
+  recentActivity: ChatContextRecentActivity
+  pendingDecisions: ChatContextPendingDecision[]
+  generatedAt: Date
+}
+
+export interface ChatContextSummary {
+  context: ChatContext
+  formattedSummary: string
+}
+
+// Suggested Questions types (Issue #96)
+export type SuggestionCategory = 'legal' | 'financial' | 'tasks' | 'general'
+
+export interface SuggestedQuestion {
+  id: string
+  text: string
+  category: SuggestionCategory
+  priority: number
+}
+
+export interface SuggestionsResponse {
+  suggestions: SuggestedQuestion[]
+}

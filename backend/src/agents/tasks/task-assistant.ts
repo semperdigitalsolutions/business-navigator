@@ -75,24 +75,31 @@ async function processTaskQuery(state: TaskStateType): Promise<Partial<TaskState
   const lastMessage = state.messages[state.messages.length - 1]
   const userQuery = lastMessage.content as string
 
-  // Build context with task information
+  // Build context with task information (Issue #95)
   let contextInfo = ''
-  if (state.metadata?.progress) {
-    const { completed, total, percentage } = state.metadata.progress
-    contextInfo += `\nUser progress: ${completed}/${total} tasks completed (${percentage}%)`
-  }
-  if (state.businessType) {
-    contextInfo += `\nBusiness type: ${state.businessType}`
-  }
-  if (state.metadata?.tasks && state.metadata.tasks.length > 0) {
-    const pendingTasks = state.metadata.tasks.filter((t: any) => t.status === 'pending')
-    const inProgressTasks = state.metadata.tasks.filter((t: any) => t.status === 'in_progress')
 
-    if (pendingTasks.length > 0) {
-      contextInfo += `\nPending tasks: ${pendingTasks.map((t: any) => t.title).join(', ')}`
+  // Use rich context if available
+  if (state.userContextSummary) {
+    contextInfo = `\n\n${state.userContextSummary}`
+  } else {
+    // Fallback to basic context
+    if (state.metadata?.progress) {
+      const { completed, total, percentage } = state.metadata.progress
+      contextInfo += `\nUser progress: ${completed}/${total} tasks completed (${percentage}%)`
     }
-    if (inProgressTasks.length > 0) {
-      contextInfo += `\nIn progress: ${inProgressTasks.map((t: any) => t.title).join(', ')}`
+    if (state.businessType) {
+      contextInfo += `\nBusiness type: ${state.businessType}`
+    }
+    if (state.metadata?.tasks && state.metadata.tasks.length > 0) {
+      const pendingTasks = state.metadata.tasks.filter((t: any) => t.status === 'pending')
+      const inProgressTasks = state.metadata.tasks.filter((t: any) => t.status === 'in_progress')
+
+      if (pendingTasks.length > 0) {
+        contextInfo += `\nPending tasks: ${pendingTasks.map((t: any) => t.title).join(', ')}`
+      }
+      if (inProgressTasks.length > 0) {
+        contextInfo += `\nIn progress: ${inProgressTasks.map((t: any) => t.title).join(', ')}`
+      }
     }
   }
 

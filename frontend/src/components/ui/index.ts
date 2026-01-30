@@ -88,3 +88,7 @@ export type { PullToRefreshProps } from './pull-to-refresh'
 // Icon
 export { Icon } from './Icon'
 export type { IconProps } from './Icon'
+
+// Limit Reached Modal
+export { LimitReachedModal } from './LimitReachedModal'
+export type { LimitReachedModalProps } from './LimitReachedModal'
