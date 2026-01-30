@@ -212,6 +212,67 @@ After database setup:
 4. ✅ Register a test user via `/api/auth/register`
 5. ✅ Test creating a business via `/api/businesses`
 
+---
+
+## Epic 9: Data-Driven Credits & Tier System
+
+Epic 9 adds a comprehensive credit-based usage system (migrations 011-020).
+
+### New Tables
+
+| Migration | Table                 | Description                                                 |
+| --------- | --------------------- | ----------------------------------------------------------- |
+| 011       | `subscription_tiers`  | Tier definitions (Free, Starter, Pro, Business, Enterprise) |
+| 012       | `ai_models`           | AI model catalog with credit costs per message              |
+| 013       | `user_credits`        | User credit balances and refill tracking                    |
+| 014       | `credit_transactions` | Immutable transaction ledger                                |
+| 015       | `site_settings`       | Application configuration key-value store                   |
+| 016       | `admin_api_keys`      | Encrypted platform API keys for AI providers                |
+| 017       | `admin_audit_log`     | Audit trail for admin actions                               |
+| 018       | `feature_flags`       | Feature toggles with tier-based access                      |
+| 019       | `users.is_admin`      | Admin column added to users table                           |
+| 020       | Credit functions      | PL/pgSQL functions for credit operations                    |
+
+### Running Epic 9 Migrations
+
+**Option 1: Supabase SQL Editor (Recommended)**
+
+Copy and run the consolidated script:
+
+```
+scripts/database/run_epic9_migrations_supabase.sql
+```
+
+**Option 2: psql Command Line**
+
+```bash
+cd scripts/database
+psql $DATABASE_URL -f run_epic9_migrations.sql
+```
+
+### Key Functions
+
+| Function                                       | Description                           |
+| ---------------------------------------------- | ------------------------------------- |
+| `spend_credits(user_id, model_id, message_id)` | Deduct credits for AI message         |
+| `add_credits(user_id, amount, type, ...)`      | Add credits (purchase, bonus, refill) |
+| `can_use_model(user_id, model_id)`             | Check if user can use a model         |
+| `get_credit_summary(user_id)`                  | Get user's credit balance and stats   |
+| `is_feature_enabled(key, user_id, tier)`       | Check if feature is enabled for user  |
+| `log_admin_action(...)`                        | Log admin action to audit trail       |
+
+### Rollback
+
+In case of emergency, run the rollback script:
+
+```bash
+psql $DATABASE_URL -f rollback_epic9.sql
+```
+
+**WARNING:** This will permanently delete all Epic 9 data!
+
+---
+
 ### Support
 
 For Supabase-specific issues, refer to:
